@@ -22,11 +22,11 @@ interface DrillState {
 
 interface UseDrillProps {
   chessGame: ChessGame;
-  incrementRating: () => void;
-  decrementRating: () => void;
+  rating: number;
+  addPoints: (playerRating: number, puzzleRating: number, success: boolean) => void;
 }
 
-export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDrillProps) => {
+export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   const [drillState, setDrillState] = useState<DrillState>({
     active: false,
     loading: false,
@@ -46,22 +46,16 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
   // Use ref to break circular dependency between recordPuzzleResult and loadNextDrillPuzzle
   const loadNextDrillPuzzleRef = useRef<(() => void) | undefined>(undefined);
 
-  const recordPuzzleResult = useCallback((success: boolean) => {
+  const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number) => {
     const timeMs = Date.now() - (puzzleState.puzzleStartTime || Date.now());
-
-    if (success) {
-      incrementRating();
-    } else {
-      decrementRating();
-    }
-
+    addPoints(rating, puzzleRating, success);
     setDrillState(prev => ({
       ...prev,
       results: [...prev.results, { success, timeMs }],
     }));
 
     loadNextDrillPuzzleRef.current?.();
-  }, [puzzleState.puzzleStartTime, incrementRating, decrementRating]);
+  }, [puzzleState.puzzleStartTime, rating, addPoints]);
 
   const loadNextDrillPuzzle = useCallback(() => {
     setDrillState(prev => {
@@ -246,20 +240,22 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
   const hasRecordedRef = useRef(false);
 
   useEffect(() => {
-    if (!drillState.active || hasRecordedRef.current) {
+    if (!drillState.active || hasRecordedRef.current || !drillState.currentPuzzle) {
       return;
     }
 
+    const puzzleRating = drillState.currentPuzzle.puzzle.rating;
+
     if (puzzleState.completed) {
       hasRecordedRef.current = true;
-      recordPuzzleResult(true);
+      recordPuzzleResult(true, puzzleRating);
       hasRecordedRef.current = false;
     } else if (puzzleState.failed) {
       hasRecordedRef.current = true;
-      recordPuzzleResult(false);
+      recordPuzzleResult(false, puzzleRating);
       hasRecordedRef.current = false;
     }
-  }, [puzzleState.completed, puzzleState.failed, drillState.active, recordPuzzleResult]);
+  }, [puzzleState.completed, puzzleState.failed, drillState.active, drillState.currentPuzzle, recordPuzzleResult]);
 
   return {
     drillState,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { calculateRatingChange } from '../utils/ratingCalculation';
 
 const RATING_STORAGE_KEY = 'monkeyDrill_userRating';
 const DEFAULT_RATING = 300;
@@ -19,12 +20,14 @@ export const useRating = () => {
     localStorage.setItem(RATING_STORAGE_KEY, rating.toString());
   }, [rating]);
 
-  const incrementRating = () => {
-    setRating(prev => prev + 1);
-  };
+  const addPoints = (playerRating: number, puzzleRating: number, success: boolean) => {
+    const points = calculateRatingChange(playerRating, puzzleRating, success);
 
-  const decrementRating = () => {
-    setRating(prev => prev - 1);
+    let newRating = Math.ceil(playerRating + points);
+    if (newRating > 9999) newRating = 9999;
+    if (newRating < 1) newRating = 1;
+
+    setRating(newRating);
   };
 
   const resetRating = () => {
@@ -33,8 +36,7 @@ export const useRating = () => {
 
   return {
     rating,
-    incrementRating,
-    decrementRating,
+    addPoints,
     resetRating,
   };
 };

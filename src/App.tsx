@@ -19,12 +19,12 @@ const App = () => {
   const chessGame = useChessGame();
   const theme = useTheme();
   const arrows = useArrows();
-  const { rating, incrementRating, decrementRating } = useRating();
+  const { rating, addPoints } = useRating();
 
   const { drillState, handleDrillStart, handleDrillTimeUp, handlePuzzleMove } = useDrill({
     chessGame,
-    incrementRating,
-    decrementRating,
+    rating,
+    addPoints,
   });
 
   const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
