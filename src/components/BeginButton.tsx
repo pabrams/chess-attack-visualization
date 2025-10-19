@@ -1,5 +1,5 @@
 import React from 'react';
-import './BeginButton.css';
+import styles from './BeginButton.module.css';
 
 interface BeginButtonProps {
   onClick: () => void;
@@ -7,12 +7,12 @@ interface BeginButtonProps {
 
 export const BeginButton: React.FC<BeginButtonProps> = ({ onClick }) => {
   return (
-    <div className="begin-button-overlay">
+    <div className={styles.overlay}>
       <button
         onClick={onClick}
         data-testid="beginButton"
         title="Begin Drill Puzzles"
-        className="begin-button"
+        className={styles.button}
       >
         <span>Begin</span>
       </button>

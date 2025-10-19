@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './LoadingOverlay.css';
+import styles from './LoadingOverlay.module.css';
 
 export const LoadingOverlay: React.FC = () => {
   const [showOverlay, setShowOverlay] = useState(false);
@@ -20,8 +20,8 @@ export const LoadingOverlay: React.FC = () => {
   }
 
   return (
-    <div className="loading-overlay">
-      <div className="loading-text">
+    <div className={styles.overlay}>
+      <div className={styles.text}>
         Loading puzzles...
       </div>
     </div>

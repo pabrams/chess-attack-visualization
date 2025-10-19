@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import './DrillLayout.css';
+import styles from './DrillLayout.module.css';
 
 interface DrillLayoutProps {
   timer: ReactNode;
@@ -15,21 +15,21 @@ export const DrillLayout: React.FC<DrillLayoutProps> = ({
   scoreboard,
 }) => {
   return (
-    <div className="responsive-layout">
-      <div className="board-results-wrapper">
-        <div className="timer-container">
+    <div className={styles.layout}>
+      <div className={styles.boardResults}>
+        <div className={styles.timer}>
           {timer}
         </div>
 
-        <div className="board-container">
+        <div className={styles.board}>
           {board}
         </div>
 
-        <div className="info-panels-wrapper">
-          <div className="puzzle-info-container">
+        <div className={styles.infoPanels}>
+          <div className={styles.puzzleInfo}>
             {puzzleInfo}
           </div>
-          <div className="scoreboard-container">
+          <div className={styles.scoreboard}>
             {scoreboard}
           </div>
         </div>

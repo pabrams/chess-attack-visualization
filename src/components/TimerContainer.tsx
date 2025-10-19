@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import './TimerContainer.css';
+import styles from './TimerContainer.module.css';
 
 interface TimerContainerProps {
   children: ReactNode;
@@ -7,7 +7,7 @@ interface TimerContainerProps {
 
 export const TimerContainer: React.FC<TimerContainerProps> = ({ children }) => {
   return (
-    <div className="timer-wrapper">
+    <div className={styles.wrapper}>
       {children}
     </div>
   );

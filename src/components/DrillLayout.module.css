@@ -1,4 +1,4 @@
-.responsive-layout {
+.layout {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,7 +10,7 @@
   max-height: 100%;
 }
 
-.board-results-wrapper {
+.boardResults {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -21,21 +21,21 @@
   position: relative;
 }
 
-.timer-container {
+.timer {
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
   flex-shrink: 0;
 }
 
-.board-container {
+.board {
   position: relative;
   flex-shrink: 0;
   width: min(calc(100vw - 2rem), calc(100vh - 200px));
   height: min(calc(100vw - 2rem), calc(100vh - 200px));
 }
 
-.info-panels-wrapper {
+.infoPanels {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -43,67 +43,67 @@
   width: 100%;
 }
 
-.puzzle-info-container {
+.puzzleInfo {
   width: 100%;
 }
 
-.scoreboard-container {
+.scoreboard {
   width: 100%;
 }
 
 @media (orientation: portrait) {
-  .responsive-layout {
+  .layout {
     flex-direction: column;
   }
 
-  .board-results-wrapper {
+  .boardResults {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
   }
 
-  .timer-container {
+  .timer {
     width: 100%;
     justify-content: center;
   }
 
-  .board-container {
+  .board {
     width: min(calc(100vw - 2rem), calc(100vh - 350px));
     height: min(calc(100vw - 2rem), calc(100vh - 350px));
   }
 
-  .info-panels-wrapper {
+  .infoPanels {
     width: calc(100vw - 2rem);
     max-width: 100%;
   }
 }
 
 @media (orientation: landscape) {
-  .responsive-layout {
+  .layout {
     flex-direction: row;
     align-items: center;
   }
 
-  .board-results-wrapper {
+  .boardResults {
     flex-direction: row;
     align-items: stretch;
     justify-content: flex-start;
     height: 100%;
   }
 
-  .timer-container {
+  .timer {
     min-width: 150px;
     align-self: flex-start;
   }
 
-  .board-container {
+  .board {
     width: min(calc(100vh - 60px - 2rem), calc(100vw - 550px));
     height: min(calc(100vh - 60px - 2rem), calc(100vw - 550px));
     align-self: flex-start;
     flex-shrink: 0;
   }
 
-  .info-panels-wrapper {
+  .infoPanels {
     max-width: 350px;
     min-width: 350px;
     width: 350px;
@@ -114,11 +114,11 @@
     align-self: stretch;
   }
 
-  .puzzle-info-container {
+  .puzzleInfo {
     flex-shrink: 0;
   }
 
-  .scoreboard-container {
+  .scoreboard {
     flex-shrink: 0;
   }
 }
