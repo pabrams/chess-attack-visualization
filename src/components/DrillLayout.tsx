@@ -17,15 +17,14 @@ export const DrillLayout: React.FC<DrillLayoutProps> = ({
   return (
     <div className={styles.layout}>
       <div className={styles.boardResults}>
-        <div className={styles.timer}>
-          {timer}
-        </div>
-
         <div className={styles.board}>
           {board}
         </div>
 
         <div className={styles.infoPanels}>
+          <div className={styles.timer}>
+            {timer}
+          </div>
           <div className={styles.puzzleInfo}>
             {puzzleInfo}
           </div>
