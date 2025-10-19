@@ -13,15 +13,17 @@ export const DrillScoreboard: React.FC<DrillScoreboardProps> = ({ results, theme
   const attemptedCount = results.length;
 
   return (
+    
     <div className={styles.container}>
-      <div className={styles.statsCol}>
+      <fieldset className={styles.statsCol}>
+        <legend>Player</legend>
         <div>
-          Player rating: {rating}
+          Rating: {rating}
         </div>
         <div>
           Solved: {solvedCount}/{attemptedCount}
         </div>
-      </div>
+      </fieldset>
       <div className={styles.resultsGrid}>
         {results.map((result, index) => (
           <div

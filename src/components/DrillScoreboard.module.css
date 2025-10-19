@@ -1,4 +1,4 @@
-.container {
+/* .container {
   width: 100%;
   min-height: 120px;
   max-height: 180px;
@@ -6,7 +6,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   overflow: auto;
-}
+} */
 
 .statsCol {
   display: flex;
@@ -58,4 +58,14 @@
 
 .timeText {
   font-size: 0.9rem;
+}
+
+fieldset {
+  border: 1px solid #ccc;
+  border-radius: clamp(12px, 3vw, 24px);
+  padding: clamp(1rem, 1vw, 2.5rem) clamp(2rem, 1vw, 5rem);
+}
+
+legend {
+  padding: 0 0.5rem;
 }

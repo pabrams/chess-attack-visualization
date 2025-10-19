@@ -1,5 +1,4 @@
 import React from 'react';
-import styles from './PuzzleInfo.module.css';
 
 interface PuzzleInfoProps {
   rating?: number;
@@ -9,12 +8,12 @@ interface PuzzleInfoProps {
 }
 
 export const PuzzleInfo: React.FC<PuzzleInfoProps> = ({ rating }) => {
-
   return (
-    <div className={styles.info}>
+    <fieldset>
+      <legend>Puzzle</legend>
       <div>
-        Puzzle rating: {rating ? rating : '—'}
+        Rating: {rating ? rating : '—'}
       </div>
-    </div>
-  );
+    </fieldset>
+  )
 };
