@@ -69,22 +69,12 @@ export const useChessGame = () => {
         setChessPosition(chessGameRef.current.fen());
         setMoveHistory(prev => [...prev, move]);
 
-        // Check if this was the last move in the solution (TODO: if we only have one-move puzzles we don't need this)
-        if (puzzleState.currentMoveIndex === puzzleState.solution.length - 1) {
-          // Puzzle completed!
-          setPuzzleState(prev => ({
-            ...prev,
-            completed: true,
-            isPlayerTurn: false,
-          }));
-        } else {
-          // More moves to go - increment index and set to opponent's turn
-          setPuzzleState(prev => ({
-            ...prev,
-            currentMoveIndex: prev.currentMoveIndex + 1,
-            isPlayerTurn: false,
-          }));
-        }
+        // Puzzle completed! (all our puzzles are one-move only)
+        setPuzzleState(prev => ({
+          ...prev,
+          completed: true,
+          isPlayerTurn: false,
+        }));
 
         return true;
       }

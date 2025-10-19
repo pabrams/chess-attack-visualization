@@ -27,6 +27,26 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
     currentPuzzle: null,
   });
 
+  // Use ref to break circular dependency between recordPuzzleResult and loadNextDrillPuzzle
+  const loadNextDrillPuzzleRef = useRef<(() => void) | undefined>(undefined);
+
+  const recordPuzzleResult = useCallback((success: boolean) => {
+    const timeMs = Date.now() - (chessGame.puzzleState.puzzleStartTime || Date.now());
+
+    if (success) {
+      incrementRating();
+    } else {
+      decrementRating();
+    }
+
+    setDrillState(prev => ({
+      ...prev,
+      results: [...prev.results, { success, timeMs }],
+    }));
+
+    loadNextDrillPuzzleRef.current?.();
+  }, [chessGame.puzzleState.puzzleStartTime, incrementRating, decrementRating]);
+
   const loadNextDrillPuzzle = useCallback(() => {
     setDrillState(prev => {
       if (prev.puzzleQueue.length === 0) {
@@ -38,7 +58,7 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
 
       chessGame.exitPuzzleMode();
 
-      // Load from FEN and make the setup move manually to avoid state sync issues
+      // Load from FEN and make the setup move
       import('chess.js').then(({ Chess }) => {
         const setupMove = (puzzle as any)._setupMove;
         const fen = (puzzle as any)._fen;
@@ -57,13 +77,7 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
           if (success) {
             chessGame.startPuzzleMode(puzzle.puzzle.solution, () => {
               // On wrong move: record failure and load next puzzle
-              const timeMs = Date.now() - (chessGame.puzzleState.puzzleStartTime || Date.now());
-              decrementRating();
-              setDrillState(prev => ({
-                ...prev,
-                results: [...prev.results, { success: false, timeMs }],
-              }));
-              loadNextDrillPuzzle();
+              recordPuzzleResult(false);
             });
           }
         }
@@ -75,7 +89,10 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
         currentPuzzle: puzzle as any,
       };
     });
-  }, [chessGame, decrementRating]);
+  }, [chessGame, recordPuzzleResult]);
+
+  // Keep ref up to date
+  loadNextDrillPuzzleRef.current = loadNextDrillPuzzle;
 
   const handleDrillStart = async () => {
     // Randomly select white or black
@@ -165,17 +182,11 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
       hasRecordedRef.current = true;
 
       // Record success and load next puzzle
-      const timeMs = Date.now() - (chessGame.puzzleState.puzzleStartTime || Date.now());
-      incrementRating();
-      setDrillState(prev => ({
-        ...prev,
-        results: [...prev.results, { success: true, timeMs }],
-      }));
+      recordPuzzleResult(true);
 
       hasRecordedRef.current = false;
-      loadNextDrillPuzzle();
     }
-  }, [chessGame.puzzleState.completed, drillState.active, loadNextDrillPuzzle, incrementRating]);
+  }, [chessGame.puzzleState.completed, drillState.active, recordPuzzleResult]);
 
   return {
     drillState,
