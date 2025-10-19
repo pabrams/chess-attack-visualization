@@ -5,10 +5,10 @@ interface PuzzleState {
   active: boolean;
   solution: string[]; // Array of moves in UCI format (e.g., ['e2e4', 'e7e5'])
   currentMoveIndex: number; // Index of the next expected move in the solution
-  isPlayerTurn: boolean; // Whether it's the player's turn or the engine is making a move
-  completed: boolean; // Whether the puzzle has been successfully completed
-  puzzleStartTime?: number; // Timestamp when puzzle started
-  onWrongMove?: () => void; // Callback for wrong moves
+  isPlayerTurn: boolean;
+  completed: boolean;
+  puzzleStartTime?: number;
+  onWrongMove?: () => void;
 }
 
 export const useChessGame = () => {
@@ -89,7 +89,6 @@ export const useChessGame = () => {
         return true;
       }
 
-      // Normal mode - just make the move
       setChessPosition(chessGameRef.current.fen());
       setMoveHistory(prev => [...prev, move]);
       return true;
@@ -116,7 +115,7 @@ export const useChessGame = () => {
       active: true,
       solution,
       currentMoveIndex: 0,
-      isPlayerTurn: true, // Player starts immediately
+      isPlayerTurn: true,
       completed: false,
       puzzleStartTime: Date.now(),
       onWrongMove,
@@ -135,7 +134,6 @@ export const useChessGame = () => {
     });
   };
 
-  // Auto-play opponent moves in puzzle mode
   useEffect(() => {
     if (!puzzleState.active || puzzleState.isPlayerTurn || puzzleState.completed) {
       return;
