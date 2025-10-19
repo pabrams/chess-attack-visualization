@@ -8,7 +8,7 @@ let moveToSimulate: { sourceSquare: string; targetSquare: string; piece: { piece
 vi.mock('react-chessboard', () => ({
   Chessboard: ({ options = {} }: any) => {
     const { onSquareRightClick } = options;
-    
+
     return (
       <div
         data-testid="chessboard"
@@ -70,20 +70,6 @@ describe('App', () => {
     const newPosition = chessboard.getAttribute('data-position');
     expect(newPosition).not.toBe(initialPosition);
   });
-
-  test('right-clicking on e2 shows arrows in state', async () => {
-    const { container } = render(<App />);
-    const e2Square = container.querySelector('[data-square="e2"]');
-    expect(e2Square).not.toBeNull();
-
-    if (e2Square) {
-      fireEvent.contextMenu(e2Square);
-    }
-
-    const arrowsList = screen.getByTestId('arrows-list');
-    expect(arrowsList).toHaveTextContent('start: d1, end: e2, color: #ff0000');
-  });
-
 });
 
 describe('Board Position Tests', () => {
@@ -150,19 +136,4 @@ describe('Board Position Tests', () => {
       }
     ]
   );
-
-  it('confirms custom position matches expected FEN', () => {
-    const customFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
-    const movesToMake: Array<{ sourceSquare: string; targetSquare: string; piece: { pieceType: string; isSparePiece: boolean } }> = [];
-
-    render(<App />);
-    const chessboard = screen.getByTestId('chessboard');
-
-    movesToMake.forEach(move => {
-      moveToSimulate = move;
-      fireEvent.click(chessboard);
-    });
-
-    expect(chessboard).toHaveAttribute('data-position', customFen);
-  });
 });

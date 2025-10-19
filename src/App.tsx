@@ -68,13 +68,6 @@ const App = () => {
           color: theme.currentThemeColors.pageForegroundColor,
         }}
       >
-        <div data-testid="arrows-list" className="arrows-list">
-          {arrows.arrows.map(({ startSquare, endSquare, color }, i) => (
-            <div key={i}>
-              start: {startSquare}, end: {endSquare}, color: {color}
-            </div>
-          ))}
-        </div>
 
         <DrillLayout
           timer={
