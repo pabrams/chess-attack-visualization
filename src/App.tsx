@@ -1,4 +1,3 @@
-import React from 'react';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
 import { useTheme } from './hooks/useTheme';
@@ -77,7 +76,6 @@ const App = () => {
           ))}
         </div>
 
-        {/* Main content - responsive drill layout */}
         <DrillLayout
           timer={
             <TimerContainer>
