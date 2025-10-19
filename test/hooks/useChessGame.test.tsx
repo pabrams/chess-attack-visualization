@@ -51,11 +51,10 @@ describe('useChessGame', () => {
 
     // Start puzzle mode with single move
     act(() => {
-      result.current.startPuzzleMode(['e2e4']);
+      result.current.startPuzzle(['e2e4']);
     });
 
     expect(result.current.puzzleState.active).toBe(true);
-    expect(result.current.puzzleState.isPlayerTurn).toBe(true);
 
     // Make correct move - should complete the puzzle
     act(() => {

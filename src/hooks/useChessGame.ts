@@ -1,14 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Chess, Square, Move } from 'chess.js';
 
 interface PuzzleState {
   active: boolean;
-  solution: string[]; // Array of moves in UCI format (e.g., ['e2e4', 'e7e5'])
-  currentMoveIndex: number; // Index of the next expected move in the solution
-  isPlayerTurn: boolean;
+  solution: string[]; // Single move in UCI format (e.g., ['e2e4'])
   completed: boolean;
+  failed: boolean;
   puzzleStartTime?: number;
-  onWrongMove?: () => void;
 }
 
 export const useChessGame = () => {
@@ -18,9 +16,8 @@ export const useChessGame = () => {
   const [puzzleState, setPuzzleState] = useState<PuzzleState>({
     active: false,
     solution: [],
-    currentMoveIndex: 0,
-    isPlayerTurn: false,
     completed: false,
+    failed: false,
   });
 
   const getLastMove = () => {
@@ -53,15 +50,16 @@ export const useChessGame = () => {
         return false;
       }
 
-      if (puzzleState.active && puzzleState.isPlayerTurn) {
-        const expectedMove = puzzleState.solution[puzzleState.currentMoveIndex];
+      if (puzzleState.active) {
+        const expectedMove = puzzleState.solution[0];
         const playerMove = move.lan;
         if (playerMove !== expectedMove) {
-          // Wrong move - undo it
+          // Wrong move - undo it and mark as failed
           chessGameRef.current.undo();
-          if (puzzleState.onWrongMove) {
-            puzzleState.onWrongMove();
-          }
+          setPuzzleState(prev => ({
+            ...prev,
+            failed: true,
+          }));
           return false;
         }
 
@@ -73,7 +71,6 @@ export const useChessGame = () => {
         setPuzzleState(prev => ({
           ...prev,
           completed: true,
-          isPlayerTurn: false,
         }));
 
         return true;
@@ -100,15 +97,13 @@ export const useChessGame = () => {
     }
   };
 
-  const startPuzzleMode = (solution: string[], onWrongMove?: () => void) => {
+  const startPuzzle = (solution: string[]) => {
     setPuzzleState({
       active: true,
       solution,
-      currentMoveIndex: 0,
-      isPlayerTurn: true,
       completed: false,
+      failed: false,
       puzzleStartTime: Date.now(),
-      onWrongMove,
     });
   };
 
@@ -116,51 +111,13 @@ export const useChessGame = () => {
     setPuzzleState({
       active: false,
       solution: [],
-      currentMoveIndex: 0,
-      isPlayerTurn: false,
       completed: false,
-      puzzleStartTime: undefined,
-      onWrongMove: undefined,
+      failed: false,
     });
   };
 
-  useEffect(() => {
-    if (!puzzleState.active || puzzleState.isPlayerTurn || puzzleState.completed) {
-      return;
-    }
-
-    const nextMove = puzzleState.solution[puzzleState.currentMoveIndex];
-    if (!nextMove) {
-      console.error('No move found in solution at index', puzzleState.currentMoveIndex);
-      return;
-    }
-
-    // Parse the UCI move (e.g., "e2e4")
-    const from = nextMove.substring(0, 2);
-    const to = nextMove.substring(2, 4);
-    const promotion = nextMove.length > 4 ? nextMove.substring(4) : undefined;
-
-    const move = chessGameRef.current.move({
-      from,
-      to,
-      promotion: promotion as 'q' | 'r' | 'b' | 'n' | undefined,
-    });
-
-    if (!move) {
-      console.error('Failed to make opponent move:', nextMove);
-      return;
-    }
-
-    setChessPosition(chessGameRef.current.fen());
-    setMoveHistory(prev => [...prev, move]);
-
-    // Now it's the player's turn
-    setPuzzleState(prev => ({
-      ...prev,
-      currentMoveIndex: prev.currentMoveIndex + 1,
-      isPlayerTurn: true,
-    }));
-  }, [puzzleState]);
+  // Note: Opponent move auto-play removed - all puzzles are one-move only
+  // The opponent's setup move is handled manually in useDrill before starting the puzzle
 
   const getAttackers = (square: Square, color: 'w' | 'b') => {
     return chessGameRef.current.attackers(square, color);
@@ -174,7 +131,7 @@ export const useChessGame = () => {
     loadPgn,
     getAttackers,
     puzzleState,
-    startPuzzleMode,
+    startPuzzle,
     exitPuzzleMode,
   };
 };

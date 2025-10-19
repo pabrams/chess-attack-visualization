@@ -75,10 +75,7 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
           const success = chessGame.loadPgn(pgn);
 
           if (success) {
-            chessGame.startPuzzleMode(puzzle.puzzle.solution, () => {
-              // On wrong move: record failure and load next puzzle
-              recordPuzzleResult(false);
-            });
+            chessGame.startPuzzle(puzzle.puzzle.solution);
           }
         }
       });
@@ -174,19 +171,24 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
     chessGame.exitPuzzleMode();
   }, [drillState.results, chessGame]);
 
-  // Watch for puzzle completion
+  // Watch for puzzle completion or failure
   const hasRecordedRef = useRef(false);
 
   useEffect(() => {
-    if (drillState.active && chessGame.puzzleState.completed && !hasRecordedRef.current) {
+    if (!drillState.active || hasRecordedRef.current) {
+      return;
+    }
+
+    if (chessGame.puzzleState.completed) {
       hasRecordedRef.current = true;
-
-      // Record success and load next puzzle
       recordPuzzleResult(true);
-
+      hasRecordedRef.current = false;
+    } else if (chessGame.puzzleState.failed) {
+      hasRecordedRef.current = true;
+      recordPuzzleResult(false);
       hasRecordedRef.current = false;
     }
-  }, [chessGame.puzzleState.completed, drillState.active, recordPuzzleResult]);
+  }, [chessGame.puzzleState.completed, chessGame.puzzleState.failed, drillState.active, recordPuzzleResult]);
 
   return {
     drillState,

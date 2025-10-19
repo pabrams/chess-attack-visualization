@@ -89,7 +89,7 @@ const App = () => {
                 onPieceDrop={handlePieceDrop}
                 onSquareRightClick={handleSquareRightClick}
                 onMoveComplete={handleMoveComplete}
-                isPuzzleAutoPlaying={chessGame.puzzleState.active && !chessGame.puzzleState.isPlayerTurn}
+                isPuzzleAutoPlaying={false}
                 boardOrientation={drillState.active ? (drillState.playerColor === 'white' ? 'black' : 'white') : 'white'}
               />
 
