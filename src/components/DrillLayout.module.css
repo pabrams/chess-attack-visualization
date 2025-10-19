@@ -1,46 +1,36 @@
 .layout {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
+  height: calc(100vh - 80px);
 }
 
 .boardResults {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
-  flex-grow: 1;
+  height: 100%;
   width: 100%;
-  max-width: 100%;
-  position: relative;
 }
 
 .timer {
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
   flex-shrink: 0;
 }
 
 .board {
-  position: relative;
-  flex-shrink: 0;
-  width: min(calc(100vw - 2rem), calc(100vh - 200px));
-  height: min(calc(100vw - 2rem), calc(100vh - 200px));
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
 }
 
 .infoPanels {
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  width: 100%;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .puzzleInfo {
@@ -59,7 +49,6 @@
   .boardResults {
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
   }
 
   .timer {
@@ -67,58 +56,27 @@
     justify-content: center;
   }
 
-  .board {
-    width: min(calc(100vw - 2rem), calc(100vh - 350px));
-    height: min(calc(100vw - 2rem), calc(100vh - 350px));
+  .infoPanels {
+    width: 100%;
   }
 
-  .infoPanels {
-    width: calc(100vw - 2rem);
-    max-width: 100%;
+  .board {
+    width: 90%;
+    max-width: 600px;
+    height: auto;
   }
 }
 
 @media (orientation: landscape) {
-  .layout {
-    flex-direction: row;
-    align-items: center;
-  }
-
   .boardResults {
     flex-direction: row;
-    align-items: stretch;
-    justify-content: flex-start;
-    height: 100%;
   }
 
   .timer {
     min-width: 150px;
-    align-self: flex-start;
-  }
-
-  .board {
-    width: min(calc(100vh - 60px - 2rem), calc(100vw - 550px));
-    height: min(calc(100vh - 60px - 2rem), calc(100vw - 550px));
-    align-self: flex-start;
-    flex-shrink: 0;
   }
 
   .infoPanels {
-    max-width: 350px;
-    min-width: 350px;
     width: 350px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-self: stretch;
-  }
-
-  .puzzleInfo {
-    flex-shrink: 0;
-  }
-
-  .scoreboard {
-    flex-shrink: 0;
   }
 }

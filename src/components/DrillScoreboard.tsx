@@ -13,31 +13,13 @@ export const DrillScoreboard: React.FC<DrillScoreboardProps> = ({ results, theme
   const attemptedCount = results.length;
 
   return (
-    <div
-      className={styles.container}
-      style={{
-        backgroundColor: theme === 'dark' ? '#1a1a1a' : '#ffffff',
-        border: `1px solid ${theme === 'dark' ? '#444' : '#e0e0e0'}`,
-      }}
-    >
-      <div className={styles.statsRow}>
-        <div
-          className={`${styles.statBox} ${styles.solvedStat}`}
-          style={{
-            backgroundColor: theme === 'dark' ? '#2a2a2a' : '#f5f5f5',
-            color: theme === 'dark' ? '#ffffff' : '#000000',
-          }}
-        >
-          Solved: {solvedCount}/{attemptedCount}
+    <div className={styles.container}>
+      <div className={styles.statsCol}>
+        <div>
+          Player rating: {rating}
         </div>
-        <div
-          className={`${styles.statBox} ${styles.ratingStat}`}
-          style={{
-            backgroundColor: theme === 'dark' ? '#2a2a2a' : '#f5f5f5',
-            color: theme === 'dark' ? '#ffd700' : '#ff8c00',
-          }}
-        >
-          Rating: {rating}
+        <div>
+          Solved: {solvedCount}/{attemptedCount}
         </div>
       </div>
       <div className={styles.resultsGrid}>

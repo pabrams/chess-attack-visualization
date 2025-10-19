@@ -19,7 +19,7 @@ const Header: React.FC<HeaderProps> = ({ theme, onToggleTheme }) => {
       </div>
 
       <div className={styles.actions}>
-        {/* Settings menu with auth */}
+
         {loading ? (
           <div className={styles.loading}>Loading...</div>
         ) : (

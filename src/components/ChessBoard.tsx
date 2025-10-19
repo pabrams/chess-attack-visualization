@@ -60,23 +60,12 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       color: 'yellow',
       secondaryColor: 'red',
       tertiaryColor: 'blue',
-      arrowLengthReducerDenominator: 4,
+      arrowLengthReducerDenominator: 1,
       sameTargetArrowLengthReducerDenominator: 2,
-      arrowWidthDenominator: 10,
+      arrowWidthDenominator: 8,
       activeArrowWidthMultiplier: 1.5,
-      opacity: 0.5,
+      opacity: 1,
       activeOpacity: 0.6,
-    },
-    boardStyle: {
-      width: '100%',
-      height: '100%',
-      outline: `3px dashed ${lightSquareColor}`,
-      outlineOffset: '2px',
-      boxShadow: theme === 'dark'
-        ? '0 8px 32px rgba(0, 0, 0, 0.8)'
-        : '0 8px 32px rgba(0, 0, 0, 0.15)',
-      borderRadius: '8px',
-      overflow: 'hidden',
     },
     darkSquareStyle: {
       backgroundColor: darkSquareColor,
