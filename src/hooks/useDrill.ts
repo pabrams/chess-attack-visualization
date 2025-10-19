@@ -145,7 +145,7 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
     const existingResults = JSON.parse(localStorage.getItem('drillResults') || '[]');
     localStorage.setItem('drillResults', JSON.stringify([...existingResults, drillResults]));
 
-    // End drill mode
+    // End drill
     setDrillState({
       active: false,
       loading: false,
@@ -157,7 +157,7 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
     chessGame.exitPuzzleMode();
   }, [drillState.results, chessGame]);
 
-  // Watch for puzzle completion in drill mode
+  // Watch for puzzle completion
   const hasRecordedRef = useRef(false);
 
   useEffect(() => {
