@@ -13,7 +13,6 @@ export const DrillScoreboard: React.FC<DrillScoreboardProps> = ({ results, theme
   const attemptedCount = results.length;
 
   return (
-    
     <div className={styles.container}>
       <fieldset className={styles.statsCol}>
         <legend>Player</legend>
