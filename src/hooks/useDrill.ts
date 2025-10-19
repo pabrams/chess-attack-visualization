@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { LichessPuzzle } from '../types/lichess';
 import { DrillResult } from '../types/drill';
+import type { ChessGame } from './useChessGame';
 
 interface PuzzleState {
   active: boolean;
@@ -20,7 +21,7 @@ interface DrillState {
 }
 
 interface UseDrillProps {
-  chessGame: any; // TODO: type this properly
+  chessGame: ChessGame;
   incrementRating: () => void;
   decrementRating: () => void;
 }

@@ -81,3 +81,5 @@ export const useChessGame = () => {
     getAttackers,
   };
 };
+
+export type ChessGame = ReturnType<typeof useChessGame>;
