@@ -21,7 +21,7 @@ const App = () => {
   const arrows = useArrows();
   const { rating, incrementRating, decrementRating } = useRating();
 
-  const { drillState, handleDrillStart, handleDrillTimeUp } = useDrill({
+  const { drillState, handleDrillStart, handleDrillTimeUp, handlePuzzleMove } = useDrill({
     chessGame,
     incrementRating,
     decrementRating,
@@ -40,7 +40,8 @@ const App = () => {
     if (!targetSquare) {
       return false;
     }
-    return chessGame.makeMove(sourceSquare, targetSquare);
+    const move = handlePuzzleMove(sourceSquare, targetSquare);
+    return !!move;
   };
 
   const handleMoveComplete = () => {

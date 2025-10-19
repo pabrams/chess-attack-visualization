@@ -14,8 +14,10 @@ describe('useChessGame', () => {
     const { result } = renderHook(() => useChessGame());
 
     act(() => {
-      const success = result.current.makeMove('e2', 'e4');
-      expect(success).toBe(true);
+      const move = result.current.makeMove('e2', 'e4');
+      expect(move).toBeTruthy();
+      expect(move?.from).toBe('e2');
+      expect(move?.to).toBe('e4');
     });
 
     expect(result.current.chessPosition).toBe('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1');
@@ -27,8 +29,8 @@ describe('useChessGame', () => {
     const { result } = renderHook(() => useChessGame());
 
     act(() => {
-      const success = result.current.makeMove('e2', 'e5');
-      expect(success).toBe(false);
+      const move = result.current.makeMove('e2', 'e5');
+      expect(move).toBeNull();
     });
 
     expect(result.current.chessPosition).toBe('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
@@ -46,29 +48,23 @@ describe('useChessGame', () => {
     expect(result.current.getLastMove()?.san).toBe('Nf3');
   });
 
-  it('should handle puzzle mode correctly', () => {
+  it('should undo a move', () => {
     const { result } = renderHook(() => useChessGame());
 
-    // Start puzzle mode with single move
+    // Make a move
     act(() => {
-      result.current.startPuzzle(['e2e4']);
+      result.current.makeMove('e2', 'e4');
     });
 
-    expect(result.current.puzzleState.active).toBe(true);
+    expect(result.current.chessPosition).toBe('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1');
 
-    // Make correct move - should complete the puzzle
+    // Undo it
     act(() => {
-      const success = result.current.makeMove('e2', 'e4');
+      const success = result.current.undoLastMove();
       expect(success).toBe(true);
     });
 
-    expect(result.current.puzzleState.completed).toBe(true);
-
-    // Exit puzzle mode
-    act(() => {
-      result.current.exitPuzzleMode();
-    });
-
-    expect(result.current.puzzleState.active).toBe(false);
+    expect(result.current.chessPosition).toBe('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    expect(result.current.getLastMove()).toBeNull();
   });
 });

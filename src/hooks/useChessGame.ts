@@ -1,24 +1,10 @@
 import { useState, useRef } from 'react';
 import { Chess, Square, Move } from 'chess.js';
 
-interface PuzzleState {
-  active: boolean;
-  solution: string[]; // Single move in UCI format (e.g., ['e2e4'])
-  completed: boolean;
-  failed: boolean;
-  puzzleStartTime?: number;
-}
-
 export const useChessGame = () => {
   const chessGameRef = useRef(new Chess());
   const [chessPosition, setChessPosition] = useState(chessGameRef.current.fen());
   const [moveHistory, setMoveHistory] = useState<Move[]>([]);
-  const [puzzleState, setPuzzleState] = useState<PuzzleState>({
-    active: false,
-    solution: [],
-    completed: false,
-    failed: false,
-  });
 
   const getLastMove = () => {
     if (moveHistory.length === 0) {
@@ -47,41 +33,15 @@ export const useChessGame = () => {
       const move = chessGameRef.current.move(moveOptions);
 
       if (!move) {
-        return false;
-      }
-
-      if (puzzleState.active) {
-        const expectedMove = puzzleState.solution[0];
-        const playerMove = move.lan;
-        if (playerMove !== expectedMove) {
-          // Wrong move - undo it and mark as failed
-          chessGameRef.current.undo();
-          setPuzzleState(prev => ({
-            ...prev,
-            failed: true,
-          }));
-          return false;
-        }
-
-        // Correct move!
-        setChessPosition(chessGameRef.current.fen());
-        setMoveHistory(prev => [...prev, move]);
-
-        // Puzzle completed! (all our puzzles are one-move only)
-        setPuzzleState(prev => ({
-          ...prev,
-          completed: true,
-        }));
-
-        return true;
+        return null;
       }
 
       setChessPosition(chessGameRef.current.fen());
       setMoveHistory(prev => [...prev, move]);
-      return true;
+      return move;
     } catch (e) {
       console.error(e);
-      return false;
+      return null;
     }
   };
 
@@ -97,27 +57,15 @@ export const useChessGame = () => {
     }
   };
 
-  const startPuzzle = (solution: string[]) => {
-    setPuzzleState({
-      active: true,
-      solution,
-      completed: false,
-      failed: false,
-      puzzleStartTime: Date.now(),
-    });
+  const undoLastMove = () => {
+    const move = chessGameRef.current.undo();
+    if (move) {
+      setChessPosition(chessGameRef.current.fen());
+      setMoveHistory(chessGameRef.current.history({ verbose: true }));
+      return true;
+    }
+    return false;
   };
-
-  const exitPuzzleMode = () => {
-    setPuzzleState({
-      active: false,
-      solution: [],
-      completed: false,
-      failed: false,
-    });
-  };
-
-  // Note: Opponent move auto-play removed - all puzzles are one-move only
-  // The opponent's setup move is handled manually in useDrill before starting the puzzle
 
   const getAttackers = (square: Square, color: 'w' | 'b') => {
     return chessGameRef.current.attackers(square, color);
@@ -128,10 +76,8 @@ export const useChessGame = () => {
     isAtFinalPosition: chessGameRef.current.isGameOver(),
     getLastMove,
     makeMove,
+    undoLastMove,
     loadPgn,
     getAttackers,
-    puzzleState,
-    startPuzzle,
-    exitPuzzleMode,
   };
 };

@@ -2,6 +2,14 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { LichessPuzzle } from '../types/lichess';
 import { DrillResult } from '../types/drill';
 
+interface PuzzleState {
+  active: boolean;
+  solution: string[]; // Single move in UCI format (e.g., ['e2e4'])
+  completed: boolean;
+  failed: boolean;
+  puzzleStartTime?: number;
+}
+
 interface DrillState {
   active: boolean;
   loading: boolean;
@@ -27,11 +35,18 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
     currentPuzzle: null,
   });
 
+  const [puzzleState, setPuzzleState] = useState<PuzzleState>({
+    active: false,
+    solution: [],
+    completed: false,
+    failed: false,
+  });
+
   // Use ref to break circular dependency between recordPuzzleResult and loadNextDrillPuzzle
   const loadNextDrillPuzzleRef = useRef<(() => void) | undefined>(undefined);
 
   const recordPuzzleResult = useCallback((success: boolean) => {
-    const timeMs = Date.now() - (chessGame.puzzleState.puzzleStartTime || Date.now());
+    const timeMs = Date.now() - (puzzleState.puzzleStartTime || Date.now());
 
     if (success) {
       incrementRating();
@@ -45,7 +60,7 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
     }));
 
     loadNextDrillPuzzleRef.current?.();
-  }, [chessGame.puzzleState.puzzleStartTime, incrementRating, decrementRating]);
+  }, [puzzleState.puzzleStartTime, incrementRating, decrementRating]);
 
   const loadNextDrillPuzzle = useCallback(() => {
     setDrillState(prev => {
@@ -56,7 +71,13 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
 
       const [puzzle, ...remainingQueue] = prev.puzzleQueue;
 
-      chessGame.exitPuzzleMode();
+      // Reset puzzle state
+      setPuzzleState({
+        active: false,
+        solution: [],
+        completed: false,
+        failed: false,
+      });
 
       // Load from FEN and make the setup move
       import('chess.js').then(({ Chess }) => {
@@ -75,7 +96,14 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
           const success = chessGame.loadPgn(pgn);
 
           if (success) {
-            chessGame.startPuzzle(puzzle.puzzle.solution);
+            // Start puzzle
+            setPuzzleState({
+              active: true,
+              solution: puzzle.puzzle.solution,
+              completed: false,
+              failed: false,
+              puzzleStartTime: Date.now(),
+            });
           }
         }
       });
@@ -168,8 +196,50 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
       playerColor: 'white',
       currentPuzzle: null,
     });
-    chessGame.exitPuzzleMode();
-  }, [drillState.results, chessGame]);
+    setPuzzleState({
+      active: false,
+      solution: [],
+      completed: false,
+      failed: false,
+    });
+  }, [drillState.results]);
+
+  // Handle puzzle moves with validation
+  const handlePuzzleMove = useCallback((sourceSquare: string, targetSquare: string, promotion?: string) => {
+    if (!puzzleState.active) {
+      // Not in puzzle mode, make normal move
+      return chessGame.makeMove(sourceSquare, targetSquare, promotion);
+    }
+
+    // Try to make the move
+    const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
+
+    if (!move) {
+      return move;
+    }
+
+    // Check if it matches the expected solution
+    const expectedMove = puzzleState.solution[0];
+    const playerMove = move.lan;
+
+    if (playerMove !== expectedMove) {
+      // Wrong move - undo it and mark as failed
+      chessGame.undoLastMove();
+      setPuzzleState(prev => ({
+        ...prev,
+        failed: true,
+      }));
+      return null;
+    }
+
+    // Correct move - mark as completed
+    setPuzzleState(prev => ({
+      ...prev,
+      completed: true,
+    }));
+
+    return move;
+  }, [puzzleState.active, puzzleState.solution, chessGame]);
 
   // Watch for puzzle completion or failure
   const hasRecordedRef = useRef(false);
@@ -179,20 +249,22 @@ export const useDrill = ({ chessGame, incrementRating, decrementRating }: UseDri
       return;
     }
 
-    if (chessGame.puzzleState.completed) {
+    if (puzzleState.completed) {
       hasRecordedRef.current = true;
       recordPuzzleResult(true);
       hasRecordedRef.current = false;
-    } else if (chessGame.puzzleState.failed) {
+    } else if (puzzleState.failed) {
       hasRecordedRef.current = true;
       recordPuzzleResult(false);
       hasRecordedRef.current = false;
     }
-  }, [chessGame.puzzleState.completed, chessGame.puzzleState.failed, drillState.active, recordPuzzleResult]);
+  }, [puzzleState.completed, puzzleState.failed, drillState.active, recordPuzzleResult]);
 
   return {
     drillState,
+    puzzleState,
     handleDrillStart,
     handleDrillTimeUp,
+    handlePuzzleMove,
   };
 };
