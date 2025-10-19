@@ -163,7 +163,7 @@ export const fetchPuzzleBatch = async (nb: number = 50, retries: number = 3): Pr
 
       if (response.ok) {
         const text = await response.text();
-        // Parse NDJSON (newline-delimited JSON)
+        // Parse NDJSON
         const puzzles = text
           .trim()
           .split('\n')

@@ -69,7 +69,7 @@ export const useChessGame = () => {
         setChessPosition(chessGameRef.current.fen());
         setMoveHistory(prev => [...prev, move]);
 
-        // Check if this was the last move in the solution
+        // Check if this was the last move in the solution (TODO: if we only have one-move puzzles we don't need this)
         if (puzzleState.currentMoveIndex === puzzleState.solution.length - 1) {
           // Puzzle completed!
           setPuzzleState(prev => ({
