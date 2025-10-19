@@ -5,15 +5,15 @@ import { useTheme } from './hooks/useTheme';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
-import { ChessBoard } from './components/ChessBoard/ChessBoard';
-import Header from './components/Header/Header';
-import { DrillTimer } from './components/Drill/DrillTimer';
-import { DrillScoreboard } from './components/Drill/DrillScoreboard';
-import { PuzzleInfo } from './components/Drill/PuzzleInfo';
-import { DrillLayout } from './components/Drill/DrillLayout';
-import { BeginButton } from './components/Drill/BeginButton';
-import { LoadingOverlay } from './components/Drill/LoadingOverlay';
-import { TimerContainer } from './components/Drill/TimerContainer';
+import { ChessBoard } from './components/ChessBoard';
+import Header from './components/Header';
+import { DrillTimer } from './components/DrillTimer';
+import { DrillScoreboard } from './components/DrillScoreboard';
+import { PuzzleInfo } from './components/PuzzleInfo';
+import { DrillLayout } from './components/DrillLayout';
+import { BeginButton } from './components/BeginButton';
+import { LoadingOverlay } from './components/LoadingOverlay';
+import { TimerContainer } from './components/TimerContainer';
 import './App.css';
 
 const App = () => {

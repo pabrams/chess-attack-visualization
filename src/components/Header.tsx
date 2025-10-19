@@ -1,7 +1,7 @@
 import React from 'react';
-import { useLichessAuth } from '../../hooks/useLichessAuth';
-import { login } from '../../services/lichessAuth';
-import { SettingsMenu } from '../Settings/SettingsMenu';
+import { useLichessAuth } from '../hooks/useLichessAuth';
+import { login } from '../services/lichessAuth';
+import { SettingsMenu } from './SettingsMenu';
 import './Header.css';
 
 interface HeaderProps {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
-import { Arrow } from '../../hooks/useArrows';
+import { Arrow } from '../hooks/useArrows';
 import { customPieces } from './customPieces';
 
 interface ChessBoardProps {
