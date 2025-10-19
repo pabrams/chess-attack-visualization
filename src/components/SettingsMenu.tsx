@@ -10,7 +10,6 @@ interface SettingsMenuProps {
 }
 
 export const SettingsMenu: React.FC<SettingsMenuProps> = ({
-  theme,
   onToggleTheme,
   isLoggedIn,
   onLogin,
@@ -27,17 +26,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
     >
       {/* Gear icon button */}
       <button
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          padding: '0.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#E0E0E0',
-        }}
-        aria-label="Settings"
+
       >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
