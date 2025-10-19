@@ -1,0 +1,54 @@
+{
+    "beginner": {
+        "lowerBound": 0,
+        "upperBound": 399
+    },
+    "neophyte": {
+        "lowerBound": 400,
+        "upperBound": 799
+    },
+    "novice": {
+        "lowerBound": 800,
+        "upperBound": 999
+    },
+    "apprentice": {
+        "lowerBound": 1000,
+        "upperBound": 1199
+    },
+    "journeyman": {
+        "lowerBound": 1200,
+        "upperBound": 1399
+    },
+    "adept": {
+        "lowerBound": 1400,
+        "upperBound": 1599
+    },
+    "expert": {
+        "lowerBound": 1600,
+        "upperBound": 1799
+    },
+    "sage": {
+        "lowerBound": 1800,
+        "upperBound": 1999
+    },
+    "candidate-master": {
+        "lowerBound": 2000,
+        "upperBound": 2199
+    },
+    "master": {
+        "lowerBound": 2200,
+        "upperBound": 2399
+    },
+    "grandmaster": {
+        "lowerBound": 2400,
+        "upperBound": 2599
+    },
+    "super-grandmaster": {
+        "lowerBound": 2600,
+        "upperBound": 2999
+    },
+    "undefined": {
+        "lowerBound": 3000,
+        "upperBound": 9999
+    }
+}
