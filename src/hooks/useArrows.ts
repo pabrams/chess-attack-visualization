@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { Square } from 'chess.js';
-
-export interface Arrow {
-  startSquare: string;
-  endSquare: string;
-  color: string;
-}
+import { Arrow } from '../types/arrows';
 
 export const useArrows = () => {
   const [arrows, setArrows] = useState<Arrow[]>([]);

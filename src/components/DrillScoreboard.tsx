@@ -1,10 +1,6 @@
 import React from 'react';
 import styles from './DrillScoreboard.module.css';
-
-export interface DrillResult {
-  success: boolean;
-  timeMs: number;
-}
+import { DrillResult } from '../types/drill';
 
 interface DrillScoreboardProps {
   results: DrillResult[];

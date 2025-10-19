@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { LichessPuzzle } from '../types/lichess';
-import { DrillResult } from '../components/DrillScoreboard';
+import { DrillResult } from '../types/drill';
 
 interface DrillState {
   active: boolean;

@@ -1,13 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-
-export interface ThemeColors {
-  pageBackgroundColor: string;
-  pageForegroundColor: string;
-  lightSquareColor: string;
-  darkSquareColor: string;
-  whiteArrowColor: string;
-  blackArrowColor: string;
-}
+import { ThemeColors } from '../types/theme';
 
 const LIGHT_THEME_COLORS: ThemeColors = {
   pageBackgroundColor: '#f8f9fa',
