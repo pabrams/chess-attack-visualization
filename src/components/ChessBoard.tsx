@@ -38,7 +38,6 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   boardOrientation = 'white',
 }) => {
   const handlePieceDrop = (args: PieceDropHandlerArgs) => {
-    // Disable piece drops during puzzle auto-play
     if (isPuzzleAutoPlaying) {
       return false;
     }
@@ -51,7 +50,6 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   };
 
   const handleSquareClick = (args: SquareHandlerArgs) => {
-    // Disable clicks during puzzle auto-play
     if (isPuzzleAutoPlaying) {
       return;
     }

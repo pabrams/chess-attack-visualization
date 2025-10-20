@@ -10,10 +10,8 @@ interface InfoPanelLayoutProps {
 }
 
 export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, theme, rating, lastResult }) => {
-  // Sort by timestamp (most recent first)
   const sortedAttempts = [...attempts].sort((a, b) => b.timestamp - a.timestamp);
 
-  // Calculate player stats
   const attemptedCount = attempts.length;
   const succeededCount = attempts.filter(a => a.success).length;
   const successRatio = attemptedCount > 0 ? (succeededCount / attemptedCount) : 0;

@@ -48,8 +48,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   // Use ref to break circular dependency between recordPuzzleResult and loadNextDrillPuzzle
   const loadNextDrillPuzzleRef = useRef<(() => void) | undefined>(undefined);
 
-  // Load puzzle attempts from localStorage on mount
-  useEffect(() => {
+  const loadPuzzleAttemptsFromStorage = useCallback(() => {
     const stored = localStorage.getItem('puzzleAttempts');
     if (stored) {
       try {
@@ -60,7 +59,10 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     }
   }, []);
 
-  // Save puzzle attempt to localStorage
+  useEffect(() => {
+    loadPuzzleAttemptsFromStorage();
+  }, [loadPuzzleAttemptsFromStorage]);
+
   const savePuzzleAttempt = useCallback((attempt: PuzzleAttempt) => {
     setPuzzleAttempts(prev => {
       const updated = [attempt, ...prev];
@@ -72,11 +74,8 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string, puzzleUrl: string) => {
     const ratingChange = calculateRatingChange(rating, puzzleRating, success);
     addPoints(rating, puzzleRating, success);
-
-    // Update last puzzle result
     setLastPuzzleResult(success ? 'success' : 'failure');
 
-    // Save puzzle attempt to localStorage
     savePuzzleAttempt({
       puzzleId,
       puzzleUrl,
@@ -89,6 +88,48 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     loadNextDrillPuzzleRef.current?.();
   }, [rating, addPoints, savePuzzleAttempt]);
 
+  const resetPuzzleState = useCallback(() => {
+    setPuzzleState({
+      active: false,
+      solution: [],
+      completed: false,
+      failed: false,
+    });
+  }, []);
+
+  const startPuzzle = useCallback((puzzle: LichessPuzzle) => {
+    setPuzzleState({
+      active: true,
+      solution: puzzle.puzzle.solution,
+      completed: false,
+      failed: false,
+      puzzleStartTime: Date.now(),
+    });
+  }, []);
+
+  const initializePuzzleFromFen = useCallback((puzzle: LichessPuzzle & { _setupMove?: string; _fen?: string }) => {
+    import('chess.js').then(({ Chess }) => {
+      const setupMove = puzzle._setupMove!;
+      const fen = puzzle._fen!;
+
+      const tempChess = new Chess(fen);
+      const from = setupMove.substring(0, 2);
+      const to = setupMove.substring(2, 4);
+      const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
+
+      const move = tempChess.move({ from, to, promotion: promotion as any });
+
+      if (move) {
+        const pgn = tempChess.pgn();
+        const success = chessGame.loadPgn(pgn);
+
+        if (success) {
+          startPuzzle(puzzle);
+        }
+      }
+    });
+  }, [chessGame, startPuzzle]);
+
   const loadNextDrillPuzzle = useCallback(() => {
     setDrillState(prev => {
       if (prev.puzzleQueue.length === 0) {
@@ -98,57 +139,46 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
 
       const [puzzle, ...remainingQueue] = prev.puzzleQueue;
 
-      // Reset puzzle state
-      setPuzzleState({
-        active: false,
-        solution: [],
-        completed: false,
-        failed: false,
-      });
+      resetPuzzleState();
+      initializePuzzleFromFen(puzzle as any);
 
-      // Load from FEN and make the setup move
-      import('chess.js').then(({ Chess }) => {
-        const setupMove = (puzzle as any)._setupMove;
-        const fen = (puzzle as any)._fen;
-
-        const tempChess = new Chess(fen);
-        const from = setupMove.substring(0, 2);
-        const to = setupMove.substring(2, 4);
-        const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
-
-        const move = tempChess.move({ from, to, promotion: promotion as any });
-
-        if (move) {
-          const pgn = tempChess.pgn();
-          const success = chessGame.loadPgn(pgn);
-
-          if (success) {
-            // Start puzzle
-            setPuzzleState({
-              active: true,
-              solution: puzzle.puzzle.solution,
-              completed: false,
-              failed: false,
-              puzzleStartTime: Date.now(),
-            });
-          }
-        }
-      });
-   
       return {
         ...prev,
         puzzleQueue: remainingQueue,
         currentPuzzle: puzzle as any,
       };
     });
-  }, [chessGame, recordPuzzleResult]);
+  }, [resetPuzzleState, initializePuzzleFromFen]);
 
   // Keep ref up to date
   loadNextDrillPuzzleRef.current = loadNextDrillPuzzle;
 
+  const selectRandomPlayerColor = (): 'white' | 'black' => {
+    return Math.random() < 0.5 ? 'white' : 'black';
+  };
+
+  const convertToLichessPuzzleFormat = (rawPuzzles: any[]): LichessPuzzle[] => {
+    return rawPuzzles.map((p: any) => ({
+      game: {
+        pgn: '',
+        id: p.gameUrl.split('/')[3] || p.id,
+      },
+      puzzle: {
+        id: p.id,
+        initialPly: 0,
+        plays: 0,
+        rating: p.rating,
+        solution: [p.solution],
+        themes: p.themes,
+      },
+      _fen: p.fen,
+      _setupMove: p.setupMove,
+      _gameUrl: p.gameUrl,
+    } as any));
+  };
+
   const handleDrillStart = async () => {
-    // Randomly select white or black
-    const playerColor: 'white' | 'black' = Math.random() < 0.5 ? 'white' : 'black';
+    const playerColor = selectRandomPlayerColor();
 
     setDrillState({
       active: true,
@@ -160,7 +190,6 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     setLastPuzzleResult(null);
 
     try {
-      // Get the player's level based on their rating
       const playerLevel = getLevelFromRating(rating);
       const colorPrefix = playerColor === 'white' ? 'w' : 'b';
       const puzzleFile = `/visualize-chessboard-territory/lichess_db_puzzle-${colorPrefix}-one-move-${playerLevel}.json`;
@@ -173,27 +202,8 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
       }
 
       const data = await response.json();
-
       const shuffled = data.puzzles.sort(() => Math.random() - 0.5).slice(0, 200);
-
-      // Convert to LichessPuzzle format
-      const puzzles = shuffled.map((p: any) => ({
-        game: {
-          pgn: '',
-          id: p.gameUrl.split('/')[3] || p.id,
-        },
-        puzzle: {
-          id: p.id,
-          initialPly: 0,
-          plays: 0,
-          rating: p.rating,
-          solution: [p.solution], // Single move solution
-          themes: p.themes,
-        },
-        _fen: p.fen,
-        _setupMove: p.setupMove,
-        _gameUrl: p.gameUrl,
-      }));
+      const puzzles = convertToLichessPuzzleFormat(shuffled);
 
       setDrillState(prev => ({
         ...prev,
@@ -213,7 +223,6 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   };
 
   const handleDrillTimeUp = useCallback(() => {
-    // End drill
     setDrillState({
       active: false,
       loading: false,
@@ -229,42 +238,46 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     });
   }, []);
 
-  // Handle puzzle moves with validation
+  const markPuzzleAsFailed = useCallback(() => {
+    chessGame.undoLastMove();
+    setPuzzleState(prev => ({
+      ...prev,
+      failed: true,
+    }));
+  }, [chessGame]);
+
+  const markPuzzleAsCompleted = useCallback(() => {
+    setPuzzleState(prev => ({
+      ...prev,
+      completed: true,
+    }));
+  }, []);
+
+  const isMoveCorrect = (move: any, expectedMove: string): boolean => {
+    return move.lan === expectedMove;
+  };
+
   const handlePuzzleMove = useCallback((sourceSquare: string, targetSquare: string, promotion?: string) => {
     if (!puzzleState.active) {
-      // Not in puzzle mode, make normal move
       return chessGame.makeMove(sourceSquare, targetSquare, promotion);
     }
 
-    // Try to make the move
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
 
     if (!move) {
       return move;
     }
 
-    // Check if it matches the expected solution
     const expectedMove = puzzleState.solution[0];
-    const playerMove = move.lan;
 
-    if (playerMove !== expectedMove) {
-      // Wrong move - undo it and mark as failed
-      chessGame.undoLastMove();
-      setPuzzleState(prev => ({
-        ...prev,
-        failed: true,
-      }));
+    if (!isMoveCorrect(move, expectedMove)) {
+      markPuzzleAsFailed();
       return null;
     }
 
-    // Correct move - mark as completed
-    setPuzzleState(prev => ({
-      ...prev,
-      completed: true,
-    }));
-
+    markPuzzleAsCompleted();
     return move;
-  }, [puzzleState.active, puzzleState.solution, chessGame]);
+  }, [puzzleState.active, puzzleState.solution, chessGame, markPuzzleAsFailed, markPuzzleAsCompleted]);
 
   // Watch for puzzle completion or failure
   const hasRecordedRef = useRef(false);
