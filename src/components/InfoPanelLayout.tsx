@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PuzzleAttempt } from '../types/drill';
 import { getLevelFromRating, formatLevelName } from '../utils/ratingCalculation';
 import styles from './InfoPanelLayout.module.css';
@@ -14,6 +14,22 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
   const level = getLevelFromRating(rating);
   const formattedLevel = formatLevelName(level);
   const sortedAttempts = [...attempts].sort((a, b) => b.timestamp - a.timestamp);
+
+  const lazyRecordCount = 24;
+  
+  const [displayCount, setDisplayCount] = useState(lazyRecordCount);
+  
+  useEffect(() => {
+    if (sortedAttempts.length < displayCount) {
+      setDisplayCount(lazyRecordCount);
+    }
+  }, [sortedAttempts.length, displayCount]);
+  
+  const handleLoadMore = () => {
+    setDisplayCount(prev => Math.min(prev + lazyRecordCount, sortedAttempts.length));
+  };
+  
+  const visibleAttempts = sortedAttempts.slice(0, displayCount);
 
   const attemptedCount = attempts.length;
   const succeededCount = attempts.filter(a => a.success).length;
@@ -60,6 +76,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
           <table className={`${styles.table} ${theme === 'light' ? styles.tableLight : ''}`}>
             <thead>
               <tr>
+                <th></th>
                 <th>Lichess ID</th>
                 <th>Puzzle Rating</th>
                 <th>Points Gained</th>
@@ -67,8 +84,9 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
               </tr>
             </thead>
           <tbody>
-            {sortedAttempts.map((attempt, index) => (
+            {visibleAttempts.map((attempt, index) => (
               <tr key={index} className={theme === 'dark' ? styles.darkRow : styles.lightRow}>
+                <td className={styles.rowNumber}>{sortedAttempts.length - index}</td>
                 <td>
                   <a
                     href={constructPuzzleUrl(attempt.puzzleId)}
@@ -95,6 +113,11 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
         {sortedAttempts.length === 0 && (
           <div className={styles.emptyState}>
             No puzzle attempts yet
+          </div>
+        )}
+        {displayCount < sortedAttempts.length && (
+          <div className={styles.loadingMore} onClick={handleLoadMore}>
+            Click to load more... ({displayCount} of {sortedAttempts.length})
           </div>
         )}
         </div>

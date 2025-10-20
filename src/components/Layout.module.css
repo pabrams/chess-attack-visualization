@@ -1,23 +1,21 @@
 .layout {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   gap: 1rem;
   width: 100%;
-  height: calc(100vh - 80px);
 }
 
 .boardResults {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
-  height: 100%;
   width: 100%;
 }
 
 .board {
-  height: 100%;
-  max-width: 100%;
+  max-width: 600px;
+  width: 100%;
   aspect-ratio: 1 / 1;
 }
 
@@ -26,7 +24,6 @@
   flex-direction: column;
   gap: 1rem;
   flex-shrink: 0;
-  height: 100%;
 }
 
 .puzzleHistory {
@@ -50,8 +47,8 @@
   }
 
   .board {
+    max-width: 100%;
     width: 100%;
-    height: auto;
   }
 }
 
