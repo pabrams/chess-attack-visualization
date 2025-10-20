@@ -26,6 +26,9 @@ interface LayoutProps {
   puzzleAttempts: PuzzleAttempt[];
   rating: number;
   lastPuzzleResult: boolean | null;
+  playerColor: 'white' | 'black';
+  whiteArrowColor: string;
+  blackArrowColor: string;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -44,6 +47,9 @@ export const Layout: React.FC<LayoutProps> = ({
   puzzleAttempts,
   rating,
   lastPuzzleResult,
+  playerColor,
+  whiteArrowColor,
+  blackArrowColor,
 }) => {
   return (
     <div className={styles.layout}>
@@ -71,6 +77,9 @@ export const Layout: React.FC<LayoutProps> = ({
             theme={theme}
             rating={rating}
             lastResult={lastPuzzleResult}
+            playerColor={playerColor}
+            whiteArrowColor={whiteArrowColor}
+            blackArrowColor={blackArrowColor}
           />
         </div>
       </div>

@@ -162,6 +162,9 @@ const App = () => {
           puzzleAttempts={puzzleAttempts}
           rating={rating}
           lastPuzzleResult={lastPuzzleResult}
+          playerColor={drillState.playerColor}
+          whiteArrowColor={theme.currentThemeColors.whiteArrowColor}
+          blackArrowColor={theme.currentThemeColors.blackArrowColor}
         />
       </div>
     </>

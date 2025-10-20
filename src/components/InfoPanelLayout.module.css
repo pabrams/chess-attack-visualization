@@ -26,6 +26,13 @@
   box-sizing: border-box;
 }
 
+.moveInstruction {
+  text-align: center;
+  font-size: 16px;
+  margin-bottom: 12px;
+  padding: 8px;
+}
+
 .playerInfoContent {
   display: flex;
   align-items: center;

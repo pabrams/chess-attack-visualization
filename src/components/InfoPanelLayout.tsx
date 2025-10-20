@@ -8,9 +8,12 @@ interface InfoPanelLayoutProps {
   theme: 'dark' | 'light';
   rating: number;
   lastResult: boolean | null;
+  playerColor: 'white' | 'black';
+  whiteArrowColor: string;
+  blackArrowColor: string;
 }
 
-export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, theme, rating, lastResult }) => {
+export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, theme, rating, lastResult, playerColor, whiteArrowColor, blackArrowColor }) => {
   const level = getLevelFromRating(rating);
   const formattedLevel = formatLevelName(level);
   const sortedAttempts = [...attempts].sort((a, b) => b.timestamp - a.timestamp);
@@ -53,6 +56,11 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
     <div className={styles.wrapper}>
       <fieldset className={styles.playerInfoContainer}>
         <legend>Monkey Drill Info</legend>
+        <div className={styles.moveInstruction}>
+          Move the <span style={{ color: playerColor === 'white' ? blackArrowColor : whiteArrowColor, fontWeight: 'bold' }}>
+            {playerColor === 'white' ? 'Black' : 'White'}
+          </span> pieces
+        </div>
         <div className={styles.playerInfoContent}>
           <div className={styles.ratingSection}>
             <span className={styles.ratingLabel}>Rating</span>

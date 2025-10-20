@@ -16,7 +16,7 @@ const DARK_THEME_COLORS: ThemeColors = {
   lightSquareColor: '#444444',
   darkSquareColor: '#000000',
   whiteArrowColor: '#aa0033',
-  blackArrowColor: '#0044bb'
+  blackArrowColor: '#0088ff'
 };
 
 export const useTheme = () => {
