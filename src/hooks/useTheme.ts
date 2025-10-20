@@ -27,12 +27,10 @@ export const useTheme = () => {
 
   const currentThemeColors = theme === 'dark' ? DARK_THEME_COLORS : LIGHT_THEME_COLORS;
 
-  // Save theme to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Apply theme class to body element (let CSS handle the styling)
   useEffect(() => {
     document.body.className = `theme-${theme}`;
   }, [theme]);
