@@ -119,6 +119,11 @@
   z-index: 1;
 }
 
+.table.tableLight thead {
+  background-color: #cccccc;
+  color: #000000;
+}
+
 .table th {
   padding: 8px;
   text-align: left;

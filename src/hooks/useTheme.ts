@@ -4,8 +4,8 @@ import { ThemeColors } from '../types/theme';
 const LIGHT_THEME_COLORS: ThemeColors = {
   pageBackgroundColor: '#ffffff',
   pageForegroundColor: '#000000',
-  lightSquareColor: '#ffffff',
-  darkSquareColor: '#cccccc',
+  lightSquareColor: '#f0d9b5',
+  darkSquareColor: '#b58863',
   whiteArrowColor: '#ff0000',
   blackArrowColor: '#0000ff'
 };

@@ -8,8 +8,12 @@ const BLACK_ACCENT = '#0044bb';
 const TRANSPARENT = 'none';
 const STROKE_WIDTH = '2';
 
-export const getCustomPieces = (theme: 'dark' | 'light'): PieceRenderObject => {
-  const shadowColor = theme === 'dark' ? 'white' : 'black';
+export const getCustomPieces = (theme: 'dark' | 'light'): PieceRenderObject | undefined => {
+  if (theme === 'light') {
+    return undefined; // Use default pieces in light mode
+  }
+  
+  const shadowColor = 'white';
   
   return {
   wP: () => (

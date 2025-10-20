@@ -32,6 +32,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   boardOrientation = 'white',
   theme,
 }) => {
+  const customPieces = getCustomPieces(theme);
 
   const chessboardOptions = {
     onPieceDrop,
@@ -41,7 +42,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     id: 'chessboard-options',
     position: chessPosition,
     boardOrientation,
-    pieces: getCustomPieces(theme),
+    ...(customPieces && { pieces: customPieces }), // Only include pieces if not undefined
     allowDrawingArrows: false,
     arrowOptions: {
       color: 'yellow',

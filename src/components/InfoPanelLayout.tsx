@@ -58,7 +58,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
       <fieldset className={styles.historyContainer}>
         <legend>Puzzle History</legend>
         <div className={styles.tableWrapper}>
-          <table className={styles.table}>
+          <table className={`${styles.table} ${theme === 'light' ? styles.tableLight : ''}`}>
             <thead>
               <tr>
                 <th>ID</th>

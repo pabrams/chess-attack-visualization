@@ -13,9 +13,9 @@ const Header: React.FC<HeaderProps> = ({ theme, onToggleTheme }) => {
   const { user, loading, logout } = useLichessAuth();
 
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${theme === 'light' ? styles.headerLight : ''}`}>
       <div className={styles.titleSection}>
-        <h1 className={styles.title}>Monkey Drill</h1>
+        <h1 className={`${styles.title} ${theme === 'light' ? styles.titleLight : ''}`}>Monkey Drill</h1>
       </div>
 
       <div className={styles.actions}>
