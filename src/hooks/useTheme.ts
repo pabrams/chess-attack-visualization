@@ -32,15 +32,10 @@ export const useTheme = () => {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Apply theme to body element
+  // Apply theme class to body element (let CSS handle the styling)
   useEffect(() => {
-    document.body.style.backgroundColor = currentThemeColors.pageBackgroundColor;
-    document.body.style.color = currentThemeColors.pageForegroundColor;
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    document.body.style.fontFamily = 'system-ui, -apple-system, sans-serif';
-    document.body.style.transition = 'background-color 0.2s ease';
-  }, [currentThemeColors]);
+    document.body.className = `theme-${theme}`;
+  }, [theme]);
 
   const toggleTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
