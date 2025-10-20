@@ -42,17 +42,17 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     id: 'chessboard-options',
     position: chessPosition,
     boardOrientation,
-    ...(customPieces && { pieces: customPieces }), // Only include pieces if not undefined
+    ...(customPieces && { pieces: customPieces }),
     allowDrawingArrows: false,
     arrowOptions: {
       color: 'yellow',
       secondaryColor: 'red',
       tertiaryColor: 'blue',
-      arrowLengthReducerDenominator: 1,
-      sameTargetArrowLengthReducerDenominator: 2,
+      arrowLengthReducerDenominator: 1000,
+      sameTargetArrowLengthReducerDenominator: 3,
       arrowWidthDenominator: 8,
       activeArrowWidthMultiplier: 1.5,
-      opacity: 1,
+      opacity: 0.9,
       activeOpacity: 0.6,
     },
     darkSquareStyle: {

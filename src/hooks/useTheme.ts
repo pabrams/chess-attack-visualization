@@ -6,8 +6,8 @@ const LIGHT_THEME_COLORS: ThemeColors = {
   pageForegroundColor: '#000000',
   lightSquareColor: '#f0d9b5',
   darkSquareColor: '#b58863',
-  whiteArrowColor: '#ff0000',
-  blackArrowColor: '#0000ff'
+  whiteArrowColor: '#cc0033',
+  blackArrowColor: '#0066cc'
 };
 
 const DARK_THEME_COLORS: ThemeColors = {
@@ -15,8 +15,8 @@ const DARK_THEME_COLORS: ThemeColors = {
   pageForegroundColor: '#ffffff',
   lightSquareColor: '#444444',
   darkSquareColor: '#000000',
-  whiteArrowColor: '#ff0000',
-  blackArrowColor: '#0000ff'
+  whiteArrowColor: '#aa0033',
+  blackArrowColor: '#0044bb'
 };
 
 export const useTheme = () => {
