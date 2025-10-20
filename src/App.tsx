@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
 import { useTheme } from './hooks/useTheme';
@@ -13,6 +14,7 @@ import { DrillLayout } from './components/DrillLayout';
 import { BeginButton } from './components/BeginButton';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import { TimerContainer } from './components/TimerContainer';
+import { PromotionDialog } from './components/PromotionDialog';
 import './App.css';
 
 const App = () => {
@@ -27,6 +29,12 @@ const App = () => {
     addPoints,
   });
 
+  const [pendingPromotion, setPendingPromotion] = useState<{
+    sourceSquare: string;
+    targetSquare: string;
+    pieceColor: 'w' | 'b';
+  } | null>(null);
+
   const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
     arrows.showAttackersForSquare(
       square,
@@ -36,12 +44,40 @@ const App = () => {
     );
   };
 
-  const handlePieceDrop = ({ sourceSquare, targetSquare }: PieceDropHandlerArgs) => {
+  const handlePieceDrop = ({ sourceSquare, targetSquare, piece }: PieceDropHandlerArgs) => {
     if (!targetSquare) {
       return false;
     }
+
+    // Check for pawn promotion
+    if (piece && piece.pieceType) {
+      const pieceType = piece.pieceType.toLowerCase();
+      const isPawn = pieceType[1] === 'p';
+      const isBackRank = targetSquare[1] === '8' || targetSquare[1] === '1';
+
+      if (isPawn && isBackRank) {
+        const pieceColor = piece.pieceType[0] as 'w' | 'b';
+        setPendingPromotion({ sourceSquare, targetSquare, pieceColor });
+        return false; // Don't complete the move yet
+      }
+    }
+
+    // Regular move (not a promotion)
     const move = handlePuzzleMove(sourceSquare, targetSquare);
     return !!move;
+  };
+
+  const handlePromotionSelect = (promotionPiece: 'q' | 'r' | 'b' | 'n') => {
+    if (!pendingPromotion) return;
+
+    const { sourceSquare, targetSquare } = pendingPromotion;
+    const move = handlePuzzleMove(sourceSquare, targetSquare, promotionPiece);
+
+    setPendingPromotion(null);
+
+    if (move) {
+      handleMoveComplete();
+    }
   };
 
   const handleMoveComplete = () => {
@@ -60,6 +96,14 @@ const App = () => {
       />
 
       {drillState.loading && <LoadingOverlay />}
+
+      {pendingPromotion && (
+        <PromotionDialog
+          color={pendingPromotion.pieceColor}
+          onSelect={handlePromotionSelect}
+          theme={theme.theme}
+        />
+      )}
 
       <div
         data-testid="app-container"
