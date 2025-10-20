@@ -4,7 +4,6 @@ import { Arrow } from '../types/arrows';
 import { customPieces } from './customPieces';
 
 interface ChessBoardProps {
-  theme: 'dark' | 'light';
   chessPosition: string;
   arrows: Arrow[];
   lightSquareColor: string;
@@ -22,7 +21,6 @@ interface ChessBoardProps {
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({
-  theme,
   chessPosition,
   arrows,
   lightSquareColor,
