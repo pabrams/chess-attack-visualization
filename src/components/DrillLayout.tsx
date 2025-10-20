@@ -67,7 +67,6 @@ export const DrillLayout: React.FC<DrillLayoutProps> = ({
         <div className={styles.board}>
           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
             <ChessBoard
-              theme={theme}
               chessPosition={chessPosition}
               arrows={arrows}
               lightSquareColor={lightSquareColor}
