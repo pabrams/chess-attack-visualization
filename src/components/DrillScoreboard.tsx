@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './DrillScoreboard.module.css';
 import { DrillResult } from '../types/drill';
+import { getLevelFromRating, formatLevelName } from '../utils/ratingCalculation';
 
 interface DrillScoreboardProps {
   results: DrillResult[];
@@ -11,6 +12,7 @@ interface DrillScoreboardProps {
 export const DrillScoreboard: React.FC<DrillScoreboardProps> = ({ results, theme, rating }) => {
   const solvedCount = results.filter((r) => r.success).length;
   const attemptedCount = results.length;
+  const level = getLevelFromRating(rating);
 
   return (
     <div className={styles.container}>
@@ -18,6 +20,9 @@ export const DrillScoreboard: React.FC<DrillScoreboardProps> = ({ results, theme
         <legend>Player</legend>
         <div>
           Rating: {rating}
+        </div>
+        <div>
+          Level: {formatLevelName(level)}
         </div>
         <div>
           Solved: {solvedCount}/{attemptedCount}
