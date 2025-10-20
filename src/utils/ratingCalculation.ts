@@ -27,8 +27,6 @@ export function calculateRatingChange(
   const r_puzzle = puzzleRating;
   const result = success ? 1 : -1;
   const points = K * (result/2) + (K/( 4 * C)) * (r_puzzle - r_old);
-  console.log('calculateRatingChange called with:', { playerRating, puzzleRating, success });
-  console.log('calculated points:', points);
   return points;
 }
 

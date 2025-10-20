@@ -155,11 +155,9 @@ const App = () => {
           sourceSquare={sourceSquare}
           targetSquare={targetSquare}
           selectedSquare={selectedSquare}
-          isAtFinalPosition={chessGame.isAtFinalPosition}
           onPieceDrop={handlePieceDrop}
           onSquareClick={handleSquareClick}
           onSquareRightClick={handleSquareRightClick}
-          onMoveComplete={handleMoveComplete}
           boardOrientation={drillState.active ? (drillState.playerColor === 'white' ? 'black' : 'white') : 'white'}
           puzzleAttempts={puzzleAttempts}
           rating={rating}

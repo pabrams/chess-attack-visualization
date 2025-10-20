@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useReducer, useCallback, useEffect, useRef } from 'react';
 import { LichessPuzzle } from '../types/lichess';
 import { PuzzleAttempt } from '../types/drill';
 import type { ChessGame } from './useChessGame';
@@ -18,94 +18,197 @@ interface DrillState {
   puzzleQueue: LichessPuzzle[];
   playerColor: 'white' | 'black';
   currentPuzzle: (LichessPuzzle & { _gameUrl?: string }) | null;
+  puzzleState: PuzzleState;
+  puzzleAttempts: PuzzleAttempt[];
+  lastPuzzleResult: boolean | null;
 }
+
+type DrillAction =
+  | { type: 'START_LOADING'; playerColor: 'white' | 'black' }
+  | { type: 'PUZZLES_LOADED'; puzzles: LichessPuzzle[] }
+  | { type: 'LOAD_NEXT_PUZZLE' }
+  | { type: 'PUZZLE_STARTED'; puzzle: LichessPuzzle }
+  | { type: 'PUZZLE_COMPLETED' }
+  | { type: 'PUZZLE_FAILED' }
+  | { type: 'PUZZLE_RESULT_RECORDED'; attempt: PuzzleAttempt; wasSuccess: boolean }
+  | { type: 'LOADING_ERROR' }
+  | { type: 'LOAD_ATTEMPTS'; attempts: PuzzleAttempt[] };
 
 interface UseDrillProps {
   chessGame: ChessGame;
   rating: number;
-  addPoints: (playerRating: number, puzzleRating: number, success: boolean) => void;
+  addPoints: (puzzleRating: number, success: boolean) => void;
 }
 
-export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
-  const [drillState, setDrillState] = useState<DrillState>({
-    active: false,
-    loading: false,
-    puzzleQueue: [],
-    playerColor: 'white',
-    currentPuzzle: null,
-  });
-
-  const [puzzleState, setPuzzleState] = useState<PuzzleState>({
+const initialState: DrillState = {
+  active: false,
+  loading: false,
+  puzzleQueue: [],
+  playerColor: 'white',
+  currentPuzzle: null,
+  puzzleState: {
     active: false,
     solution: [],
     completed: false,
     failed: false,
-  });
+  },
+  puzzleAttempts: [],
+  lastPuzzleResult: null,
+};
 
-  const [puzzleAttempts, setPuzzleAttempts] = useState<PuzzleAttempt[]>([]);
-  const [lastPuzzleResult, setLastPuzzleResult] = useState<'success' | 'failure' | null>(null);
+function drillReducer(state: DrillState, action: DrillAction): DrillState {
+  switch (action.type) {
+    case 'START_LOADING':
+      return {
+        ...initialState,
+        // Preserve puzzle attempts history when starting a new drill
+        puzzleAttempts: state.puzzleAttempts,
+        active: true,
+        loading: true,
+        playerColor: action.playerColor,
+        lastPuzzleResult: null,
+      };
 
-  // Use ref to break circular dependency between recordPuzzleResult and loadNextDrillPuzzle
-  const loadNextPuzzleRef = useRef<(() => void) | undefined>(undefined);
+    case 'PUZZLES_LOADED':
+      return {
+        ...state,
+        loading: false,
+        puzzleQueue: action.puzzles,
+      };
 
-  const loadPuzzleAttemptsFromStorage = useCallback(() => {
+    case 'LOAD_NEXT_PUZZLE': {
+      const [nextPuzzle, ...remainingQueue] = state.puzzleQueue;
+      
+      if (!nextPuzzle) {
+        console.error('Puzzle queue is empty!');
+        return state;
+      }
+
+      return {
+        ...state,
+        puzzleQueue: remainingQueue,
+        currentPuzzle: nextPuzzle as any,
+        puzzleState: {
+          active: false,
+          solution: [],
+          completed: false,
+          failed: false,
+        },
+      };
+    }
+
+    case 'PUZZLE_STARTED':
+      return {
+        ...state,
+        puzzleState: {
+          active: true,
+          solution: action.puzzle.puzzle.solution,
+          completed: false,
+          failed: false,
+          puzzleStartTime: Date.now(),
+        },
+      };
+
+    case 'PUZZLE_COMPLETED':
+      return {
+        ...state,
+        puzzleState: {
+          ...state.puzzleState,
+          completed: true,
+        },
+      };
+
+    case 'PUZZLE_FAILED':
+      return {
+        ...state,
+        puzzleState: {
+          ...state.puzzleState,
+          failed: true,
+        },
+      };
+
+    case 'PUZZLE_RESULT_RECORDED':
+      return {
+        ...state,
+        puzzleAttempts: [action.attempt, ...state.puzzleAttempts],
+        lastPuzzleResult: action.wasSuccess,
+        puzzleState: {
+          active: false,
+          solution: [],
+          completed: false,
+          failed: false,
+        },
+      };
+
+    case 'LOADING_ERROR':
+      return {
+        ...state,
+        loading: false,
+        active: false,
+      };
+
+    case 'LOAD_ATTEMPTS':
+      return {
+        ...state,
+        puzzleAttempts: action.attempts,
+      };
+
+    default:
+      return state;
+  }
+}
+
+const selectRandomPlayerColor = (): 'white' | 'black' => {
+  return Math.random() < 0.5 ? 'white' : 'black';
+};
+
+const convertToLichessPuzzleFormat = (rawPuzzles: any[]): LichessPuzzle[] => {
+  return rawPuzzles.map((p: any) => ({
+    game: {
+      pgn: '',
+      id: p.gameUrl.split('/')[3] || p.id,
+    },
+    puzzle: {
+      id: p.id,
+      initialPly: 0,
+      plays: 0,
+      rating: p.rating,
+      solution: [p.solution],
+      themes: p.themes,
+    },
+    _fen: p.fen,
+    _setupMove: p.setupMove,
+    _gameUrl: p.gameUrl,
+  } as any));
+};
+
+export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
+  const [state, dispatch] = useReducer(drillReducer, initialState);
+  
+  // Track the initial rating to avoid restarting drill when rating changes
+  const initialRatingRef = useRef(rating);
+  
+  // Load puzzle attempts from localStorage on mount
+  useEffect(() => {
     const stored = localStorage.getItem('puzzleAttempts');
     if (stored) {
       try {
-        setPuzzleAttempts(JSON.parse(stored));
+        const attempts = JSON.parse(stored);
+        dispatch({ type: 'LOAD_ATTEMPTS', attempts });
       } catch (error) {
         console.error('Failed to load puzzle attempts:', error);
       }
     }
   }, []);
 
+  // Save puzzle attempts to localStorage whenever they change
   useEffect(() => {
-    loadPuzzleAttemptsFromStorage();
-  }, [loadPuzzleAttemptsFromStorage]);
+    if (state.puzzleAttempts.length > 0) {
+      localStorage.setItem('puzzleAttempts', JSON.stringify(state.puzzleAttempts));
+    }
+  }, [state.puzzleAttempts]);
 
-  const savePuzzleAttempt = useCallback((attempt: PuzzleAttempt) => {
-    setPuzzleAttempts(prev => {
-      const updated = [attempt, ...prev];
-      localStorage.setItem('puzzleAttempts', JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
-
-  const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
-    const ratingChange = calculateRatingChange(rating, puzzleRating, success);
-    addPoints(rating, puzzleRating, success);
-    setLastPuzzleResult(success ? 'success' : 'failure');
-
-    savePuzzleAttempt({
-      puzzleId,
-      puzzleRating,
-      ratingChange,
-      timestamp: Date.now(),
-      success,
-    });
-
-    loadNextPuzzleRef.current?.();
-  }, [rating, addPoints, savePuzzleAttempt]);
-
-  const resetPuzzleState = useCallback(() => {
-    setPuzzleState({
-      active: false,
-      solution: [],
-      completed: false,
-      failed: false,
-    });
-  }, []);
-
-  const startPuzzle = useCallback((puzzle: LichessPuzzle) => {
-    setPuzzleState({
-      active: true,
-      solution: puzzle.puzzle.solution,
-      completed: false,
-      failed: false,
-      puzzleStartTime: Date.now(),
-    });
-  }, []);
-
+  // Initialize puzzle from FEN
   const initializePuzzleFromFen = useCallback((puzzle: LichessPuzzle & { _setupMove?: string; _fen?: string }) => {
     import('chess.js').then(({ Chess }) => {
       const setupMove = puzzle._setupMove!;
@@ -123,77 +226,81 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
         const success = chessGame.loadPgn(pgn);
 
         if (success) {
-          startPuzzle(puzzle);
+          dispatch({ type: 'PUZZLE_STARTED', puzzle });
         }
       }
     });
-  }, [chessGame, startPuzzle]);
+  }, [chessGame]);
 
+  // Load next puzzle - this is called after recording a result
   const loadNextPuzzle = useCallback(() => {
-    setDrillState(prev => {
-      if (prev.puzzleQueue.length === 0) {
-        console.error('Puzzle queue is empty!');
-        return prev;
-      }
+    dispatch({ type: 'LOAD_NEXT_PUZZLE' });
+  }, []);
 
-      const [puzzle, ...remainingQueue] = prev.puzzleQueue;
+  // Effect to initialize puzzle when currentPuzzle changes (but not active yet)
+  useEffect(() => {
+    if (state.currentPuzzle && !state.puzzleState.active) {
+      initializePuzzleFromFen(state.currentPuzzle as any);
+    }
+  }, [state.currentPuzzle, state.puzzleState.active, initializePuzzleFromFen]);
 
-      resetPuzzleState();
-      initializePuzzleFromFen(puzzle as any);
+  // Record puzzle result and load next puzzle
+  const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
+    const ratingChange = calculateRatingChange(rating, puzzleRating, success);
+    
+    // Update external rating
+    addPoints(puzzleRating, success);
+    
+    // Create attempt record
+    const attempt: PuzzleAttempt = {
+      puzzleId,
+      puzzleRating,
+      ratingChange,
+      timestamp: Date.now(),
+      success,
+    };
 
-      return {
-        ...prev,
-        puzzleQueue: remainingQueue,
-        currentPuzzle: puzzle as any,
-      };
-    });
-  }, [resetPuzzleState, initializePuzzleFromFen]);
+    // Dispatch result
+    dispatch({ type: 'PUZZLE_RESULT_RECORDED', attempt, wasSuccess: success });
+    
+    // Load next puzzle after a small delay to allow UI to update
+    setTimeout(() => {
+      loadNextPuzzle();
+    }, 0);
+  }, [rating, addPoints, loadNextPuzzle]);
 
-  loadNextPuzzleRef.current = loadNextPuzzle;
+  // Watch for puzzle completion or failure and record result
+  useEffect(() => {
+    if (!state.active || !state.currentPuzzle) {
+      return;
+    }
 
-  const selectRandomPlayerColor = (): 'white' | 'black' => {
-    return Math.random() < 0.5 ? 'white' : 'black';
-  };
+    const { completed, failed } = state.puzzleState;
+    
+    if (!completed && !failed) {
+      return;
+    }
 
-  const convertToLichessPuzzleFormat = (rawPuzzles: any[]): LichessPuzzle[] => {
-    return rawPuzzles.map((p: any) => ({
-      game: {
-        pgn: '',
-        id: p.gameUrl.split('/')[3] || p.id,
-      },
-      puzzle: {
-        id: p.id,
-        initialPly: 0,
-        plays: 0,
-        rating: p.rating,
-        solution: [p.solution],
-        themes: p.themes,
-      },
-      _fen: p.fen,
-      _setupMove: p.setupMove,
-      _gameUrl: p.gameUrl,
-    } as any));
-  };
+    const puzzleRating = state.currentPuzzle.puzzle.rating;
+    const puzzleId = state.currentPuzzle.puzzle.id;
 
+    // Record the result
+    recordPuzzleResult(completed, puzzleRating, puzzleId);
+  }, [state.puzzleState.completed, state.puzzleState.failed, state.active, state.currentPuzzle, recordPuzzleResult]);
+
+  // Start drill on mount
   useEffect(() => {
     const startDrill = async () => {
       const playerColor = selectRandomPlayerColor();
 
-      setDrillState({
-        active: true,
-        loading: true,
-        puzzleQueue: [],
-        playerColor,
-        currentPuzzle: null,
-      });
-      setLastPuzzleResult(null);
+      dispatch({ type: 'START_LOADING', playerColor });
 
       try {
-        const playerLevel = getLevelFromRating(rating);
+        const playerLevel = getLevelFromRating(initialRatingRef.current);
         const colorPrefix = playerColor === 'white' ? 'w' : 'b';
         const puzzleFile = `/visualize-chessboard-territory/lichess_db_puzzle-${colorPrefix}-one-move-${playerLevel}.json`;
 
-        console.log(`Loading ${playerColor} puzzles for level ${playerLevel} (rating: ${rating}) from ${puzzleFile}...`);
+        console.log(`Loading ${playerColor} puzzles for level ${playerLevel} (rating: ${initialRatingRef.current}) from ${puzzleFile}...`);
         const response = await fetch(puzzleFile);
 
         if (!response.ok) {
@@ -204,40 +311,27 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
         const shuffled = data.puzzles.sort(() => Math.random() - 0.5).slice(0, 200);
         const puzzles = convertToLichessPuzzleFormat(shuffled);
 
-        setDrillState(prev => ({
-          ...prev,
-          loading: false,
-          puzzleQueue: puzzles,
-        }));
-
+        dispatch({ type: 'PUZZLES_LOADED', puzzles });
+        
+        // Load the first puzzle
         loadNextPuzzle();
       } catch (error) {
         console.error('Error loading puzzles:', error);
-        setDrillState(prev => ({
-          ...prev,
-          loading: false,
-          active: false,
-        }));
+        dispatch({ type: 'LOADING_ERROR' });
       }
     };
 
     startDrill();
-  }, []);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   const markPuzzleAsFailed = useCallback(() => {
     chessGame.undoLastMove();
-    setPuzzleState(prev => ({
-      ...prev,
-      failed: true,
-    }));
+    dispatch({ type: 'PUZZLE_FAILED' });
   }, [chessGame]);
 
   const markPuzzleAsCompleted = useCallback(() => {
-    setPuzzleState(prev => ({
-      ...prev,
-      completed: true,
-    }));
+    dispatch({ type: 'PUZZLE_COMPLETED' });
   }, []);
 
   const isMoveCorrect = (move: any, expectedMove: string): boolean => {
@@ -245,7 +339,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   };
 
   const handlePuzzleMove = useCallback((sourceSquare: string, targetSquare: string, promotion?: string) => {
-    if (!puzzleState.active) {
+    if (!state.puzzleState.active) {
       return chessGame.makeMove(sourceSquare, targetSquare, promotion);
     }
 
@@ -255,7 +349,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
       return move;
     }
 
-    const expectedMove = puzzleState.solution[0];
+    const expectedMove = state.puzzleState.solution[0];
 
     if (!isMoveCorrect(move, expectedMove)) {
       markPuzzleAsFailed();
@@ -264,35 +358,19 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
 
     markPuzzleAsCompleted();
     return move;
-  }, [puzzleState.active, puzzleState.solution, chessGame, markPuzzleAsFailed, markPuzzleAsCompleted]);
-
-  // Watch for puzzle completion or failure
-  const hasRecordedRef = useRef(false);
-
-  useEffect(() => {
-    if (!drillState.active || hasRecordedRef.current || !drillState.currentPuzzle) {
-      return;
-    }
-
-    const puzzleRating = drillState.currentPuzzle.puzzle.rating;
-    const puzzleId = drillState.currentPuzzle.puzzle.id;
-
-    if (puzzleState.completed) {
-      hasRecordedRef.current = true;
-      recordPuzzleResult(true, puzzleRating, puzzleId);
-      hasRecordedRef.current = false;
-    } else if (puzzleState.failed) {
-      hasRecordedRef.current = true;
-      recordPuzzleResult(false, puzzleRating, puzzleId);
-      hasRecordedRef.current = false;
-    }
-  }, [puzzleState.completed, puzzleState.failed, drillState.active, drillState.currentPuzzle, recordPuzzleResult]);
+  }, [state.puzzleState.active, state.puzzleState.solution, chessGame, markPuzzleAsFailed, markPuzzleAsCompleted]);
 
   return {
-    drillState,
-    puzzleState,
-    puzzleAttempts,
-    lastPuzzleResult,
+    drillState: {
+      active: state.active,
+      loading: state.loading,
+      puzzleQueue: state.puzzleQueue,
+      playerColor: state.playerColor,
+      currentPuzzle: state.currentPuzzle,
+    },
+    puzzleState: state.puzzleState,
+    puzzleAttempts: state.puzzleAttempts,
+    lastPuzzleResult: state.lastPuzzleResult,
     handlePuzzleMove,
   };
 };

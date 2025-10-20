@@ -8,12 +8,15 @@ const BLACK_ACCENT = '#0044bb';
 const TRANSPARENT = 'none';
 const STROKE_WIDTH = '2';
 
-export const customPieces: PieceRenderObject = {
+export const getCustomPieces = (theme: 'dark' | 'light'): PieceRenderObject => {
+  const shadowColor = theme === 'dark' ? 'white' : 'black';
+  
+  return {
   wP: () => (
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-wP">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <path
@@ -33,7 +36,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-wR">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinecap: 'round', strokeLinejoin: 'round', filter: 'url(#dropShadow-wR)' }}>
@@ -51,7 +54,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-wN">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinecap: 'round', strokeLinejoin: 'round' , filter: 'url(#dropShadow-wN)'}}>
@@ -66,7 +69,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-wB">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinecap: 'round', strokeLinejoin: 'round' , filter: 'url(#dropShadow-wB)'}}>
@@ -83,7 +86,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-wQ">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinejoin: 'round' , filter: 'url(#dropShadow-wQ)'}}>
@@ -103,7 +106,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-wK">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinecap: 'round', strokeLinejoin: 'round' , filter: 'url(#dropShadow-wK)'}}>
@@ -121,7 +124,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-bP">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <path
@@ -141,7 +144,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-bR">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinecap: 'round', strokeLinejoin: 'round' , filter: 'url(#dropShadow-bR)'}}>
@@ -159,7 +162,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-bN">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinecap: 'round', strokeLinejoin: 'round' , filter: 'url(#dropShadow-bN)'}}>
@@ -174,7 +177,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-bB">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinecap: 'round', strokeLinejoin: 'round' , filter: 'url(#dropShadow-bB)'}}>
@@ -191,7 +194,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-bQ">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinejoin: 'round' , filter: 'url(#dropShadow-bQ)'}}>
@@ -211,7 +214,7 @@ export const customPieces: PieceRenderObject = {
     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 45 45" width="100%" height="100%" style={{ mixBlendMode: 'normal' }}>
       <defs>
         <filter id="dropShadow-bK">
-          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="white" floodOpacity="0.8"/>
+          <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor={shadowColor} floodOpacity="0.8"/>
         </filter>
       </defs>
       <g style={{ fill: TRANSPARENT, strokeWidth: STROKE_WIDTH, strokeLinecap: 'round', strokeLinejoin: 'round' , filter: 'url(#dropShadow-bK)'}}>
@@ -225,4 +228,5 @@ export const customPieces: PieceRenderObject = {
       </g>
     </svg>
   ),
+  };
 };

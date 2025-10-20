@@ -1,7 +1,7 @@
 import React from 'react';
 import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow } from '../types/arrows';
-import { customPieces } from './customPieces';
+import { getCustomPieces } from './customPieces';
 
 interface ChessBoardProps {
   chessPosition: string;
@@ -11,13 +11,11 @@ interface ChessBoardProps {
   sourceSquare: string | null;
   targetSquare: string | null;
   selectedSquare: string | null;
-  isAtFinalPosition: boolean;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
-  onMoveComplete: () => void;
-  isPuzzleAutoPlaying?: boolean;
   boardOrientation?: 'white' | 'black';
+  theme: 'dark' | 'light';
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({
@@ -31,40 +29,19 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   onPieceDrop,
   onSquareClick,
   onSquareRightClick,
-  onMoveComplete,
-  isPuzzleAutoPlaying = false,
   boardOrientation = 'white',
+  theme,
 }) => {
-  const handlePieceDrop = (args: PieceDropHandlerArgs) => {
-    if (isPuzzleAutoPlaying) {
-      return false;
-    }
-
-    const success = onPieceDrop(args);
-    if (success) {
-      onMoveComplete();
-    }
-    return success;
-  };
-
-  const handleSquareClick = (args: SquareHandlerArgs) => {
-    if (isPuzzleAutoPlaying) {
-      return;
-    }
-
-    onSquareClick(args);
-  };
 
   const chessboardOptions = {
-    onPieceDrop: handlePieceDrop,
-    onSquareClick: handleSquareClick,
+    onPieceDrop,
+    onSquareClick,
     onSquareRightClick,
     arrows,
     id: 'chessboard-options',
     position: chessPosition,
-    areDraggablePieces: !isPuzzleAutoPlaying,
     boardOrientation,
-    pieces: customPieces,
+    pieces: getCustomPieces(theme),
     allowDrawingArrows: false,
     arrowOptions: {
       color: 'yellow',

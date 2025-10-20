@@ -1,20 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeColors } from '../types/theme';
 
 const LIGHT_THEME_COLORS: ThemeColors = {
-  pageBackgroundColor: '#f8f9fa',
+  pageBackgroundColor: '#ffffff',
   pageForegroundColor: '#000000',
   lightSquareColor: '#ffffff',
-  darkSquareColor: '#777777',
+  darkSquareColor: '#cccccc',
   whiteArrowColor: '#ff0000',
   blackArrowColor: '#0000ff'
 };
 
 const DARK_THEME_COLORS: ThemeColors = {
-  pageBackgroundColor: '#0a0a0a',
+  pageBackgroundColor: '#000000',
   pageForegroundColor: '#ffffff',
-  lightSquareColor: '#dddddd',
-  darkSquareColor: '#444444',
+  lightSquareColor: '#444444',
+  darkSquareColor: '#000000',
   whiteArrowColor: '#ff0000',
   blackArrowColor: '#0000ff'
 };
@@ -27,19 +27,8 @@ export const useTheme = () => {
 
   const currentThemeColors = theme === 'dark' ? DARK_THEME_COLORS : LIGHT_THEME_COLORS;
 
-  // Save theme to localStorage when it changes, but handle initial render correctly
-  const isInitialRender = useRef(true);
+  // Save theme to localStorage whenever it changes
   useEffect(() => {
-    if (isInitialRender.current) {
-      isInitialRender.current = false;
-      // Only save to localStorage on initial render if no theme was previously saved
-      const savedTheme = localStorage.getItem('theme');
-      if (!savedTheme) {
-        localStorage.setItem('theme', theme);
-      }
-      return;
-    }
-    // For subsequent renders, always save the theme
     localStorage.setItem('theme', theme);
   }, [theme]);
 

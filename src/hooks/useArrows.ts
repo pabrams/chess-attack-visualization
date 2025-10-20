@@ -48,7 +48,6 @@ export const useArrows = () => {
 
   return {
     arrows,
-    lastClickedSquare,
     clearArrows,
     showAttackersForSquare,
   };

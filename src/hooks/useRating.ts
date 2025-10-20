@@ -20,10 +20,10 @@ export const useRating = () => {
     localStorage.setItem(RATING_STORAGE_KEY, rating.toString());
   }, [rating]);
 
-  const addPoints = (playerRating: number, puzzleRating: number, success: boolean) => {
-    const points = calculateRatingChange(playerRating, puzzleRating, success);
+  const addPoints = (puzzleRating: number, success: boolean) => {
+    const points = calculateRatingChange(rating, puzzleRating, success);
 
-    let newRating = Math.ceil(playerRating + points);
+    let newRating = Math.ceil(rating + points);
     if (newRating > 9999) newRating = 9999;
     if (newRating < 1) newRating = 1;
 

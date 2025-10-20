@@ -7,7 +7,7 @@ interface InfoPanelLayoutProps {
   attempts: PuzzleAttempt[];
   theme: 'dark' | 'light';
   rating: number;
-  lastResult: 'success' | 'failure' | null;
+  lastResult: boolean | null;
 }
 
 export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, theme, rating, lastResult }) => {
@@ -40,7 +40,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
         <div className={styles.playerInfoContent}>
           <div className={styles.ratingSection}>
             <span className={styles.ratingLabel}>Rating</span>
-            <span className={`${styles.ratingValue} ${lastResult === 'success' ? styles.ratingSuccess : lastResult === 'failure' ? styles.ratingFailure : ''}`}>{rating}</span>
+            <span className={`${styles.ratingValue} ${lastResult === true ? styles.ratingSuccess : lastResult === false ? styles.ratingFailure : ''}`}>{rating}</span>
             <span className={styles.levelLabel}>{formattedLevel}</span>
           </div>
           <div className={styles.puzzleStats}>

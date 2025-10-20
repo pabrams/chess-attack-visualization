@@ -17,17 +17,15 @@ interface LayoutProps {
   sourceSquare: string | null;
   targetSquare: string | null;
   selectedSquare: string | null;
-  isAtFinalPosition: boolean;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
-  onMoveComplete: () => void;
   boardOrientation: 'white' | 'black';
 
   // Info panel props
   puzzleAttempts: PuzzleAttempt[];
   rating: number;
-  lastPuzzleResult: 'success' | 'failure' | null;
+  lastPuzzleResult: boolean | null;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -39,11 +37,9 @@ export const Layout: React.FC<LayoutProps> = ({
   sourceSquare,
   targetSquare,
   selectedSquare,
-  isAtFinalPosition,
   onPieceDrop,
   onSquareClick,
   onSquareRightClick,
-  onMoveComplete,
   boardOrientation,
   puzzleAttempts,
   rating,
@@ -61,13 +57,11 @@ export const Layout: React.FC<LayoutProps> = ({
             sourceSquare={sourceSquare}
             targetSquare={targetSquare}
             selectedSquare={selectedSquare}
-            isAtFinalPosition={isAtFinalPosition}
             onPieceDrop={onPieceDrop}
             onSquareClick={onSquareClick}
             onSquareRightClick={onSquareRightClick}
-            onMoveComplete={onMoveComplete}
-            isPuzzleAutoPlaying={false}
             boardOrientation={boardOrientation}
+            theme={theme}
           />
         </div>
 

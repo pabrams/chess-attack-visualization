@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { LichessUser } from '../types/lichess';
 import { handleRedirect } from '../services/lichessAuth';
 
@@ -35,6 +35,12 @@ export const useLichessAuth = () => {
     initAuth();
   }, []);
 
+  const logout = useCallback(() => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('lichessToken');
+  }, []);
+
   useEffect(() => {
     const fetchUser = async () => {
       if (token) {
@@ -59,13 +65,7 @@ export const useLichessAuth = () => {
     };
 
     fetchUser();
-  }, [token]);
-
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('lichessToken');
-  };
+  }, [token, logout]);
 
   return { token, user, loading, logout };
 };
