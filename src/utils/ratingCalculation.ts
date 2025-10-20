@@ -1,4 +1,4 @@
-import levelsData from '../../public/levels.json';
+import levelsData from '../levels.json';
 
 interface LevelBounds {
   lowerBound: number;
