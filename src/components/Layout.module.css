@@ -14,7 +14,6 @@
 }
 
 .board {
-  max-width: 600px;
   width: 100%;
   aspect-ratio: 1 / 1;
 }
@@ -57,7 +56,12 @@
     flex-direction: row;
   }
 
+  .board {
+    height: calc(100vh - 100px);
+    width: auto;
+  }
+
   .infoPanels {
-    width: 350px;
+    width: 450px;
   }
 }
