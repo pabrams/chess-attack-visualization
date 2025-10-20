@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { LichessPuzzle } from '../types/lichess';
 import { DrillResult } from '../types/drill';
 import type { ChessGame } from './useChessGame';
+import { getLevelFromRating } from '../utils/ratingCalculation';
 
 interface PuzzleState {
   active: boolean;
@@ -128,11 +129,18 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     });
 
     try {
-      const puzzleFile = playerColor === 'white'
-        ? '/visualize-chessboard-territory/lichess_db_puzzle-w-one-move-neophyte.json'
-        : '/visualize-chessboard-territory/lichess_db_puzzle-b-one-move-neophyte.json';
-      console.log(`Loading ${playerColor} puzzles from ${puzzleFile}...`);
+      // Get the player's level based on their rating
+      const playerLevel = getLevelFromRating(rating);
+      const colorPrefix = playerColor === 'white' ? 'w' : 'b';
+      const puzzleFile = `/visualize-chessboard-territory/lichess_db_puzzle-${colorPrefix}-one-move-${playerLevel}.json`;
+
+      console.log(`Loading ${playerColor} puzzles for level ${playerLevel} (rating: ${rating}) from ${puzzleFile}...`);
       const response = await fetch(puzzleFile);
+
+      if (!response.ok) {
+        throw new Error(`Failed to load puzzle file: ${response.status} ${response.statusText}`);
+      }
+
       const data = await response.json();
 
       const shuffled = data.puzzles.sort(() => Math.random() - 0.5).slice(0, 200);
