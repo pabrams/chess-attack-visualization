@@ -35,6 +35,9 @@ const App = () => {
     pieceColor: 'w' | 'b';
   } | null>(null);
 
+  // Click-to-move state
+  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+
   const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
     arrows.showAttackersForSquare(
       square,
@@ -44,27 +47,59 @@ const App = () => {
     );
   };
 
-  const handlePieceDrop = ({ sourceSquare, targetSquare, piece }: PieceDropHandlerArgs) => {
-    if (!targetSquare) {
-      return false;
-    }
-
+  // Helper function to attempt a move and handle pawn promotion
+  const attemptMove = (sourceSquare: string, targetSquare: string): boolean => {
     // Check for pawn promotion
-    if (piece && piece.pieceType) {
-      const pieceType = piece.pieceType.toLowerCase();
-      const isPawn = pieceType[1] === 'p';
+    const piece = chessGame.getPieceAt(sourceSquare);
+    if (piece) {
+      const isPawn = piece.type === 'p';
       const isBackRank = targetSquare[1] === '8' || targetSquare[1] === '1';
 
       if (isPawn && isBackRank) {
-        const pieceColor = piece.pieceType[0] as 'w' | 'b';
-        setPendingPromotion({ sourceSquare, targetSquare, pieceColor });
-        return false; // Don't complete the move yet
+        setPendingPromotion({ sourceSquare, targetSquare, pieceColor: piece.color });
+        return false; // Don't complete the move yet - wait for promotion selection
       }
     }
 
     // Regular move (not a promotion)
     const move = handlePuzzleMove(sourceSquare, targetSquare);
-    return !!move;
+    if (move) {
+      handleMoveComplete();
+      return true;
+    }
+    return false;
+  };
+
+  const handleSquareClick = ({ square }: SquareHandlerArgs) => {
+    if (!selectedSquare) {
+      // First click - select the piece if it's movable
+      const piece = chessGame.getPieceAt(square);
+      if (piece) {
+        setSelectedSquare(square);
+      }
+    } else {
+      // Second click - attempt to move
+      const sourceSquare = selectedSquare;
+      const targetSquare = square;
+
+      // Clear selection regardless of move success
+      setSelectedSquare(null);
+
+      // If clicking the same square, just deselect
+      if (sourceSquare === targetSquare) {
+        return;
+      }
+
+      attemptMove(sourceSquare, targetSquare);
+    }
+  };
+
+  const handlePieceDrop = ({ sourceSquare, targetSquare }: PieceDropHandlerArgs) => {
+    if (!targetSquare) {
+      return false;
+    }
+
+    return attemptMove(sourceSquare, targetSquare);
   };
 
   const handlePromotionSelect = (promotionPiece: 'q' | 'r' | 'b' | 'n') => {
@@ -130,8 +165,10 @@ const App = () => {
                 darkSquareColor={theme.currentThemeColors.darkSquareColor}
                 sourceSquare={sourceSquare}
                 targetSquare={targetSquare}
+                selectedSquare={selectedSquare}
                 isAtFinalPosition={chessGame.isAtFinalPosition}
                 onPieceDrop={handlePieceDrop}
+                onSquareClick={handleSquareClick}
                 onSquareRightClick={handleSquareRightClick}
                 onMoveComplete={handleMoveComplete}
                 isPuzzleAutoPlaying={false}

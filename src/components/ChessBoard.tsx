@@ -11,8 +11,10 @@ interface ChessBoardProps {
   darkSquareColor: string;
   sourceSquare: string | null;
   targetSquare: string | null;
+  selectedSquare: string | null;
   isAtFinalPosition: boolean;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
+  onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
   onMoveComplete: () => void;
   isPuzzleAutoPlaying?: boolean;
@@ -27,7 +29,9 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   darkSquareColor,
   sourceSquare,
   targetSquare,
+  selectedSquare,
   onPieceDrop,
+  onSquareClick,
   onSquareRightClick,
   onMoveComplete,
   isPuzzleAutoPlaying = false,
@@ -46,8 +50,18 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     return success;
   };
 
+  const handleSquareClick = (args: SquareHandlerArgs) => {
+    // Disable clicks during puzzle auto-play
+    if (isPuzzleAutoPlaying) {
+      return;
+    }
+
+    onSquareClick(args);
+  };
+
   const chessboardOptions = {
     onPieceDrop: handlePieceDrop,
+    onSquareClick: handleSquareClick,
     onSquareRightClick,
     arrows,
     id: 'chessboard-options',
@@ -78,6 +92,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     squareStyles: {
       ...(sourceSquare ? { [sourceSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' } } : {}),
       ...(targetSquare ? { [targetSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' } } : {}),
+      ...(selectedSquare ? { [selectedSquare]: { backgroundColor: 'rgba(0, 255, 0, 0.5)' } } : {}),
     },
   };
 

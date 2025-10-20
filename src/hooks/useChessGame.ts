@@ -71,6 +71,10 @@ export const useChessGame = () => {
     return chessGameRef.current.attackers(square, color);
   };
 
+  const getPieceAt = (square: string) => {
+    return chessGameRef.current.get(square as Square);
+  };
+
   return {
     chessPosition,
     isAtFinalPosition: chessGameRef.current.isGameOver(),
@@ -79,6 +83,7 @@ export const useChessGame = () => {
     undoLastMove,
     loadPgn,
     getAttackers,
+    getPieceAt,
   };
 };
 
