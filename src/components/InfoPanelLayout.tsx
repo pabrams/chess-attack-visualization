@@ -36,15 +36,14 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
   return (
     <div className={styles.wrapper}>
       <fieldset className={styles.playerInfoContainer}>
-        <legend>Player Info</legend>
+        <legend>Monkey Drill Info</legend>
         <div className={styles.playerInfoContent}>
           <div className={styles.ratingSection}>
             <span className={styles.ratingLabel}>Rating</span>
             <span className={`${styles.ratingValue} ${lastResult === true ? styles.ratingSuccess : lastResult === false ? styles.ratingFailure : ''}`}>{rating}</span>
-            <span className={styles.levelLabel}>{formattedLevel}</span>
           </div>
           <div className={styles.puzzleStats}>
-            <span className={styles.puzzleStatsLabel}>Puzzles:</span>
+            <span className={styles.puzzleStatsLabel}>Success Rate</span>
             <span className={styles.puzzleStatsValue}>
               <span className={styles.succeededCount}>{succeededCount}</span>
               <span className={styles.separator}>/</span>
@@ -61,9 +60,9 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
           <table className={`${styles.table} ${theme === 'light' ? styles.tableLight : ''}`}>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Rating</th>
-                <th>Points</th>
+                <th>Lichess ID</th>
+                <th>Puzzle Rating</th>
+                <th>Points Gained</th>
                 <th>Date</th>
               </tr>
             </thead>
