@@ -1,5 +1,6 @@
 import React from 'react';
 import { PuzzleAttempt } from '../types/drill';
+import { getLevelFromRating, formatLevelName } from '../utils/ratingCalculation';
 import styles from './InfoPanelLayout.module.css';
 
 interface InfoPanelLayoutProps {
@@ -10,6 +11,8 @@ interface InfoPanelLayoutProps {
 }
 
 export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, theme, rating, lastResult }) => {
+  const level = getLevelFromRating(rating);
+  const formattedLevel = formatLevelName(level);
   const sortedAttempts = [...attempts].sort((a, b) => b.timestamp - a.timestamp);
 
   const attemptedCount = attempts.length;
@@ -38,6 +41,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
           <div className={styles.ratingSection}>
             <span className={styles.ratingLabel}>Rating</span>
             <span className={`${styles.ratingValue} ${lastResult === 'success' ? styles.ratingSuccess : lastResult === 'failure' ? styles.ratingFailure : ''}`}>{rating}</span>
+            <span className={styles.levelLabel}>{formattedLevel}</span>
           </div>
           <div className={styles.puzzleStats}>
             <span className={styles.puzzleStatsLabel}>Puzzles:</span>

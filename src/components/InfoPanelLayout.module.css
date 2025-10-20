@@ -61,6 +61,14 @@
   color: #f44336 !important;
 }
 
+.levelLabel {
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.8;
+  text-transform: capitalize;
+  margin-top: 4px;
+}
+
 .puzzleStats {
   display: flex;
   flex-direction: column;
