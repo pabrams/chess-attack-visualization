@@ -16,9 +16,18 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
   const succeededCount = attempts.filter(a => a.success).length;
   const successRatio = attemptedCount > 0 ? (succeededCount / attemptedCount) : 0;
 
-  const formatTimestamp = (timestamp: number) => {
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString();
+  };
+
+  const formatFullTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleString();
+  };
+
+  const constructPuzzleUrl = (puzzleId: string) => {
+    return `https://lichess.org/training/${puzzleId}`;
   };
 
   return (
@@ -51,8 +60,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
                 <th>ID</th>
                 <th>Rating</th>
                 <th>Points</th>
-                <th>Result</th>
-                <th>Timestamp</th>
+                <th>Date</th>
               </tr>
             </thead>
           <tbody>
@@ -60,7 +68,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
               <tr key={index} className={theme === 'dark' ? styles.darkRow : styles.lightRow}>
                 <td>
                   <a
-                    href={attempt.puzzleUrl}
+                    href={constructPuzzleUrl(attempt.puzzleId)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.puzzleLink}
@@ -74,12 +82,9 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, them
                 >
                   {attempt.ratingChange >= 0 ? '+' : ''}{attempt.ratingChange.toFixed(1)}
                 </td>
-                <td>
-                  <span className={attempt.success ? styles.success : styles.failure}>
-                    {attempt.success ? '✓' : '✗'}
-                  </span>
+                <td title={formatFullTimestamp(attempt.timestamp)}>
+                  {formatDate(attempt.timestamp)}
                 </td>
-                <td>{formatTimestamp(attempt.timestamp)}</td>
               </tr>
             ))}
           </tbody>

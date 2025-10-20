@@ -71,14 +71,13 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     });
   }, []);
 
-  const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string, puzzleUrl: string) => {
+  const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
     const ratingChange = calculateRatingChange(rating, puzzleRating, success);
     addPoints(rating, puzzleRating, success);
     setLastPuzzleResult(success ? 'success' : 'failure');
 
     savePuzzleAttempt({
       puzzleId,
-      puzzleUrl,
       puzzleRating,
       ratingChange,
       timestamp: Date.now(),
@@ -289,15 +288,14 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
 
     const puzzleRating = drillState.currentPuzzle.puzzle.rating;
     const puzzleId = drillState.currentPuzzle.puzzle.id;
-    const puzzleUrl = drillState.currentPuzzle._gameUrl || '';
 
     if (puzzleState.completed) {
       hasRecordedRef.current = true;
-      recordPuzzleResult(true, puzzleRating, puzzleId, puzzleUrl);
+      recordPuzzleResult(true, puzzleRating, puzzleId);
       hasRecordedRef.current = false;
     } else if (puzzleState.failed) {
       hasRecordedRef.current = true;
-      recordPuzzleResult(false, puzzleRating, puzzleId, puzzleUrl);
+      recordPuzzleResult(false, puzzleRating, puzzleId);
       hasRecordedRef.current = false;
     }
   }, [puzzleState.completed, puzzleState.failed, drillState.active, drillState.currentPuzzle, recordPuzzleResult]);
