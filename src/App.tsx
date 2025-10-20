@@ -6,7 +6,7 @@ import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
 import Header from './components/Header';
-import { DrillLayout } from './components/DrillLayout';
+import { Layout } from './components/Layout';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import { PromotionDialog } from './components/PromotionDialog';
 import './App.css';
@@ -17,7 +17,7 @@ const App = () => {
   const arrows = useArrows();
   const { rating, addPoints } = useRating();
 
-  const { drillState, puzzleAttempts, lastPuzzleResult, handleDrillStart, handleDrillTimeUp, handlePuzzleMove } = useDrill({
+  const { drillState, puzzleAttempts, lastPuzzleResult, handlePuzzleMove } = useDrill({
     chessGame,
     rating,
     addPoints,
@@ -146,10 +146,8 @@ const App = () => {
         }}
       >
 
-        <DrillLayout
+        <Layout
           theme={theme.theme}
-          isDrillActive={drillState.active && !drillState.loading}
-          onTimeUp={handleDrillTimeUp}
           chessPosition={chessGame.chessPosition}
           arrows={arrows.arrows}
           lightSquareColor={theme.currentThemeColors.lightSquareColor}
@@ -163,8 +161,6 @@ const App = () => {
           onSquareRightClick={handleSquareRightClick}
           onMoveComplete={handleMoveComplete}
           boardOrientation={drillState.active ? (drillState.playerColor === 'white' ? 'black' : 'white') : 'white'}
-          showBeginButton={!drillState.active && !drillState.loading}
-          onBeginClick={handleDrillStart}
           puzzleAttempts={puzzleAttempts}
           rating={rating}
           lastPuzzleResult={lastPuzzleResult}

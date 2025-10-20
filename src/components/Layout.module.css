@@ -15,12 +15,6 @@
   width: 100%;
 }
 
-.timer {
-  display: flex;
-  flex-shrink: 0;
-  width: 100%;
-}
-
 .board {
   height: 100%;
   max-width: 100%;
@@ -49,11 +43,6 @@
   .boardResults {
     flex-direction: column;
     align-items: center;
-  }
-
-  .timer {
-    width: 100%;
-    justify-content: center;
   }
 
   .infoPanels {
