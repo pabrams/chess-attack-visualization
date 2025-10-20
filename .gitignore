@@ -24,16 +24,3 @@ public/cm-chessboard-assets
 *.sln
 *.sw?
 *.zip
-
-# Ignore codebase switcher script
-
-codebase_switcher.py
-
-# Ignore .cursorignore files
-
-.cursorignore
-
-# Ignore cursor indexing ignore script
-
-.cursorindexingignore
-
