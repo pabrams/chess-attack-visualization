@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { LichessPuzzle } from '../types/lichess';
-import { DrillResult } from '../types/drill';
+import { PuzzleAttempt } from '../types/drill';
 import type { ChessGame } from './useChessGame';
-import { getLevelFromRating } from '../utils/ratingCalculation';
+import { getLevelFromRating, calculateRatingChange } from '../utils/ratingCalculation';
 
 interface PuzzleState {
   active: boolean;
@@ -15,7 +15,6 @@ interface PuzzleState {
 interface DrillState {
   active: boolean;
   loading: boolean;
-  results: DrillResult[];
   puzzleQueue: LichessPuzzle[];
   playerColor: 'white' | 'black';
   currentPuzzle: (LichessPuzzle & { _gameUrl?: string }) | null;
@@ -31,7 +30,6 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   const [drillState, setDrillState] = useState<DrillState>({
     active: false,
     loading: false,
-    results: [],
     puzzleQueue: [],
     playerColor: 'white',
     currentPuzzle: null,
@@ -44,19 +42,52 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     failed: false,
   });
 
+  const [puzzleAttempts, setPuzzleAttempts] = useState<PuzzleAttempt[]>([]);
+  const [lastPuzzleResult, setLastPuzzleResult] = useState<'success' | 'failure' | null>(null);
+
   // Use ref to break circular dependency between recordPuzzleResult and loadNextDrillPuzzle
   const loadNextDrillPuzzleRef = useRef<(() => void) | undefined>(undefined);
 
-  const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number) => {
-    const timeMs = Date.now() - (puzzleState.puzzleStartTime || Date.now());
+  // Load puzzle attempts from localStorage on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('puzzleAttempts');
+    if (stored) {
+      try {
+        setPuzzleAttempts(JSON.parse(stored));
+      } catch (error) {
+        console.error('Failed to load puzzle attempts:', error);
+      }
+    }
+  }, []);
+
+  // Save puzzle attempt to localStorage
+  const savePuzzleAttempt = useCallback((attempt: PuzzleAttempt) => {
+    setPuzzleAttempts(prev => {
+      const updated = [attempt, ...prev];
+      localStorage.setItem('puzzleAttempts', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string, puzzleUrl: string) => {
+    const ratingChange = calculateRatingChange(rating, puzzleRating, success);
     addPoints(rating, puzzleRating, success);
-    setDrillState(prev => ({
-      ...prev,
-      results: [...prev.results, { success, timeMs }],
-    }));
+
+    // Update last puzzle result
+    setLastPuzzleResult(success ? 'success' : 'failure');
+
+    // Save puzzle attempt to localStorage
+    savePuzzleAttempt({
+      puzzleId,
+      puzzleUrl,
+      puzzleRating,
+      ratingChange,
+      timestamp: Date.now(),
+      success,
+    });
 
     loadNextDrillPuzzleRef.current?.();
-  }, [puzzleState.puzzleStartTime, rating, addPoints]);
+  }, [rating, addPoints, savePuzzleAttempt]);
 
   const loadNextDrillPuzzle = useCallback(() => {
     setDrillState(prev => {
@@ -122,11 +153,11 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     setDrillState({
       active: true,
       loading: true,
-      results: [],
       puzzleQueue: [],
       playerColor,
       currentPuzzle: null,
     });
+    setLastPuzzleResult(null);
 
     try {
       // Get the player's level based on their rating
@@ -182,19 +213,10 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   };
 
   const handleDrillTimeUp = useCallback(() => {
-    // Save results to localStorage
-    const drillResults = {
-      timestamp: Date.now(),
-      results: drillState.results,
-    };
-    const existingResults = JSON.parse(localStorage.getItem('drillResults') || '[]');
-    localStorage.setItem('drillResults', JSON.stringify([...existingResults, drillResults]));
-
     // End drill
     setDrillState({
       active: false,
       loading: false,
-      results: [],
       puzzleQueue: [],
       playerColor: 'white',
       currentPuzzle: null,
@@ -205,7 +227,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
       completed: false,
       failed: false,
     });
-  }, [drillState.results]);
+  }, []);
 
   // Handle puzzle moves with validation
   const handlePuzzleMove = useCallback((sourceSquare: string, targetSquare: string, promotion?: string) => {
@@ -253,14 +275,16 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     }
 
     const puzzleRating = drillState.currentPuzzle.puzzle.rating;
+    const puzzleId = drillState.currentPuzzle.puzzle.id;
+    const puzzleUrl = drillState.currentPuzzle._gameUrl || '';
 
     if (puzzleState.completed) {
       hasRecordedRef.current = true;
-      recordPuzzleResult(true, puzzleRating);
+      recordPuzzleResult(true, puzzleRating, puzzleId, puzzleUrl);
       hasRecordedRef.current = false;
     } else if (puzzleState.failed) {
       hasRecordedRef.current = true;
-      recordPuzzleResult(false, puzzleRating);
+      recordPuzzleResult(false, puzzleRating, puzzleId, puzzleUrl);
       hasRecordedRef.current = false;
     }
   }, [puzzleState.completed, puzzleState.failed, drillState.active, drillState.currentPuzzle, recordPuzzleResult]);
@@ -268,6 +292,8 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   return {
     drillState,
     puzzleState,
+    puzzleAttempts,
+    lastPuzzleResult,
     handleDrillStart,
     handleDrillTimeUp,
     handlePuzzleMove,

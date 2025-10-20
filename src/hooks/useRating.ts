@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { calculateRatingChange } from '../utils/ratingCalculation';
 
 const RATING_STORAGE_KEY = 'monkeyDrill_userRating';
-const DEFAULT_RATING = 300;
+const DEFAULT_RATING = 1;
 
 export const useRating = () => {
   const [rating, setRating] = useState<number>(() => {

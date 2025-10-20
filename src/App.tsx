@@ -5,15 +5,9 @@ import { useTheme } from './hooks/useTheme';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
-import { ChessBoard } from './components/ChessBoard';
 import Header from './components/Header';
-import { DrillTimer } from './components/DrillTimer';
-import { DrillScoreboard } from './components/DrillScoreboard';
-import { PuzzleInfo } from './components/PuzzleInfo';
 import { DrillLayout } from './components/DrillLayout';
-import { BeginButton } from './components/BeginButton';
 import { LoadingOverlay } from './components/LoadingOverlay';
-import { TimerContainer } from './components/TimerContainer';
 import { PromotionDialog } from './components/PromotionDialog';
 import './App.css';
 
@@ -23,7 +17,7 @@ const App = () => {
   const arrows = useArrows();
   const { rating, addPoints } = useRating();
 
-  const { drillState, handleDrillStart, handleDrillTimeUp, handlePuzzleMove } = useDrill({
+  const { drillState, puzzleAttempts, lastPuzzleResult, handleDrillStart, handleDrillTimeUp, handlePuzzleMove } = useDrill({
     chessGame,
     rating,
     addPoints,
@@ -150,48 +144,27 @@ const App = () => {
       >
 
         <DrillLayout
-          timer={
-            <TimerContainer>
-              <DrillTimer onTimeUp={handleDrillTimeUp} theme={theme.theme} isActive={drillState.active && !drillState.loading} />
-            </TimerContainer>
-          }
-          board={
-            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-              <ChessBoard
-                theme={theme.theme}
-                chessPosition={chessGame.chessPosition}
-                arrows={arrows.arrows}
-                lightSquareColor={theme.currentThemeColors.lightSquareColor}
-                darkSquareColor={theme.currentThemeColors.darkSquareColor}
-                sourceSquare={sourceSquare}
-                targetSquare={targetSquare}
-                selectedSquare={selectedSquare}
-                isAtFinalPosition={chessGame.isAtFinalPosition}
-                onPieceDrop={handlePieceDrop}
-                onSquareClick={handleSquareClick}
-                onSquareRightClick={handleSquareRightClick}
-                onMoveComplete={handleMoveComplete}
-                isPuzzleAutoPlaying={false}
-                boardOrientation={drillState.active ? (drillState.playerColor === 'white' ? 'black' : 'white') : 'white'}
-              />
-
-
-              {!drillState.active && !drillState.loading && (
-                <BeginButton onClick={handleDrillStart} />
-              )}
-            </div>
-          }
-          puzzleInfo={
-            <PuzzleInfo
-              rating={drillState.currentPuzzle?.puzzle.rating}
-              themes={drillState.currentPuzzle?.puzzle.themes}
-              gameUrl={(drillState.currentPuzzle as any)?._gameUrl}
-              theme={theme.theme}
-            />
-          }
-          scoreboard={
-            <DrillScoreboard results={drillState.results} theme={theme.theme} rating={rating} />
-          }
+          theme={theme.theme}
+          isDrillActive={drillState.active && !drillState.loading}
+          onTimeUp={handleDrillTimeUp}
+          chessPosition={chessGame.chessPosition}
+          arrows={arrows.arrows}
+          lightSquareColor={theme.currentThemeColors.lightSquareColor}
+          darkSquareColor={theme.currentThemeColors.darkSquareColor}
+          sourceSquare={sourceSquare}
+          targetSquare={targetSquare}
+          selectedSquare={selectedSquare}
+          isAtFinalPosition={chessGame.isAtFinalPosition}
+          onPieceDrop={handlePieceDrop}
+          onSquareClick={handleSquareClick}
+          onSquareRightClick={handleSquareRightClick}
+          onMoveComplete={handleMoveComplete}
+          boardOrientation={drillState.active ? (drillState.playerColor === 'white' ? 'black' : 'white') : 'white'}
+          showBeginButton={!drillState.active && !drillState.loading}
+          onBeginClick={handleDrillStart}
+          puzzleAttempts={puzzleAttempts}
+          rating={rating}
+          lastPuzzleResult={lastPuzzleResult}
         />
       </div>
     </>

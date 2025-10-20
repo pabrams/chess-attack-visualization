@@ -18,6 +18,7 @@
 .timer {
   display: flex;
   flex-shrink: 0;
+  width: 100%;
 }
 
 .board {
@@ -31,14 +32,13 @@
   flex-direction: column;
   gap: 1rem;
   flex-shrink: 0;
+  height: 100%;
 }
 
-.puzzleInfo {
+.puzzleHistory {
   width: 100%;
-}
-
-.scoreboard {
-  width: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
 @media (orientation: portrait) {
@@ -70,10 +70,6 @@
 @media (orientation: landscape) {
   .boardResults {
     flex-direction: row;
-  }
-
-  .timer {
-    min-width: 150px;
   }
 
   .infoPanels {
