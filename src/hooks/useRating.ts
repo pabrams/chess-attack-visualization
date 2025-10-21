@@ -6,7 +6,6 @@ const DEFAULT_RATING = 1;
 
 export const useRating = () => {
   const [rating, setRating] = useState<number>(() => {
-    // Load from localStorage on init
     const stored = localStorage.getItem(RATING_STORAGE_KEY);
     if (stored) {
       const parsed = parseFloat(stored);
@@ -15,7 +14,6 @@ export const useRating = () => {
     return DEFAULT_RATING;
   });
 
-  // Save to localStorage whenever rating changes
   useEffect(() => {
     localStorage.setItem(RATING_STORAGE_KEY, rating.toString());
   }, [rating]);

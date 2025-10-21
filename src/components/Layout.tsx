@@ -8,8 +8,6 @@ import styles from './Layout.module.css';
 
 interface LayoutProps {
   theme: 'dark' | 'light';
-
-  // Board props
   chessPosition: string;
   arrows: Arrow[];
   lightSquareColor: string;
@@ -21,8 +19,6 @@ interface LayoutProps {
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
   boardOrientation: 'white' | 'black';
-
-  // Info panel props
   puzzleAttempts: PuzzleAttempt[];
   rating: number;
   lastPuzzleResult: boolean | null;

@@ -77,7 +77,6 @@ export const useChessGame = () => {
 
   return {
     chessPosition,
-    isAtFinalPosition: chessGameRef.current.isGameOver(),
     getLastMove,
     makeMove,
     undoLastMove,

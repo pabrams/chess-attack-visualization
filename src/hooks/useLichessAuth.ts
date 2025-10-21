@@ -21,8 +21,6 @@ export const useLichessAuth = () => {
           const storedToken = localStorage.getItem('lichessToken');
           if (storedToken) {
             setToken(storedToken);
-          } else {
-            console.log('No stored token found');
           }
         }
       } catch (error) {

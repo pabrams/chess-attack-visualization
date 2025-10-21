@@ -93,12 +93,8 @@ export const handleRedirect = async () => {
       sessionStorage.removeItem('codeVerifier');
       return null;
     }
-  } else {
-1    // Clean up URL if there's a code but no verifier (corrupted state)
-    if (code) {
-      console.log('Cleaning up URL with orphaned authorization code');
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
+  } else if (code) {
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
   return null;
 };
@@ -206,16 +202,12 @@ export const fetchSingleMovePuzzles = async (targetCount: number = 100): Promise
       const isSingleMove = puzzle.puzzle.solution.length === 1;
       return isSingleMove;
     });
-    console.log(`Batch ${i + 1}/${maxBatches}: Got ${batch.length} puzzles, filtered to ${filtered.length} single-move puzzles (total: ${singleMovePuzzles.length + filtered.length})`);
     singleMovePuzzles.push(...filtered);
 
-    // Add delay between batches to avoid rate limiting - wait 3 seconds between batches
     if (i < maxBatches - 1 && singleMovePuzzles.length < targetCount) {
-      console.log('Waiting 3 seconds before next batch to avoid rate limiting...');
       await new Promise(resolve => setTimeout(resolve, 3000));
     }
   }
 
-  console.log(`Finished fetching: ${singleMovePuzzles.length} single-move puzzles`);
   return singleMovePuzzles.slice(0, targetCount);
 };

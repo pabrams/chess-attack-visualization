@@ -18,7 +18,6 @@ export const useArrows = () => {
     blackArrowColor: string
   ) => {
     if (square === lastClickedSquare && arrows.length > 0) {
-      // Clear arrows on second click of same square
       clearArrows();
     } else {
       const newArrows: Arrow[] = [];
