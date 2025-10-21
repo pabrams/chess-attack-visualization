@@ -31,8 +31,7 @@ type DrillAction =
   | { type: 'PUZZLE_COMPLETED' }
   | { type: 'PUZZLE_FAILED' }
   | { type: 'PUZZLE_RESULT_RECORDED'; attempt: PuzzleAttempt; wasSuccess: boolean }
-  | { type: 'LOADING_ERROR' }
-  | { type: 'LOAD_ATTEMPTS'; attempts: PuzzleAttempt[] };
+  | { type: 'LOADING_ERROR' };
 
 interface UseDrillProps {
   chessGame: ChessGame;
@@ -61,7 +60,6 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
     case 'START_LOADING':
       return {
         ...initialState,
-        // Preserve puzzle attempts history when starting a new drill
         puzzleAttempts: state.puzzleAttempts,
         active: true,
         loading: true,
@@ -147,12 +145,6 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
         active: false,
       };
 
-    case 'LOAD_ATTEMPTS':
-      return {
-        ...state,
-        puzzleAttempts: action.attempts,
-      };
-
     default:
       return state;
   }
@@ -182,33 +174,36 @@ const convertToLichessPuzzleFormat = (rawPuzzles: any[]): LichessPuzzle[] => {
   } as any));
 };
 
-export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
-  const [state, dispatch] = useReducer(drillReducer, initialState);
+function loadInitialState(): DrillState {
+  const stored = localStorage.getItem('puzzleAttempts');
   
-  // Track the initial rating to avoid restarting drill when rating changes
-  const initialRatingRef = useRef(rating);
-  
-  // Load puzzle attempts from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('puzzleAttempts');
-    if (stored) {
-      try {
-        const attempts = JSON.parse(stored);
-        dispatch({ type: 'LOAD_ATTEMPTS', attempts });
-      } catch (error) {
-        console.error('Failed to load puzzle attempts:', error);
-      }
+  if (stored) {
+    try {
+      const attempts = JSON.parse(stored);
+      return {
+        ...initialState,
+        puzzleAttempts: attempts,
+      };
+    } catch (error) {
+      console.error('Failed to parse puzzle attempts from localStorage:', error);
     }
-  }, []);
+  }
+  return initialState;
+}
 
-  // Save puzzle attempts to localStorage whenever they change
+export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
+  const [state, dispatch] = useReducer(drillReducer, undefined, loadInitialState);
+  const initialRatingRef = useRef(rating);
+  const isFirstRenderRef = useRef(true);
   useEffect(() => {
-    if (state.puzzleAttempts.length > 0) {
-      localStorage.setItem('puzzleAttempts', JSON.stringify(state.puzzleAttempts));
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
     }
+    
+    localStorage.setItem('puzzleAttempts', JSON.stringify(state.puzzleAttempts));
   }, [state.puzzleAttempts]);
 
-  // Initialize puzzle from FEN
   const initializePuzzleFromFen = useCallback((puzzle: LichessPuzzle & { _setupMove?: string; _fen?: string }) => {
     import('chess.js').then(({ Chess }) => {
       const setupMove = puzzle._setupMove!;
@@ -232,26 +227,21 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     });
   }, [chessGame]);
 
-  // Load next puzzle - this is called after recording a result
   const loadNextPuzzle = useCallback(() => {
     dispatch({ type: 'LOAD_NEXT_PUZZLE' });
   }, []);
 
-  // Effect to initialize puzzle when currentPuzzle changes (but not active yet)
   useEffect(() => {
     if (state.currentPuzzle && !state.puzzleState.active) {
       initializePuzzleFromFen(state.currentPuzzle as any);
     }
   }, [state.currentPuzzle, state.puzzleState.active, initializePuzzleFromFen]);
 
-  // Record puzzle result and load next puzzle
   const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
     const ratingChange = calculateRatingChange(rating, puzzleRating, success);
     
-    // Update external rating
     addPoints(puzzleRating, success);
     
-    // Create attempt record
     const attempt: PuzzleAttempt = {
       puzzleId,
       puzzleRating,
@@ -260,16 +250,13 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
       success,
     };
 
-    // Dispatch result
     dispatch({ type: 'PUZZLE_RESULT_RECORDED', attempt, wasSuccess: success });
     
-    // Load next puzzle after a small delay to allow UI to update
     setTimeout(() => {
       loadNextPuzzle();
     }, 0);
   }, [rating, addPoints, loadNextPuzzle]);
 
-  // Watch for puzzle completion or failure and record result
   useEffect(() => {
     if (!state.active || !state.currentPuzzle) {
       return;
@@ -284,11 +271,9 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     const puzzleRating = state.currentPuzzle.puzzle.rating;
     const puzzleId = state.currentPuzzle.puzzle.id;
 
-    // Record the result
     recordPuzzleResult(completed, puzzleRating, puzzleId);
   }, [state.puzzleState.completed, state.puzzleState.failed, state.active, state.currentPuzzle, recordPuzzleResult]);
 
-  // Start drill on mount
   useEffect(() => {
     const startDrill = async () => {
       const playerColor = selectRandomPlayerColor();
@@ -299,8 +284,6 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
         const playerLevel = getLevelFromRating(initialRatingRef.current);
         const colorPrefix = playerColor === 'white' ? 'w' : 'b';
         const puzzleFile = `/visualize-chessboard-territory/lichess_db_puzzle-${colorPrefix}-one-move-${playerLevel}.json`;
-
-        console.log(`Loading ${playerColor} puzzles for level ${playerLevel} (rating: ${initialRatingRef.current}) from ${puzzleFile}...`);
         const response = await fetch(puzzleFile);
 
         if (!response.ok) {
@@ -313,7 +296,6 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
 
         dispatch({ type: 'PUZZLES_LOADED', puzzles });
         
-        // Load the first puzzle
         loadNextPuzzle();
       } catch (error) {
         console.error('Error loading puzzles:', error);
@@ -322,8 +304,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     };
 
     startDrill();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  }, []);
 
   const markPuzzleAsFailed = useCallback(() => {
     chessGame.undoLastMove();
