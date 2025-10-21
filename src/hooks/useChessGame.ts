@@ -75,6 +75,11 @@ export const useChessGame = () => {
     return chessGameRef.current.get(square as Square);
   };
 
+  const getLegalMoves = (square: string): string[] => {
+    const moves = chessGameRef.current.moves({ square: square as Square, verbose: true });
+    return moves.map(move => move.to);
+  };
+
   return {
     chessPosition,
     getLastMove,
@@ -83,6 +88,7 @@ export const useChessGame = () => {
     loadPgn,
     getAttackers,
     getPieceAt,
+    getLegalMoves,
   };
 };
 

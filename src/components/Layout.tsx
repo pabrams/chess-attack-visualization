@@ -15,6 +15,7 @@ interface LayoutProps {
   sourceSquare: string | null;
   targetSquare: string | null;
   selectedSquare: string | null;
+  legalMoves: string[];
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
@@ -36,6 +37,7 @@ export const Layout: React.FC<LayoutProps> = ({
   sourceSquare,
   targetSquare,
   selectedSquare,
+  legalMoves,
   onPieceDrop,
   onSquareClick,
   onSquareRightClick,
@@ -59,6 +61,7 @@ export const Layout: React.FC<LayoutProps> = ({
             sourceSquare={sourceSquare}
             targetSquare={targetSquare}
             selectedSquare={selectedSquare}
+            legalMoves={legalMoves}
             onPieceDrop={onPieceDrop}
             onSquareClick={onSquareClick}
             onSquareRightClick={onSquareRightClick}

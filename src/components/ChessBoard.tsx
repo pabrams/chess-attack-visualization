@@ -11,6 +11,7 @@ interface ChessBoardProps {
   sourceSquare: string | null;
   targetSquare: string | null;
   selectedSquare: string | null;
+  legalMoves: string[];
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
@@ -26,6 +27,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   sourceSquare,
   targetSquare,
   selectedSquare,
+  legalMoves,
   onPieceDrop,
   onSquareClick,
   onSquareRightClick,
@@ -33,6 +35,14 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   theme,
 }) => {
   const customPieces = getCustomPieces(theme);
+
+  const legalMoveStyles = legalMoves.reduce((styles, square) => {
+    styles[square] = {
+      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.3) 25%, transparent 25%)',
+      borderRadius: '50%',
+    };
+    return styles;
+  }, {} as Record<string, any>);
 
   const chessboardOptions = {
     onPieceDrop,
@@ -64,6 +74,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       border: 'none',
     },
     squareStyles: {
+      ...legalMoveStyles,
       ...(sourceSquare ? { [sourceSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' } } : {}),
       ...(targetSquare ? { [targetSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' } } : {}),
       ...(selectedSquare ? { [selectedSquare]: { backgroundColor: 'rgba(0, 255, 0, 0.5)' } } : {}),

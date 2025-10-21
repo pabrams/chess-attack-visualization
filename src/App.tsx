@@ -30,6 +30,7 @@ const App = () => {
   } | null>(null);
 
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const legalMoves = selectedSquare ? chessGame.getLegalMoves(selectedSquare) : [];
 
   const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
     arrows.showAttackersForSquare(
@@ -155,6 +156,7 @@ const App = () => {
           sourceSquare={sourceSquare}
           targetSquare={targetSquare}
           selectedSquare={selectedSquare}
+          legalMoves={legalMoves}
           onPieceDrop={handlePieceDrop}
           onSquareClick={handleSquareClick}
           onSquareRightClick={handleSquareRightClick}
