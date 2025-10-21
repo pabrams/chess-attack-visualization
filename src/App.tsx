@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
-import { useTheme } from './hooks/useTheme';
+import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
@@ -13,7 +13,7 @@ import './App.css';
 
 const App = () => {
   const chessGame = useChessGame();
-  const theme = useTheme();
+  const { theme, currentThemeColors, toggleTheme } = useThemeContext();
   const arrows = useArrows();
   const { rating, addPoints } = useRating();
 
@@ -36,8 +36,8 @@ const App = () => {
     arrows.showAttackersForSquare(
       square,
       chessGame.getAttackers,
-      theme.currentThemeColors.whiteArrowColor,
-      theme.currentThemeColors.blackArrowColor
+      currentThemeColors.whiteArrowColor,
+      currentThemeColors.blackArrowColor
     );
   };
 
@@ -124,8 +124,8 @@ const App = () => {
   return (
     <>
       <Header
-        theme={theme.theme}
-        onToggleTheme={theme.toggleTheme}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {drillState.loading && <LoadingOverlay />}
@@ -134,7 +134,7 @@ const App = () => {
         <PromotionDialog
           color={pendingPromotion.pieceColor}
           onSelect={handlePromotionSelect}
-          theme={theme.theme}
+          theme={theme}
         />
       )}
 
@@ -142,17 +142,14 @@ const App = () => {
         data-testid="app-container"
         className="app-container"
         style={{
-          backgroundColor: theme.currentThemeColors.pageBackgroundColor,
-          color: theme.currentThemeColors.pageForegroundColor,
+          backgroundColor: currentThemeColors.pageBackgroundColor,
+          color: currentThemeColors.pageForegroundColor,
         }}
       >
 
         <Layout
-          theme={theme.theme}
           chessPosition={chessGame.chessPosition}
           arrows={arrows.arrows}
-          lightSquareColor={theme.currentThemeColors.lightSquareColor}
-          darkSquareColor={theme.currentThemeColors.darkSquareColor}
           sourceSquare={sourceSquare}
           targetSquare={targetSquare}
           selectedSquare={selectedSquare}
@@ -165,8 +162,6 @@ const App = () => {
           rating={rating}
           lastPuzzleResult={lastPuzzleResult}
           playerColor={drillState.playerColor}
-          whiteArrowColor={theme.currentThemeColors.whiteArrowColor}
-          blackArrowColor={theme.currentThemeColors.blackArrowColor}
         />
       </div>
     </>

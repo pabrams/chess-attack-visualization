@@ -1,63 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { PuzzleAttempt } from '../types/drill';
-import { getLevelFromRating, formatLevelName } from '../utils/ratingCalculation';
+import { usePuzzleStats } from '../hooks/usePuzzleStats';
+import { useThemeContext } from '../contexts/ThemeContext';
+import { formatDate, formatFullTimestamp, constructPuzzleUrl } from '../utils/formatters';
 import styles from './InfoPanelLayout.module.css';
 
 interface InfoPanelLayoutProps {
   attempts: PuzzleAttempt[];
-  theme: 'dark' | 'light';
   rating: number;
   lastResult: boolean | null;
   playerColor: 'white' | 'black';
-  whiteArrowColor: string;
-  blackArrowColor: string;
 }
 
-export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, theme, rating, lastResult, playerColor, whiteArrowColor, blackArrowColor }) => {
-  const level = getLevelFromRating(rating);
-  const formattedLevel = formatLevelName(level);
-  const sortedAttempts = [...attempts].sort((a, b) => b.timestamp - a.timestamp);
-
-  const lazyRecordCount = 24;
-  
-  const [displayCount, setDisplayCount] = useState(lazyRecordCount);
-  
-  useEffect(() => {
-    if (sortedAttempts.length < displayCount) {
-      setDisplayCount(lazyRecordCount);
-    }
-  }, [sortedAttempts.length, displayCount]);
-  
-  const handleLoadMore = () => {
-    setDisplayCount(prev => Math.min(prev + lazyRecordCount, sortedAttempts.length));
-  };
-  
-  const visibleAttempts = sortedAttempts.slice(0, displayCount);
-
-  const attemptedCount = attempts.length;
-  const succeededCount = attempts.filter(a => a.success).length;
-  const successRatio = attemptedCount > 0 ? (succeededCount / attemptedCount) : 0;
-
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString();
-  };
-
-  const formatFullTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
-  };
-
-  const constructPuzzleUrl = (puzzleId: string) => {
-    return `https://lichess.org/training/${puzzleId}`;
-  };
+export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, rating, lastResult, playerColor }) => {
+  const { theme, currentThemeColors } = useThemeContext();
+  const {
+    sortedAttempts,
+    visibleAttempts,
+    displayCount,
+    attemptedCount,
+    succeededCount,
+    successRatio,
+    handleLoadMore,
+  } = usePuzzleStats(attempts);
 
   return (
     <div className={styles.wrapper}>
       <fieldset className={styles.playerInfoContainer}>
         <legend>Monkey Drill Info</legend>
         <div className={styles.moveInstruction}>
-          Move the <span style={{ color: playerColor === 'white' ? blackArrowColor : whiteArrowColor, fontWeight: 'bold' }}>
+          Move the <span style={{ color: playerColor === 'white' ? currentThemeColors.blackArrowColor : currentThemeColors.whiteArrowColor, fontWeight: 'bold' }}>
             {playerColor === 'white' ? 'Black' : 'White'}
           </span> pieces
         </div>

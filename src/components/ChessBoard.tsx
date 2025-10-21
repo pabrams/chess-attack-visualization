@@ -1,13 +1,12 @@
 import React from 'react';
 import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow } from '../types/arrows';
+import { useThemeContext } from '../contexts/ThemeContext';
 import { getCustomPieces } from './customPieces';
 
 interface ChessBoardProps {
   chessPosition: string;
   arrows: Arrow[];
-  lightSquareColor: string;
-  darkSquareColor: string;
   sourceSquare: string | null;
   targetSquare: string | null;
   selectedSquare: string | null;
@@ -16,14 +15,11 @@ interface ChessBoardProps {
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
   boardOrientation?: 'white' | 'black';
-  theme: 'dark' | 'light';
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({
   chessPosition,
   arrows,
-  lightSquareColor,
-  darkSquareColor,
   sourceSquare,
   targetSquare,
   selectedSquare,
@@ -32,8 +28,8 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   onSquareClick,
   onSquareRightClick,
   boardOrientation = 'white',
-  theme,
 }) => {
+  const { theme, currentThemeColors } = useThemeContext();
   const customPieces = getCustomPieces(theme);
 
   const legalMoveStyles = legalMoves.reduce((styles, square) => {
@@ -66,11 +62,11 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
       activeOpacity: 0.6,
     },
     darkSquareStyle: {
-      backgroundColor: darkSquareColor,
+      backgroundColor: currentThemeColors.darkSquareColor,
       border: 'none',
     },
     lightSquareStyle: {
-      backgroundColor: lightSquareColor,
+      backgroundColor: currentThemeColors.lightSquareColor,
       border: 'none',
     },
     squareStyles: {

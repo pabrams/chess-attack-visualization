@@ -7,11 +7,8 @@ import { InfoPanelLayout } from './InfoPanelLayout';
 import styles from './Layout.module.css';
 
 interface LayoutProps {
-  theme: 'dark' | 'light';
   chessPosition: string;
   arrows: Arrow[];
-  lightSquareColor: string;
-  darkSquareColor: string;
   sourceSquare: string | null;
   targetSquare: string | null;
   selectedSquare: string | null;
@@ -24,16 +21,11 @@ interface LayoutProps {
   rating: number;
   lastPuzzleResult: boolean | null;
   playerColor: 'white' | 'black';
-  whiteArrowColor: string;
-  blackArrowColor: string;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
-  theme,
   chessPosition,
   arrows,
-  lightSquareColor,
-  darkSquareColor,
   sourceSquare,
   targetSquare,
   selectedSquare,
@@ -46,8 +38,6 @@ export const Layout: React.FC<LayoutProps> = ({
   rating,
   lastPuzzleResult,
   playerColor,
-  whiteArrowColor,
-  blackArrowColor,
 }) => {
   return (
     <div className={styles.layout}>
@@ -56,8 +46,6 @@ export const Layout: React.FC<LayoutProps> = ({
           <ChessBoard
             chessPosition={chessPosition}
             arrows={arrows}
-            lightSquareColor={lightSquareColor}
-            darkSquareColor={darkSquareColor}
             sourceSquare={sourceSquare}
             targetSquare={targetSquare}
             selectedSquare={selectedSquare}
@@ -66,19 +54,15 @@ export const Layout: React.FC<LayoutProps> = ({
             onSquareClick={onSquareClick}
             onSquareRightClick={onSquareRightClick}
             boardOrientation={boardOrientation}
-            theme={theme}
           />
         </div>
 
         <div className={styles.infoPanels}>
           <InfoPanelLayout
             attempts={puzzleAttempts}
-            theme={theme}
             rating={rating}
             lastResult={lastPuzzleResult}
             playerColor={playerColor}
-            whiteArrowColor={whiteArrowColor}
-            blackArrowColor={blackArrowColor}
           />
         </div>
       </div>
