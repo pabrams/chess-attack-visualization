@@ -6,7 +6,7 @@
 }
 
 .playerInfoContainer {
-  border: 1px solid #ccc;
+  border: 1px solid #888;
   border-radius: 4px;
   padding: 12px;
   flex-shrink: 0;
@@ -15,7 +15,7 @@
 }
 
 .historyContainer {
-  border: 1px solid #ccc;
+  border: 1px solid #888;
   border-radius: 4px;
   padding: 12px;
   flex-shrink: 0;
@@ -228,4 +228,11 @@
   font-size: 12px;
   font-weight: 500;
   text-align: left;
+}
+
+@media (orientation: landscape) {
+  .historyContainer {
+    height: calc(100vh - 100px - 200px);
+    max-height: calc(100vh - 100px - 200px);
+  }
 }

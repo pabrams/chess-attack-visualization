@@ -16,6 +16,10 @@
 .board {
   width: 100%;
   aspect-ratio: 1 / 1;
+  border: 1px solid #888;
+  border-radius: 4px;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .infoPanels {
@@ -57,8 +61,10 @@
   }
 
   .board {
-    height: calc(100vh - 100px);
+    height: auto;
+    max-height: calc(100vh - 100px);
     width: auto;
+    aspect-ratio: 1 / 1;
   }
 
   .infoPanels {
