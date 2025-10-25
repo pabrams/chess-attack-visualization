@@ -68,7 +68,7 @@ export const useChessGame = () => {
   };
 
   const getAttackers = (square: Square, color: 'w' | 'b') => {
-    return chessGameRef.current.attackers(square, color);
+    return chessGameRef.current.attackers(square, color, true);
   };
 
   const getPieceAt = (square: string) => {
