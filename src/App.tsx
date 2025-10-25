@@ -41,6 +41,24 @@ const App = () => {
     );
   };
 
+  const showEnemyKingAttackers = () => {
+    const enemyColor = drillState.playerColor === 'white' ? 'b' : 'w';
+
+    const kingSquares = chessGame.findPiece({ type: 'k', color: enemyColor });
+    const enemyKingSquare = kingSquares[0]; // There should only be one king
+
+    // Show attackers for the enemy king
+    if (enemyKingSquare) {
+      console.log('Enemy king square:', enemyKingSquare);
+      arrows.showAttackersForSquare(
+        enemyKingSquare,
+        chessGame.getAttackers,
+        currentThemeColors.whiteArrowColor,
+        currentThemeColors.blackArrowColor
+      );
+    }
+  };
+
   const isPawnPromotion = (sourceSquare: string, targetSquare: string): boolean => {
     const piece = chessGame.getPieceAt(sourceSquare);
     if (!piece) return false;
@@ -114,7 +132,15 @@ const App = () => {
   };
 
   const handleMoveComplete = () => {
-    arrows.clearArrows();
+    if (drillState.active) {
+      showEnemyKingAttackers();
+      // Keep arrows visible for 500ms before continuing to next puzzle
+      setTimeout(() => {
+        arrows.clearArrows();
+      }, 500);
+    } else {
+      arrows.clearArrows();
+    }
   };
 
   const lastMove = chessGame.getLastMove();

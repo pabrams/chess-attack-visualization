@@ -251,10 +251,12 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     };
 
     dispatch({ type: 'PUZZLE_RESULT_RECORDED', attempt, wasSuccess: success });
-    
+
+    // Wait 500ms to allow arrows showing enemy king attackers to display
     setTimeout(() => {
       loadNextPuzzle();
-    }, 0);
+      console.log('loadding next puzzle...');
+    }, 1500);
   }, [rating, addPoints, loadNextPuzzle]);
 
   useEffect(() => {

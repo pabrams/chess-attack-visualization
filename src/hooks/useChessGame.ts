@@ -80,6 +80,10 @@ export const useChessGame = () => {
     return moves.map(move => move.to);
   };
 
+  const findPiece = (piece: { type: string; color: 'w' | 'b' }) => {
+    return chessGameRef.current.findPiece({ type: piece.type as any, color: piece.color });
+  };
+
   return {
     chessPosition,
     getLastMove,
@@ -89,6 +93,7 @@ export const useChessGame = () => {
     getAttackers,
     getPieceAt,
     getLegalMoves,
+    findPiece,
   };
 };
 
