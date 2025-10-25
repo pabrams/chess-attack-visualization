@@ -11,6 +11,10 @@ export const useArrows = () => {
     setLastClickedSquare(null);
   };
 
+  const addArrows = (newArrows: Arrow[]) => {
+    setArrows(prev => [...prev, ...newArrows]);
+  };
+
   const showAttackersForSquare = (
     square: string,
     getAttackers: (square: Square, color: 'w' | 'b') => Square[],
@@ -30,7 +34,7 @@ export const useArrows = () => {
           color: whiteArrowColor,
         });
       });
-      
+
       const blackAttackers = getAttackers(square as Square, 'b');
       blackAttackers.forEach((attackerSquare) => {
         newArrows.push({
@@ -49,5 +53,6 @@ export const useArrows = () => {
     arrows,
     clearArrows,
     showAttackersForSquare,
+    addArrows,
   };
 };

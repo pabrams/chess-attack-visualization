@@ -231,11 +231,16 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     dispatch({ type: 'LOAD_NEXT_PUZZLE' });
   }, []);
 
+  // Track the previous puzzle to know when a new one is loaded (not just when state changes)
+  const prevPuzzleRef = useRef<LichessPuzzle | null>(null);
+
   useEffect(() => {
-    if (state.currentPuzzle && !state.puzzleState.active) {
+    // Only initialize when the puzzle actually changes (new puzzle from queue), not when puzzle state changes
+    if (state.currentPuzzle && state.currentPuzzle !== prevPuzzleRef.current) {
+      prevPuzzleRef.current = state.currentPuzzle;
       initializePuzzleFromFen(state.currentPuzzle as any);
     }
-  }, [state.currentPuzzle, state.puzzleState.active, initializePuzzleFromFen]);
+  }, [state.currentPuzzle, initializePuzzleFromFen]);
 
   const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
     const ratingChange = calculateRatingChange(rating, puzzleRating, success);
@@ -252,11 +257,11 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
 
     dispatch({ type: 'PUZZLE_RESULT_RECORDED', attempt, wasSuccess: success });
 
-    // Wait 500ms to allow arrows showing enemy king attackers to display
+    // Only delay on successful solve to show checkmate threats; fail immediately to next puzzle
+    const delayMs = success ? 5000 : 0;
     setTimeout(() => {
       loadNextPuzzle();
-      console.log('loadding next puzzle...');
-    }, 1500);
+    }, delayMs);
   }, [rating, addPoints, loadNextPuzzle]);
 
   useEffect(() => {
@@ -265,14 +270,11 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     }
 
     const { completed, failed } = state.puzzleState;
-    
     if (!completed && !failed) {
       return;
     }
-
     const puzzleRating = state.currentPuzzle.puzzle.rating;
     const puzzleId = state.currentPuzzle.puzzle.id;
-
     recordPuzzleResult(completed, puzzleRating, puzzleId);
   }, [state.puzzleState.completed, state.puzzleState.failed, state.active, state.currentPuzzle, recordPuzzleResult]);
 
@@ -322,9 +324,6 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
   };
 
   const handlePuzzleMove = useCallback((sourceSquare: string, targetSquare: string, promotion?: string) => {
-    if (!state.puzzleState.active) {
-      return chessGame.makeMove(sourceSquare, targetSquare, promotion);
-    }
 
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
 

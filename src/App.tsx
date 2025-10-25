@@ -5,6 +5,7 @@ import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
+import { getAdjacentSquares } from './utils/squareUtils';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
 import { LoadingOverlay } from './components/LoadingOverlay';
@@ -41,22 +42,36 @@ const App = () => {
     );
   };
 
-  const showEnemyKingAttackers = () => {
-    const enemyColor = drillState.playerColor === 'white' ? 'b' : 'w';
+  const showCheckmaters = () => {
+    const enemyColor = drillState.playerColor === 'white' ? 'w' : 'b'; // checkmated side to move
 
     const kingSquares = chessGame.findPiece({ type: 'k', color: enemyColor });
-    const enemyKingSquare = kingSquares[0]; // There should only be one king
+    const enemyKingSquare = kingSquares[0];
 
-    // Show attackers for the enemy king
-    if (enemyKingSquare) {
-      console.log('Enemy king square:', enemyKingSquare);
-      arrows.showAttackersForSquare(
-        enemyKingSquare,
-        chessGame.getAttackers,
-        currentThemeColors.whiteArrowColor,
-        currentThemeColors.blackArrowColor
-      );
+    if (!enemyKingSquare) return;
+
+    const aroundSquares = getAdjacentSquares(enemyKingSquare);
+    const newArrows: { startSquare: string; endSquare: string; color: string }[] = [];
+
+    for (const square of aroundSquares) {
+      const piece = chessGame.getPieceAt(square);
+      const isEnemyOrEmpty = !piece || piece.color === enemyColor;
+      if (isEnemyOrEmpty) {
+        const attackerColor = enemyColor === 'b' ? 'w' : 'b';
+        const attackerArrowColor = attackerColor === 'w' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor;
+        const attackers = chessGame.getAttackers(square as any, attackerColor);
+
+        attackers.forEach(attackerSquare => {
+          newArrows.push({
+            startSquare: attackerSquare,
+            endSquare: square,
+            color: attackerArrowColor,
+          });
+        });
+      }
     }
+
+    arrows.addArrows(newArrows);
   };
 
   const isPawnPromotion = (sourceSquare: string, targetSquare: string): boolean => {
@@ -133,11 +148,10 @@ const App = () => {
 
   const handleMoveComplete = () => {
     if (drillState.active) {
-      showEnemyKingAttackers();
-      // Keep arrows visible for 500ms before continuing to next puzzle
+      showCheckmaters();
       setTimeout(() => {
         arrows.clearArrows();
-      }, 500);
+      }, 5000);
     } else {
       arrows.clearArrows();
     }
