@@ -3,16 +3,28 @@
         "lowerBound": 0,
         "upperBound": 399
     },
-    "neophyte": {
+    "neophyte-a": {
         "lowerBound": 400,
+        "upperBound": 599
+    },
+    "neophyte-b": {
+        "lowerBound": 600,
         "upperBound": 799
     },
-    "novice": {
+    "novice-a": {
         "lowerBound": 800,
+        "upperBound": 899
+    },
+    "novice-b": {
+        "lowerBound": 900,
         "upperBound": 999
     },
-    "apprentice": {
+    "apprentice-a": {
         "lowerBound": 1000,
+        "upperBound": 1099
+    },
+    "apprentice-b": {
+        "lowerBound": 1100,
         "upperBound": 1199
     },
     "journeyman": {
