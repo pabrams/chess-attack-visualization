@@ -52,13 +52,23 @@ const App = () => {
 
     const aroundSquares = getAdjacentSquares(enemyKingSquare);
     const newArrows: { startSquare: string; endSquare: string; color: string }[] = [];
+    const attackerColor = enemyColor === 'b' ? 'w' : 'b';
+    const attackerArrowColor = attackerColor === 'w' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor;
 
+    const kingAttackers = chessGame.getAttackers(enemyKingSquare as any, attackerColor);
+    kingAttackers.forEach(attackerSquare => {
+      newArrows.push({
+        startSquare: attackerSquare,
+        endSquare: enemyKingSquare,
+        color: attackerArrowColor,
+      });
+    });
+
+    // Show attackers of the surrounding squares
     for (const square of aroundSquares) {
       const piece = chessGame.getPieceAt(square);
       const isEnemyOrEmpty = !piece || piece.color === enemyColor;
       if (isEnemyOrEmpty) {
-        const attackerColor = enemyColor === 'b' ? 'w' : 'b';
-        const attackerArrowColor = attackerColor === 'w' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor;
         const attackers = chessGame.getAttackers(square as any, attackerColor);
 
         attackers.forEach(attackerSquare => {
