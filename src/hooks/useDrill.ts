@@ -3,6 +3,7 @@ import { LichessPuzzle } from '../types/lichess';
 import { PuzzleAttempt } from '../types/drill';
 import type { ChessGame } from './useChessGame';
 import { getLevelFromRating, calculateRatingChange } from '../utils/ratingCalculation';
+import { sampleArray } from '../utils/arrayUtils';
 
 interface PuzzleState {
   active: boolean;
@@ -17,7 +18,7 @@ interface DrillState {
   loading: boolean;
   puzzleQueue: LichessPuzzle[];
   playerColor: 'white' | 'black';
-  currentPuzzle: (LichessPuzzle & { _gameUrl?: string }) | null;
+  currentPuzzle: LichessPuzzle | null;
   puzzleState: PuzzleState;
   puzzleAttempts: PuzzleAttempt[];
   lastPuzzleResult: boolean | null;
@@ -76,7 +77,7 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
 
     case 'LOAD_NEXT_PUZZLE': {
       const [nextPuzzle, ...remainingQueue] = state.puzzleQueue;
-      
+
       if (!nextPuzzle) {
         console.error('Puzzle queue is empty!');
         return state;
@@ -86,12 +87,7 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
         ...state,
         puzzleQueue: remainingQueue,
         currentPuzzle: nextPuzzle as any,
-        puzzleState: {
-          active: false,
-          solution: [],
-          completed: false,
-          failed: false,
-        },
+        puzzleState: createEmptyPuzzleState(),
       };
     }
 
@@ -130,12 +126,7 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
         ...state,
         puzzleAttempts: [action.attempt, ...state.puzzleAttempts],
         lastPuzzleResult: action.wasSuccess,
-        puzzleState: {
-          active: false,
-          solution: [],
-          completed: false,
-          failed: false,
-        },
+        puzzleState: createEmptyPuzzleState(),
       };
 
     case 'LOADING_ERROR':
@@ -154,6 +145,13 @@ const selectRandomPlayerColor = (): 'white' | 'black' => {
   return Math.random() < 0.5 ? 'white' : 'black';
 };
 
+const createEmptyPuzzleState = (): PuzzleState => ({
+  active: false,
+  solution: [],
+  completed: false,
+  failed: false,
+});
+
 const convertToLichessPuzzleFormat = (rawPuzzles: any[]): LichessPuzzle[] => {
   return rawPuzzles.map((p: any) => ({
     game: {
@@ -170,7 +168,6 @@ const convertToLichessPuzzleFormat = (rawPuzzles: any[]): LichessPuzzle[] => {
     },
     _fen: p.fen,
     _setupMove: p.setupMove,
-    _gameUrl: p.gameUrl,
   } as any));
 };
 
@@ -295,8 +292,8 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
         }
 
         const data = await response.json();
-        const shuffled = data.puzzles.sort(() => Math.random() - 0.5).slice(0, 200);
-        const puzzles = convertToLichessPuzzleFormat(shuffled);
+        const sampled = sampleArray(data.puzzles, 200);
+        const puzzles = convertToLichessPuzzleFormat(sampled);
 
         dispatch({ type: 'PUZZLES_LOADED', puzzles });
         

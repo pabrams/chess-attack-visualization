@@ -84,6 +84,10 @@ export const useChessGame = () => {
     return chessGameRef.current.findPiece({ type: piece.type as any, color: piece.color });
   };
 
+  const getTurn = (): 'w' | 'b' => {
+    return chessGameRef.current.turn();
+  };
+
   return {
     chessPosition,
     getLastMove,
@@ -94,6 +98,7 @@ export const useChessGame = () => {
     getPieceAt,
     getLegalMoves,
     findPiece,
+    getTurn,
   };
 };
 

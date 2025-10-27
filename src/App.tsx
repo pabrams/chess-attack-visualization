@@ -6,6 +6,8 @@ import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
 import { getAdjacentSquares } from './utils/squareUtils';
+import { createArrowsFromAttackers } from './utils/arrowUtils';
+import { isBackRank, getBoardOrientation, invertColor } from './utils/chessPieceUtils';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
 import { LoadingOverlay } from './components/LoadingOverlay';
@@ -43,44 +45,41 @@ const App = () => {
   };
 
   const showCheckmaters = () => {
-    const enemyColor = drillState.playerColor === 'white' ? 'w' : 'b'; // checkmated side to move
+    // After a move, it's the opponent's turn. We want to show who's attacking them.
+    const defendingColor = chessGame.getTurn();
+    const attackingColor = invertColor(defendingColor);
 
-    const kingSquares = chessGame.findPiece({ type: 'k', color: enemyColor });
-    const enemyKingSquare = kingSquares[0];
+    const kingSquares = chessGame.findPiece({ type: 'k', color: defendingColor });
+    const defendingKingSquare = kingSquares[0];
 
-    if (!enemyKingSquare) return;
+    if (!defendingKingSquare) {
+      console.warn('showCheckmaters: no defending king found');
+      return;
+    }
 
-    const aroundSquares = getAdjacentSquares(enemyKingSquare);
+    console.log('showCheckmaters', { attackingColor, defendingColor, defendingKingSquare });
+
+    const aroundSquares = getAdjacentSquares(defendingKingSquare);
     const newArrows: { startSquare: string; endSquare: string; color: string }[] = [];
-    const attackerColor = enemyColor === 'b' ? 'w' : 'b';
-    const attackerArrowColor = attackerColor === 'w' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor;
+    const attackerArrowColor = attackingColor === 'w' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor;
+    const kingAttackers = chessGame.getAttackers(defendingKingSquare as any, attackingColor);
+    console.log('kingAttackers', kingAttackers);
+    newArrows.push(
+      ...createArrowsFromAttackers(kingAttackers, defendingKingSquare, attackerArrowColor)
+    );
 
-    const kingAttackers = chessGame.getAttackers(enemyKingSquare as any, attackerColor);
-    kingAttackers.forEach(attackerSquare => {
-      newArrows.push({
-        startSquare: attackerSquare,
-        endSquare: enemyKingSquare,
-        color: attackerArrowColor,
-      });
-    });
-
-    // Show attackers of the surrounding squares
     for (const square of aroundSquares) {
       const piece = chessGame.getPieceAt(square);
-      const isEnemyOrEmpty = !piece || piece.color === enemyColor;
-      if (isEnemyOrEmpty) {
-        const attackers = chessGame.getAttackers(square as any, attackerColor);
-
-        attackers.forEach(attackerSquare => {
-          newArrows.push({
-            startSquare: attackerSquare,
-            endSquare: square,
-            color: attackerArrowColor,
-          });
-        });
+      const isDefendingOrEmpty = !piece || piece.color === defendingColor;
+      if (isDefendingOrEmpty) {
+        const attackers = chessGame.getAttackers(square as any, attackingColor);
+        newArrows.push(
+          ...createArrowsFromAttackers(attackers, square, attackerArrowColor)
+        );
       }
     }
 
+    console.log('newArrows', newArrows);
     arrows.addArrows(newArrows);
   };
 
@@ -89,9 +88,7 @@ const App = () => {
     if (!piece) return false;
 
     const isPawn = piece.type === 'p';
-    const isBackRank = targetSquare[1] === '8' || targetSquare[1] === '1';
-
-    return isPawn && isBackRank;
+    return isPawn && isBackRank(targetSquare);
   };
 
   const attemptMove = (sourceSquare: string, targetSquare: string): boolean => {
@@ -207,7 +204,7 @@ const App = () => {
           onPieceDrop={handlePieceDrop}
           onSquareClick={handleSquareClick}
           onSquareRightClick={handleSquareRightClick}
-          boardOrientation={drillState.active ? (drillState.playerColor === 'white' ? 'black' : 'white') : 'white'}
+          boardOrientation={getBoardOrientation(drillState.active, drillState.playerColor)}
           puzzleAttempts={puzzleAttempts}
           rating={rating}
           lastPuzzleResult={lastPuzzleResult}

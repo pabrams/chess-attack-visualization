@@ -28,13 +28,8 @@ export const useRating = () => {
     setRating(newRating);
   };
 
-  const resetRating = () => {
-    setRating(DEFAULT_RATING);
-  };
-
   return {
     rating,
     addPoints,
-    resetRating,
   };
 };

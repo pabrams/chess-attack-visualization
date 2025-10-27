@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Square } from 'chess.js';
 import { Arrow } from '../types/arrows';
+import { createArrowsFromAttackers } from '../utils/arrowUtils';
 
 export const useArrows = () => {
   const [arrows, setArrows] = useState<Arrow[]>([]);
@@ -27,22 +28,14 @@ export const useArrows = () => {
       const newArrows: Arrow[] = [];
 
       const whiteAttackers = getAttackers(square as Square, 'w');
-      whiteAttackers.forEach((attackerSquare) => {
-        newArrows.push({
-          startSquare: attackerSquare,
-          endSquare: square,
-          color: whiteArrowColor,
-        });
-      });
+      newArrows.push(
+        ...createArrowsFromAttackers(whiteAttackers, square, whiteArrowColor)
+      );
 
       const blackAttackers = getAttackers(square as Square, 'b');
-      blackAttackers.forEach((attackerSquare) => {
-        newArrows.push({
-          startSquare: attackerSquare,
-          endSquare: square,
-          color: blackArrowColor,
-        });
-      });
+      newArrows.push(
+        ...createArrowsFromAttackers(blackAttackers, square, blackArrowColor)
+      );
 
       setArrows(newArrows);
       setLastClickedSquare(square);

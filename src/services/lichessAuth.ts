@@ -99,51 +99,6 @@ export const handleRedirect = async () => {
   return null;
 };
 
-export const fetchPuzzle = async (params?: {
-  themes?: string | string[];
-  rating?: number;
-  color?: 'white' | 'black';
-  player?: string;
-}): Promise<LichessPuzzle | null> => {
-  try {
-    const url = new URL(`${LICHESS_HOST}/api/puzzle/next`);
-
-    if (params) {
-      if (params.themes) {
-        const themes = Array.isArray(params.themes) ? params.themes.join(',') : params.themes;
-        url.searchParams.set('themes', themes);
-      }
-      if (params.rating) {
-        url.searchParams.set('rating', params.rating.toString());
-      }
-      if (params.color) {
-        url.searchParams.set('color', params.color);
-      }
-      if (params.player) {
-        url.searchParams.set('player', params.player);
-      }
-    }
-
-    const response = await fetch(url.toString(), {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
-
-    if (response.ok) {
-      const puzzle: LichessPuzzle = await response.json();
-      return puzzle;
-    } else {
-      console.error('Failed to fetch puzzle:', response.status, response.statusText);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error fetching puzzle:', error);
-    return null;
-  }
-};
-
 export const fetchPuzzleBatch = async (nb: number = 50, retries: number = 3): Promise<LichessPuzzle[]> => {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -189,25 +144,4 @@ export const fetchPuzzleBatch = async (nb: number = 50, retries: number = 3): Pr
     }
   }
   return [];
-};
-
-export const fetchSingleMovePuzzles = async (targetCount: number = 100): Promise<LichessPuzzle[]> => {
-  const singleMovePuzzles: LichessPuzzle[] = [];
-  const batchSize = 50;
-  const maxBatches = Math.min(3, Math.ceil(targetCount / 5)); // Limit to 3 batches max
-
-  for (let i = 0; i < maxBatches && singleMovePuzzles.length < targetCount; i++) {
-    const batch = await fetchPuzzleBatch(batchSize);
-    const filtered = batch.filter(puzzle => {
-      const isSingleMove = puzzle.puzzle.solution.length === 1;
-      return isSingleMove;
-    });
-    singleMovePuzzles.push(...filtered);
-
-    if (i < maxBatches - 1 && singleMovePuzzles.length < targetCount) {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    }
-  }
-
-  return singleMovePuzzles.slice(0, targetCount);
 };

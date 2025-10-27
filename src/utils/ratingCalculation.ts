@@ -53,16 +53,3 @@ export function getLevelFromRating(rating: number): string {
   // Fallback to "beginner" if no match found
   return 'beginner';
 }
-
-/**
- * Formats a level name for display (capitalizes and replaces hyphens with spaces)
- *
- * @param level - The level name (e.g., "candidate-master")
- * @returns The formatted level name (e.g., "Candidate Master")
- */
-export function formatLevelName(level: string): string {
-  return level
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
