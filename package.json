@@ -11,6 +11,7 @@
     "dev": "vite",
     "docker:dev": "docker run --network=host -v .:/app -it chess npm exec vite dev --host",
     "lint": "eslint .",
+    "prebuild": "pnpm --filter ./local-mods/chess.js run build",
     "preview": "vite preview",
     "zip": "./zip_project.sh",
     "zip:init": "pnpm run zip -- preedit",
