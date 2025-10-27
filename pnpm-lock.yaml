@@ -21,8 +21,8 @@ importers:
         specifier: ^11.1.3
         version: 11.1.3(@nestjs/common@11.1.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.3)
       chess.js:
-        specifier: link:/home/i/repos/chess.js
-        version: link:../chess.js
+        specifier: file:../chess.js/dist
+        version: dist@file:../chess.js/dist
       pkce-challenge:
         specifier: ^5.0.0
         version: 5.0.0
@@ -1743,6 +1743,9 @@ packages:
   detect-newline@3.1.0:
     resolution: {integrity: sha512-TLz+x/vEXm/Y7P7wn1EJFNLxYpUD4TgMosxY6fAVJUnJMbupHBOncxyWUG9OpTaH9EBD7uFI5LfEgmMOc54DsA==}
     engines: {node: '>=8'}
+
+  dist@file:../chess.js/dist:
+    resolution: {directory: ../chess.js/dist, type: directory}
 
   dom-accessibility-api@0.5.16:
     resolution: {integrity: sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg==}
@@ -5170,6 +5173,8 @@ snapshots:
   dequal@2.0.3: {}
 
   detect-newline@3.1.0: {}
+
+  dist@file:../chess.js/dist: {}
 
   dom-accessibility-api@0.5.16: {}
 
