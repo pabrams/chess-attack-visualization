@@ -13,5 +13,5 @@ export default defineConfig({
       usePolling: true,
     },
   },
-  base: '/visualize-chessboard-territory/',
+  base: '/',
 });

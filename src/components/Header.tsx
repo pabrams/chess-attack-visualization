@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ theme, onToggleTheme }) => {
   return (
     <header className={`${styles.header} ${theme === 'light' ? styles.headerLight : ''}`}>
       <div className={styles.titleSection}>
-        <img src="/visualize-chessboard-territory/monkey.jpeg" alt="Monkey" className={styles.monkeyImage} />
+        <img src="monkey.jpeg" alt="Monkey" className={styles.monkeyImage} />
         <h1 className={`${styles.title} ${theme === 'light' ? styles.titleLight : ''}`}>Monkey Drill</h1>
       </div>
 

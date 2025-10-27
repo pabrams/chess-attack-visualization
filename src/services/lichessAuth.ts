@@ -1,7 +1,7 @@
 import { LichessPuzzle } from '../types/lichess';
 
 const LICHESS_HOST = 'https://lichess.org';
-const CLIENT_ID = 'visualize-chessboard-territory';
+const CLIENT_ID = 'monkey-drill';
 
 // Manual PKCE implementation
 function generateCodeVerifier() {
