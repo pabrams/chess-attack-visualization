@@ -29,12 +29,17 @@ export const createArrowsFromAttackers = (
 /**
  * Creates arrows showing attackers of squares around a center square
  * Useful for checkmate visualization
+ *
+ * Shows arrows to:
+ * - Empty squares (king can move there)
+ * - Squares with enemy pieces (king can capture if not defended)
+ *
+ * Does NOT show arrows to squares with the king's own pieces
  */
 export const createArrowsForSquaresAroundTarget = (
   targetSquares: string[],
   getAttackers: (square: Square, color: Color) => Square[],
   attackingColor: Color,
-  defendingColor: Color,
   getPieceAt: (square: string) => any,
   arrowColor: string
 ): Arrow[] => {
@@ -42,8 +47,7 @@ export const createArrowsForSquaresAroundTarget = (
 
   for (const square of targetSquares) {
     const piece = getPieceAt(square);
-    // Show arrows if square is empty or occupied by defending side
-    if (!piece || piece.color === defendingColor) {
+    if (!piece || piece.color === attackingColor) {
       const attackers = getAttackers(square as Square, attackingColor);
       arrows.push(...createArrowsFromAttackers(attackers, square, arrowColor));
     }

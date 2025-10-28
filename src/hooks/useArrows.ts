@@ -73,7 +73,6 @@ export const useArrows = () => {
         aroundSquares,
         chessGame.getAttackers,
         checkmatingColor,
-        checksColor,
         chessGame.getPieceAt,
         arrowColor
       )
