@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
+import { Color } from 'chess.js';
 import { useChessGame } from './hooks/useChessGame';
 import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
-import { getAdjacentSquares } from './utils/squareUtils';
-import { createArrowsFromAttackers } from './utils/arrowUtils';
-import { isBackRank, getBoardOrientation, invertColor } from './utils/chessPieceUtils';
+import { isBackRank, getBoardOrientation } from './utils/chessPieceUtils';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
 import { LoadingOverlay } from './components/LoadingOverlay';
@@ -29,7 +28,7 @@ const App = () => {
   const [pendingPromotion, setPendingPromotion] = useState<{
     sourceSquare: string;
     targetSquare: string;
-    pieceColor: 'w' | 'b';
+    pieceColor: Color;
   } | null>(null);
 
   const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
@@ -42,45 +41,6 @@ const App = () => {
       currentThemeColors.whiteArrowColor,
       currentThemeColors.blackArrowColor
     );
-  };
-
-  const showCheckmaters = () => {
-    // After a move, it's the opponent's turn. We want to show who's attacking them.
-    const defendingColor = chessGame.getTurn();
-    const attackingColor = invertColor(defendingColor);
-
-    const kingSquares = chessGame.findPiece({ type: 'k', color: defendingColor });
-    const defendingKingSquare = kingSquares[0];
-
-    if (!defendingKingSquare) {
-      console.warn('showCheckmaters: no defending king found');
-      return;
-    }
-
-    console.log('showCheckmaters', { attackingColor, defendingColor, defendingKingSquare });
-
-    const aroundSquares = getAdjacentSquares(defendingKingSquare);
-    const newArrows: { startSquare: string; endSquare: string; color: string }[] = [];
-    const attackerArrowColor = attackingColor === 'w' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor;
-    const kingAttackers = chessGame.getAttackers(defendingKingSquare as any, attackingColor);
-    console.log('kingAttackers', kingAttackers);
-    newArrows.push(
-      ...createArrowsFromAttackers(kingAttackers, defendingKingSquare, attackerArrowColor)
-    );
-
-    for (const square of aroundSquares) {
-      const piece = chessGame.getPieceAt(square);
-      const isDefendingOrEmpty = !piece || piece.color === defendingColor;
-      if (isDefendingOrEmpty) {
-        const attackers = chessGame.getAttackers(square as any, attackingColor);
-        newArrows.push(
-          ...createArrowsFromAttackers(attackers, square, attackerArrowColor)
-        );
-      }
-    }
-
-    console.log('newArrows', newArrows);
-    arrows.addArrows(newArrows);
   };
 
   const isPawnPromotion = (sourceSquare: string, targetSquare: string): boolean => {
@@ -155,7 +115,7 @@ const App = () => {
 
   const handleMoveComplete = () => {
     if (drillState.active) {
-      showCheckmaters();
+      arrows.showCheckmaters(chessGame, currentThemeColors);
       setTimeout(() => {
         arrows.clearArrows();
       }, 5000);

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Chess, Square, Move } from 'chess.js';
+import { Chess, Square, Move, Color } from 'chess.js';
 
 export const useChessGame = () => {
   const chessGameRef = useRef(new Chess());
@@ -67,7 +67,7 @@ export const useChessGame = () => {
     return false;
   };
 
-  const getAttackers = (square: Square, color: 'w' | 'b') => {
+  const getAttackers = (square: Square, color: Color) => {
     return chessGameRef.current.attackers(square, color, true);
   };
 
@@ -80,11 +80,11 @@ export const useChessGame = () => {
     return moves.map(move => move.to);
   };
 
-  const findPiece = (piece: { type: string; color: 'w' | 'b' }) => {
+  const findPiece = (piece: { type: string; color: Color }) => {
     return chessGameRef.current.findPiece({ type: piece.type as any, color: piece.color });
   };
 
-  const getTurn = (): 'w' | 'b' => {
+  const getTurn = (): Color => {
     return chessGameRef.current.turn();
   };
 

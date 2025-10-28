@@ -1,5 +1,5 @@
 import React from 'react';
-import { PuzzleAttempt } from '../types/drill';
+import { PuzzleAttempt, PlayerColor } from '../types/drill';
 import { usePuzzleStats } from '../hooks/usePuzzleStats';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { formatDate, formatFullTimestamp, constructPuzzleUrl } from '../utils/formatters';
@@ -9,7 +9,7 @@ interface InfoPanelLayoutProps {
   attempts: PuzzleAttempt[];
   rating: number;
   lastResult: boolean | null;
-  playerColor: 'white' | 'black';
+  playerColor: PlayerColor;
 }
 
 export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, rating, lastResult, playerColor }) => {

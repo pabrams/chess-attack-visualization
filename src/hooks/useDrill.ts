@@ -1,6 +1,6 @@
 import { useReducer, useCallback, useEffect, useRef } from 'react';
 import { LichessPuzzle } from '../types/lichess';
-import { PuzzleAttempt } from '../types/drill';
+import { PuzzleAttempt, PlayerColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
 import { getLevelFromRating, calculateRatingChange } from '../utils/ratingCalculation';
 import { sampleArray } from '../utils/arrayUtils';
@@ -17,7 +17,7 @@ interface DrillState {
   active: boolean;
   loading: boolean;
   puzzleQueue: LichessPuzzle[];
-  playerColor: 'white' | 'black';
+  playerColor: PlayerColor;
   currentPuzzle: LichessPuzzle | null;
   puzzleState: PuzzleState;
   puzzleAttempts: PuzzleAttempt[];
@@ -25,7 +25,7 @@ interface DrillState {
 }
 
 type DrillAction =
-  | { type: 'START_LOADING'; playerColor: 'white' | 'black' }
+  | { type: 'START_LOADING'; playerColor: PlayerColor }
   | { type: 'PUZZLES_LOADED'; puzzles: LichessPuzzle[] }
   | { type: 'LOAD_NEXT_PUZZLE' }
   | { type: 'PUZZLE_STARTED'; puzzle: LichessPuzzle }
@@ -141,7 +141,7 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
   }
 }
 
-const selectRandomPlayerColor = (): 'white' | 'black' => {
+const selectRandomPlayerColor = (): PlayerColor => {
   return Math.random() < 0.5 ? 'white' : 'black';
 };
 

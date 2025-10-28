@@ -1,6 +1,7 @@
 import React from 'react';
 import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow } from '../types/arrows';
+import { PlayerColor } from '../types/drill';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { getCustomPieces } from './customPieces';
 
@@ -14,7 +15,7 @@ interface ChessBoardProps {
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
-  boardOrientation?: 'white' | 'black';
+  boardOrientation?: PlayerColor;
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({

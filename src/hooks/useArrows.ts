@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Square } from 'chess.js';
+import { Square, Color as PieceColor } from 'chess.js';
 import { Arrow } from '../types/arrows';
-import { createArrowsFromAttackers } from '../utils/arrowUtils';
+import { createArrowsFromAttackers, createArrowsForSquaresAroundTarget } from '../utils/arrowUtils';
+import { getAdjacentSquares } from '../utils/squareUtils';
+import { invertColor } from '../utils/chessPieceUtils';
 
 export const useArrows = () => {
   const [arrows, setArrows] = useState<Arrow[]>([]);
@@ -18,7 +20,7 @@ export const useArrows = () => {
 
   const showAttackersForSquare = (
     square: string,
-    getAttackers: (square: Square, color: 'w' | 'b') => Square[],
+    getAttackers: (square: Square, color: PieceColor) => Square[],
     whiteArrowColor: string,
     blackArrowColor: string
   ) => {
@@ -42,10 +44,49 @@ export const useArrows = () => {
     }
   };
 
+  const showCheckmaters = (
+    chessGame: any,
+    currentThemeColors: { whiteArrowColor: string; blackArrowColor: string }
+  ) => {
+    // After a move, it's the opponent's turn. Show who's attacking them.
+    const checksColor = chessGame.getTurn();  // Whose turn it is (being checked/mated)
+    const checkmatingColor = invertColor(checksColor);  // Who just moved (delivering mate)
+
+    const kingSquares = chessGame.findPiece({ type: 'k', color: checksColor });
+    const kingSquare = kingSquares[0];
+
+    if (!kingSquare) {
+      return;
+    }
+
+    const arrowColor = checkmatingColor === 'w' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor;
+    const newArrows: Arrow[] = [];
+
+    // Show who's attacking the king
+    const kingAttackers = chessGame.getAttackers(kingSquare as any, checkmatingColor);
+    newArrows.push(...createArrowsFromAttackers(kingAttackers, kingSquare, arrowColor));
+
+    // Show who's attacking the squares around the king
+    const aroundSquares = getAdjacentSquares(kingSquare);
+    newArrows.push(
+      ...createArrowsForSquaresAroundTarget(
+        aroundSquares,
+        chessGame.getAttackers,
+        checkmatingColor,
+        checksColor,
+        chessGame.getPieceAt,
+        arrowColor
+      )
+    );
+
+    addArrows(newArrows);
+  };
+
   return {
     arrows,
     clearArrows,
     showAttackersForSquare,
     addArrows,
+    showCheckmaters,
   };
 };

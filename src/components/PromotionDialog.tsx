@@ -1,8 +1,9 @@
 import React from 'react';
+import { Color as PieceColor } from 'chess.js';
 import styles from './PromotionDialog.module.css';
 
 interface PromotionDialogProps {
-  color: 'w' | 'b';
+  color: PieceColor;
   onSelect: (piece: 'q' | 'r' | 'b' | 'n') => void;
   theme: 'dark' | 'light';
 }

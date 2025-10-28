@@ -1,7 +1,7 @@
 import React from 'react';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow } from '../types/arrows';
-import { PuzzleAttempt } from '../types/drill';
+import { PuzzleAttempt, PlayerColor } from '../types/drill';
 import { ChessBoard } from './ChessBoard';
 import { InfoPanelLayout } from './InfoPanelLayout';
 import styles from './Layout.module.css';
@@ -16,11 +16,11 @@ interface LayoutProps {
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
-  boardOrientation: 'white' | 'black';
+  boardOrientation: PlayerColor;
   puzzleAttempts: PuzzleAttempt[];
   rating: number;
   lastPuzzleResult: boolean | null;
-  playerColor: 'white' | 'black';
+  playerColor: PlayerColor;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
