@@ -48,9 +48,8 @@ export const useArrows = () => {
     chessGame: any,
     currentThemeColors: { whiteArrowColor: string; blackArrowColor: string }
   ) => {
-    // After a move, it's the opponent's turn. Show who's attacking them.
-    const checksColor = chessGame.getTurn();  // Whose turn it is (being checked/mated)
-    const checkmatingColor = invertColor(checksColor);  // Who just moved (delivering mate)
+    const checksColor = chessGame.getTurn();
+    const checkmatingColor = invertColor(checksColor);
 
     const kingSquares = chessGame.findPiece({ type: 'k', color: checksColor });
     const kingSquare = kingSquares[0];
