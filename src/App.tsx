@@ -56,7 +56,7 @@ const App = () => {
       arrows.showCheckmaters();
       setTimeout(() => {
         arrows.clearArrows();
-      }, 5000);
+      }, 1500);
     } else {
       arrows.clearArrows();
     }

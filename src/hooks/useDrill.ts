@@ -75,25 +75,33 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
       const setupMove = puzzle._setupMove!;
       const fen = puzzle._fen!;
 
-      const tempChess = new Chess(fen);
-      const from = setupMove.substring(0, 2);
-      const to = setupMove.substring(2, 4);
-      const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
+      const success = chessGame.loadPgn(new Chess(fen).pgn());
 
-      const move = tempChess.move({ from, to, promotion: promotion as 'q' | 'r' | 'b' | 'n' | undefined });
-
-      if (move) {
-        const pgn = tempChess.pgn();
-        const success = chessGame.loadPgn(pgn);
-
-        if (success) {
-          setPuzzleActive(true);
-          setPuzzleSolution(puzzle.puzzle.solution);
-          setPuzzleCompleted(false);
-          setPuzzleFailed(false);
-          setPuzzleStartTime(Date.now());
-        }
+      if (!success) {
+        return;
       }
+
+      setTimeout(() => {
+        const tempChess = new Chess(fen);
+        const from = setupMove.substring(0, 2);
+        const to = setupMove.substring(2, 4);
+        const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
+
+        const move = tempChess.move({ from, to, promotion: promotion as 'q' | 'r' | 'b' | 'n' | undefined });
+
+        if (move) {
+          const pgn = tempChess.pgn();
+          const setupSuccess = chessGame.loadPgn(pgn);
+
+          if (setupSuccess) {
+            setPuzzleActive(true);
+            setPuzzleSolution(puzzle.puzzle.solution);
+            setPuzzleCompleted(false);
+            setPuzzleFailed(false);
+            setPuzzleStartTime(Date.now());
+          }
+        }
+      }, 600);
     });
   }, [chessGame]);
 
@@ -132,8 +140,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
     onResultRecorded(success, puzzleRating, puzzleId);
     resetPuzzleState();
 
-    // Only delay on successful solve to show checkmate threats; fail immediately to next puzzle
-    const delayMs = success ? 5000 : 0;
+    const delayMs = success ? 1500 : 0;
     setTimeout(() => {
       loadNextPuzzle();
     }, delayMs);
