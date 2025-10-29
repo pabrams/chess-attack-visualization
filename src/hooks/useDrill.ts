@@ -6,6 +6,8 @@ import type { ChessGame } from './useChessGame';
 import { getLevelFromRating } from '../utils/ratingCalculation';
 import { sampleArray } from '../utils/arrayUtils';
 
+export const SOLVE_COMPLETION_DELAY_MS = 1500;
+
 interface RawPuzzle {
   id: string;
   rating: number;
@@ -140,7 +142,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
     onResultRecorded(success, puzzleRating, puzzleId);
     resetPuzzleState();
 
-    const delayMs = success ? 1500 : 0;
+    const delayMs = success ? SOLVE_COMPLETION_DELAY_MS : 0;
     setTimeout(() => {
       loadNextPuzzle();
     }, delayMs);

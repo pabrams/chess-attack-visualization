@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Square } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
 import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
-import { useDrill } from './hooks/useDrill';
+import { useDrill, SOLVE_COMPLETION_DELAY_MS } from './hooks/useDrill';
 import { useMoveHandler } from './hooks/useMoveHandler';
 import { usePuzzleResults } from './hooks/usePuzzleResults';
 import Header from './components/Header';
@@ -54,13 +54,19 @@ const App = () => {
   const handleMoveComplete = () => {
     if (drillState.active) {
       arrows.showCheckmaters();
-      setTimeout(() => {
-        arrows.clearArrows();
-      }, 1500);
     } else {
       arrows.clearArrows();
     }
   };
+
+  useEffect(() => {
+    if (puzzleState.completed || puzzleState.failed) {
+      const timer = setTimeout(() => {
+        arrows.clearArrows();
+      }, SOLVE_COMPLETION_DELAY_MS);
+      return () => clearTimeout(timer);
+    }
+  }, [puzzleState.completed, puzzleState.failed, arrows]);
 
   const {
     selectedSquare,
