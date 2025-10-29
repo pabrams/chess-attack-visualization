@@ -8,11 +8,9 @@ import type { ChessGame } from './useChessGame';
 
 export const useArrows = () => {
   const [arrows, setArrows] = useState<Arrow[]>([]);
-  const [lastClickedSquare, setLastClickedSquare] = useState<Square | null>(null);
 
   const clearArrows = () => {
     setArrows([]);
-    setLastClickedSquare(null);
   };
 
   const addArrows = (newArrows: Arrow[]) => {
@@ -25,24 +23,19 @@ export const useArrows = () => {
     whiteArrowColor: string,
     blackArrowColor: string
   ) => {
-    if (square === lastClickedSquare && arrows.length > 0) {
-      clearArrows();
-    } else {
-      const newArrows: Arrow[] = [];
+    const newArrows: Arrow[] = [];
 
-      const whiteAttackers = getAttackers(square, 'w');
-      newArrows.push(
-        ...createArrowsFromAttackers(whiteAttackers, square, whiteArrowColor)
-      );
+    const whiteAttackers = getAttackers(square, 'w');
+    newArrows.push(
+      ...createArrowsFromAttackers(whiteAttackers, square, whiteArrowColor)
+    );
 
-      const blackAttackers = getAttackers(square, 'b');
-      newArrows.push(
-        ...createArrowsFromAttackers(blackAttackers, square, blackArrowColor)
-      );
+    const blackAttackers = getAttackers(square, 'b');
+    newArrows.push(
+      ...createArrowsFromAttackers(blackAttackers, square, blackArrowColor)
+    );
 
-      setArrows(newArrows);
-      setLastClickedSquare(square);
-    }
+    setArrows(newArrows);
   };
 
   const showCheckmaters = (

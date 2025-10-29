@@ -32,15 +32,23 @@ const App = () => {
   } | null>(null);
 
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
+  const [lastClickedSquare, setLastClickedSquare] = useState<Square | null>(null);
   const legalMoves = selectedSquare ? chessGame.getLegalMoves(selectedSquare) : [];
 
   const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
-    arrows.showAttackersForSquare(
-      square as Square,
-      chessGame.getAttackers,
-      currentThemeColors.whiteArrowColor,
-      currentThemeColors.blackArrowColor
-    );
+    square = square as Square;
+    if (square === lastClickedSquare && arrows.arrows.length > 0) {
+      arrows.clearArrows();
+      setLastClickedSquare(null);
+    } else {
+      arrows.showAttackersForSquare(
+        square,
+        chessGame.getAttackers,
+        currentThemeColors.whiteArrowColor,
+        currentThemeColors.blackArrowColor
+      );
+      setLastClickedSquare(square);
+    }
   };
 
   const isPawnPromotion = (sourceSquare: Square, targetSquare: Square): boolean => {
