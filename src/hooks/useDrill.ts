@@ -48,13 +48,10 @@ const convertToLichessPuzzleFormat = (rawPuzzles: RawPuzzle[]): LichessPuzzle[] 
 };
 
 export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps) => {
-  // Drill state
   const [active, setActive] = useState(false);
   const [userColor, setUserColor] = useState<UserColor>('white');
   const [puzzleQueue, setPuzzleQueue] = useState<LichessPuzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<LichessPuzzle | null>(null);
-
-  // Puzzle state
   const [puzzleActive, setPuzzleActive] = useState(false);
   const [puzzleSolution, setPuzzleSolution] = useState<string[]>([]);
   const [puzzleCompleted, setPuzzleCompleted] = useState(false);
