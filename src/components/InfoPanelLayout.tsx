@@ -1,5 +1,5 @@
 import React from 'react';
-import { PuzzleAttempt, PlayerColor } from '../types/drill';
+import { PuzzleAttempt, UserColor } from '../types/drill';
 import { usePuzzleStats } from '../hooks/usePuzzleStats';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { formatDate, formatFullTimestamp, constructPuzzleUrl } from '../utils/formatters';
@@ -9,10 +9,10 @@ interface InfoPanelLayoutProps {
   attempts: PuzzleAttempt[];
   rating: number;
   lastResult: boolean | null;
-  playerColor: PlayerColor;
+  userColor: UserColor;
 }
 
-export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, rating, lastResult, playerColor }) => {
+export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, rating, lastResult, userColor }) => {
   const { theme, currentThemeColors } = useThemeContext();
   const {
     sortedAttempts,
@@ -29,8 +29,8 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, rati
       <fieldset className={styles.playerInfoContainer}>
         <legend>Monkey Drill Info</legend>
         <div className={styles.moveInstruction}>
-          Move the <span style={{ color: playerColor === 'white' ? currentThemeColors.blackArrowColor : currentThemeColors.whiteArrowColor, fontWeight: 'bold' }}>
-            {playerColor === 'white' ? 'Black' : 'White'}
+          Move the <span style={{ color: userColor === 'white' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor, fontWeight: 'bold' }}>
+            {userColor}
           </span> pieces
         </div>
         <div className={styles.playerInfoContent}>

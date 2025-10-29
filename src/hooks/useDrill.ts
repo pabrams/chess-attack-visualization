@@ -1,7 +1,7 @@
 import { useReducer, useCallback, useEffect, useRef } from 'react';
 import { Square } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
-import { PuzzleAttempt, PlayerColor } from '../types/drill';
+import { PuzzleAttempt, UserColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
 import { getLevelFromRating, calculateRatingChange } from '../utils/ratingCalculation';
 import { sampleArray } from '../utils/arrayUtils';
@@ -18,7 +18,7 @@ interface DrillState {
   active: boolean;
   loading: boolean;
   puzzleQueue: LichessPuzzle[];
-  playerColor: PlayerColor;
+  userColor: UserColor;
   currentPuzzle: LichessPuzzle | null;
   puzzleState: PuzzleState;
   puzzleAttempts: PuzzleAttempt[];
@@ -26,7 +26,7 @@ interface DrillState {
 }
 
 type DrillAction =
-  | { type: 'START_LOADING'; playerColor: PlayerColor }
+  | { type: 'START_LOADING'; userColor: UserColor }
   | { type: 'PUZZLES_LOADED'; puzzles: LichessPuzzle[] }
   | { type: 'LOAD_NEXT_PUZZLE' }
   | { type: 'PUZZLE_STARTED'; puzzle: LichessPuzzle }
@@ -45,7 +45,7 @@ const initialState: DrillState = {
   active: false,
   loading: false,
   puzzleQueue: [],
-  playerColor: 'white',
+  userColor: 'white',
   currentPuzzle: null,
   puzzleState: {
     active: false,
@@ -65,7 +65,7 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
         puzzleAttempts: state.puzzleAttempts,
         active: true,
         loading: true,
-        playerColor: action.playerColor,
+        userColor: action.userColor,
         lastPuzzleResult: null,
       };
 
@@ -142,7 +142,7 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
   }
 }
 
-const selectRandomPlayerColor = (): PlayerColor => {
+const selectRandomUserColor = (): UserColor => {
   return Math.random() < 0.5 ? 'white' : 'black';
 };
 
@@ -278,13 +278,13 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
 
   useEffect(() => {
     const startDrill = async () => {
-      const playerColor = selectRandomPlayerColor();
+      const userColor = selectRandomUserColor();
 
-      dispatch({ type: 'START_LOADING', playerColor });
+      dispatch({ type: 'START_LOADING', userColor });
 
       try {
         const playerLevel = getLevelFromRating(initialRatingRef.current);
-        const colorPrefix = playerColor === 'white' ? 'w' : 'b';
+        const colorPrefix = userColor === 'white' ? 'w' : 'b';
         const puzzleFile = `/lichess_db_puzzle-${colorPrefix}-one-move-${playerLevel}.json`;
         const response = await fetch(puzzleFile);
 
@@ -297,7 +297,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
         const puzzles = convertToLichessPuzzleFormat(sampled);
 
         dispatch({ type: 'PUZZLES_LOADED', puzzles });
-        
+
         loadNextPuzzle();
       } catch (error) {
         console.error('Error loading puzzles:', error);
@@ -345,7 +345,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
       active: state.active,
       loading: state.loading,
       puzzleQueue: state.puzzleQueue,
-      playerColor: state.playerColor,
+      userColor: state.userColor,
       currentPuzzle: state.currentPuzzle,
     },
     puzzleState: state.puzzleState,

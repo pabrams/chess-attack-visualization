@@ -6,7 +6,7 @@ import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
-import { isBackRank, getBoardOrientation } from './utils/chessPieceUtils';
+import { isBackRank } from './utils/chessPieceUtils';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
 import { LoadingOverlay } from './components/LoadingOverlay';
@@ -170,11 +170,10 @@ const App = () => {
           onPieceDrop={handlePieceDrop}
           onSquareClick={handleSquareClick}
           onSquareRightClick={handleSquareRightClick}
-          boardOrientation={getBoardOrientation(drillState.active, drillState.playerColor)}
           puzzleAttempts={puzzleAttempts}
           rating={rating}
           lastPuzzleResult={lastPuzzleResult}
-          playerColor={drillState.playerColor}
+          userColor={drillState.userColor}
         />
       </div>
     </>

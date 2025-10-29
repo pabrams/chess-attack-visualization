@@ -1,4 +1,4 @@
-export type PlayerColor = 'white' | 'black';
+export type UserColor = 'white' | 'black';
 
 export interface PuzzleAttempt {
   puzzleId: string;

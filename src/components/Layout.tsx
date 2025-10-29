@@ -2,7 +2,7 @@ import React from 'react';
 import { Square } from 'chess.js';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow } from '../types/arrows';
-import { PuzzleAttempt, PlayerColor } from '../types/drill';
+import { PuzzleAttempt, UserColor } from '../types/drill';
 import { ChessBoard } from './ChessBoard';
 import { InfoPanelLayout } from './InfoPanelLayout';
 import styles from './Layout.module.css';
@@ -15,11 +15,10 @@ interface LayoutProps {
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
-  boardOrientation: PlayerColor;
   puzzleAttempts: PuzzleAttempt[];
   rating: number;
   lastPuzzleResult: boolean | null;
-  playerColor: PlayerColor;
+  userColor: UserColor;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
@@ -30,11 +29,10 @@ export const Layout: React.FC<LayoutProps> = ({
   onPieceDrop,
   onSquareClick,
   onSquareRightClick,
-  boardOrientation,
   puzzleAttempts,
   rating,
   lastPuzzleResult,
-  playerColor,
+  userColor,
 }) => {
   return (
     <div className={styles.layout}>
@@ -48,7 +46,7 @@ export const Layout: React.FC<LayoutProps> = ({
             onPieceDrop={onPieceDrop}
             onSquareClick={onSquareClick}
             onSquareRightClick={onSquareRightClick}
-            boardOrientation={boardOrientation}
+            boardOrientation={userColor}
           />
         </div>
 
@@ -57,7 +55,7 @@ export const Layout: React.FC<LayoutProps> = ({
             attempts={puzzleAttempts}
             rating={rating}
             lastResult={lastPuzzleResult}
-            playerColor={playerColor}
+            userColor={userColor}
           />
         </div>
       </div>
