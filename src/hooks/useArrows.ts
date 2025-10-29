@@ -66,11 +66,9 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     const arrowColor = checkmatingColor === 'w' ? whiteArrowColor : blackArrowColor;
     const newArrows: Arrow[] = [];
 
-    // Show who's attacking the king
     const kingAttackers = chessGame.getAttackers(kingSquare, checkmatingColor);
     newArrows.push(...createArrowsFromAttackers(kingAttackers, kingSquare, arrowColor));
 
-    // Show who's attacking the squares around the king
     const aroundSquares = getAdjacentSquares(kingSquare);
     newArrows.push(
       ...createArrowsForSquaresAroundTarget(
