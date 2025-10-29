@@ -7,12 +7,10 @@ import { useThemeContext } from '../contexts/ThemeContext';
 import { getCustomPieces } from './customPieces';
 
 interface ChessBoardProps {
-  chessPosition: string;
+  fen: string;
   arrows: Arrow[];
-  sourceSquare: Square | null;
-  targetSquare: Square | null;
-  selectedSquare: Square | null;
-  legalMoves: Square[];
+  lastMove: { from: Square; to: Square } | null;
+  pendingMove: { sourceSquare: Square; legalTargets: Square[] } | null;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
@@ -20,12 +18,10 @@ interface ChessBoardProps {
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = ({
-  chessPosition,
+  fen,
   arrows,
-  sourceSquare,
-  targetSquare,
-  selectedSquare,
-  legalMoves,
+  lastMove,
+  pendingMove,
   onPieceDrop,
   onSquareClick,
   onSquareRightClick,
@@ -34,13 +30,13 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   const { theme, currentThemeColors } = useThemeContext();
   const customPieces = getCustomPieces(theme);
 
-  const legalMoveStyles = legalMoves.reduce((styles, square) => {
+  const legalMoveStyles = pendingMove ? pendingMove.legalTargets.reduce((styles, square) => {
     styles[square] = {
       background: 'radial-gradient(circle, rgba(0, 0, 0, 0.3) 25%, transparent 25%)',
       borderRadius: '50%',
     };
     return styles;
-  }, {} as Record<string, any>);
+  }, {} as Record<string, any>) : {};
 
   const chessboardOptions = {
     onPieceDrop,
@@ -48,7 +44,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     onSquareRightClick,
     arrows,
     id: 'chessboard-options',
-    position: chessPosition,
+    position: fen,
     boardOrientation,
     ...(customPieces && { pieces: customPieces }),
     allowDrawingArrows: false,
@@ -73,9 +69,11 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     },
     squareStyles: {
       ...legalMoveStyles,
-      ...(sourceSquare ? { [sourceSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' } } : {}),
-      ...(targetSquare ? { [targetSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' } } : {}),
-      ...(selectedSquare ? { [selectedSquare]: { backgroundColor: 'rgba(0, 255, 0, 0.5)' } } : {}),
+      ...(lastMove ? {
+        [lastMove.from]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
+        [lastMove.to]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
+      } : {}),
+      ...(pendingMove ? { [pendingMove.sourceSquare]: { backgroundColor: 'rgba(0, 255, 0, 0.5)' } } : {}),
     },
   };
 

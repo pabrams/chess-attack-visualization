@@ -155,12 +155,18 @@ const App = () => {
       >
 
         <Layout
-          chessPosition={chessGame.chessPosition}
+          fen={chessGame.fen}
           arrows={arrows.arrows}
-          sourceSquare={sourceSquare}
-          targetSquare={targetSquare}
-          selectedSquare={selectedSquare}
-          legalMoves={legalMoves}
+          lastMove={
+            sourceSquare && targetSquare
+              ? { from: sourceSquare, to: targetSquare }
+              : null
+          }
+          pendingMove={
+            selectedSquare
+              ? { sourceSquare: selectedSquare, legalTargets: legalMoves }
+              : null
+          }
           onPieceDrop={handlePieceDrop}
           onSquareClick={handleSquareClick}
           onSquareRightClick={handleSquareRightClick}

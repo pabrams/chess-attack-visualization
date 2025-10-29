@@ -8,12 +8,10 @@ import { InfoPanelLayout } from './InfoPanelLayout';
 import styles from './Layout.module.css';
 
 interface LayoutProps {
-  chessPosition: string;
+  fen: string;
   arrows: Arrow[];
-  sourceSquare: Square | null;
-  targetSquare: Square | null;
-  selectedSquare: Square | null;
-  legalMoves: Square[];
+  lastMove: { from: Square; to: Square } | null;
+  pendingMove: { sourceSquare: Square; legalTargets: Square[] } | null;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;
@@ -25,12 +23,10 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({
-  chessPosition,
+  fen,
   arrows,
-  sourceSquare,
-  targetSquare,
-  selectedSquare,
-  legalMoves,
+  lastMove,
+  pendingMove,
   onPieceDrop,
   onSquareClick,
   onSquareRightClick,
@@ -45,12 +41,10 @@ export const Layout: React.FC<LayoutProps> = ({
       <div className={styles.boardResults}>
         <div className={styles.board}>
           <ChessBoard
-            chessPosition={chessPosition}
+            fen={fen}
             arrows={arrows}
-            sourceSquare={sourceSquare}
-            targetSquare={targetSquare}
-            selectedSquare={selectedSquare}
-            legalMoves={legalMoves}
+            lastMove={lastMove}
+            pendingMove={pendingMove}
             onPieceDrop={onPieceDrop}
             onSquareClick={onSquareClick}
             onSquareRightClick={onSquareRightClick}

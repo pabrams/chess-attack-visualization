@@ -3,7 +3,7 @@ import { Chess, Square, Move, Color } from 'chess.js';
 
 export const useChessGame = () => {
   const chessGameRef = useRef(new Chess());
-  const [chessPosition, setChessPosition] = useState(chessGameRef.current.fen());
+  const [fen, setFen] = useState(chessGameRef.current.fen());
   const [moveHistory, setMoveHistory] = useState<Move[]>([]);
 
   const getLastMove = () => {
@@ -36,7 +36,7 @@ export const useChessGame = () => {
         return null;
       }
 
-      setChessPosition(chessGameRef.current.fen());
+      setFen(chessGameRef.current.fen());
       setMoveHistory(prev => [...prev, move]);
       return move;
     } catch (e) {
@@ -48,7 +48,7 @@ export const useChessGame = () => {
   const loadPgn = (pgn: string) => {
     try {
       chessGameRef.current.loadPgn(pgn);
-      setChessPosition(chessGameRef.current.fen());
+      setFen(chessGameRef.current.fen());
       setMoveHistory(chessGameRef.current.history({ verbose: true }));
       return true;
     } catch (e) {
@@ -60,7 +60,7 @@ export const useChessGame = () => {
   const undoLastMove = () => {
     const move = chessGameRef.current.undo();
     if (move) {
-      setChessPosition(chessGameRef.current.fen());
+      setFen(chessGameRef.current.fen());
       setMoveHistory(chessGameRef.current.history({ verbose: true }));
       return true;
     }
@@ -89,7 +89,7 @@ export const useChessGame = () => {
   };
 
   return {
-    chessPosition,
+    fen,
     getLastMove,
     makeMove,
     undoLastMove,
