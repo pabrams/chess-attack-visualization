@@ -120,7 +120,15 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
     }
   }, [currentPuzzle, initializePuzzleFromFen]);
 
-  const recordPuzzleResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
+  useEffect(() => {
+    if (!currentPuzzle || (!puzzleCompleted && !puzzleFailed)) {
+      return;
+    }
+
+    const puzzleRating = currentPuzzle.puzzle.rating;
+    const puzzleId = currentPuzzle.puzzle.id;
+    const success = puzzleCompleted;
+
     onResultRecorded(success, puzzleRating, puzzleId);
     resetPuzzleState();
 
@@ -129,21 +137,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
     setTimeout(() => {
       loadNextPuzzle();
     }, delayMs);
-  }, [onResultRecorded, resetPuzzleState, loadNextPuzzle]);
-
-  useEffect(() => {
-    if (!active || !currentPuzzle) {
-      return;
-    }
-
-    if (!puzzleCompleted && !puzzleFailed) {
-      return;
-    }
-
-    const puzzleRating = currentPuzzle.puzzle.rating;
-    const puzzleId = currentPuzzle.puzzle.id;
-    recordPuzzleResult(puzzleCompleted, puzzleRating, puzzleId);
-  }, [puzzleCompleted, puzzleFailed, active, currentPuzzle, recordPuzzleResult]);
+  }, [puzzleCompleted, puzzleFailed, currentPuzzle, onResultRecorded, resetPuzzleState, loadNextPuzzle]);
 
   useEffect(() => {
     const startDrill = async () => {
