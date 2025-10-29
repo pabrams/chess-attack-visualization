@@ -1,10 +1,20 @@
 import { useReducer, useCallback, useEffect, useRef } from 'react';
-import { Square } from 'chess.js';
+import { Square, Move } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
 import { PuzzleAttempt, UserColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
 import { getLevelFromRating, calculateRatingChange } from '../utils/ratingCalculation';
 import { sampleArray } from '../utils/arrayUtils';
+
+interface RawPuzzle {
+  id: string;
+  rating: number;
+  themes: string[];
+  fen: string;
+  solution: string;
+  setupMove: string;
+  gameUrl: string;
+}
 
 interface PuzzleState {
   active: boolean;
@@ -87,7 +97,7 @@ function drillReducer(state: DrillState, action: DrillAction): DrillState {
       return {
         ...state,
         puzzleQueue: remainingQueue,
-        currentPuzzle: nextPuzzle as any,
+        currentPuzzle: nextPuzzle,
         puzzleState: createEmptyPuzzleState(),
       };
     }
@@ -153,8 +163,8 @@ const createEmptyPuzzleState = (): PuzzleState => ({
   failed: false,
 });
 
-const convertToLichessPuzzleFormat = (rawPuzzles: any[]): LichessPuzzle[] => {
-  return rawPuzzles.map((p: any) => ({
+const convertToLichessPuzzleFormat = (rawPuzzles: RawPuzzle[]): LichessPuzzle[] => {
+  return rawPuzzles.map((p: RawPuzzle) => ({
     game: {
       pgn: '',
       id: p.gameUrl.split('/')[3] || p.id,
@@ -169,7 +179,7 @@ const convertToLichessPuzzleFormat = (rawPuzzles: any[]): LichessPuzzle[] => {
     },
     _fen: p.fen,
     _setupMove: p.setupMove,
-  } as any));
+  } as LichessPuzzle & { _fen?: string; _setupMove?: string }));
 };
 
 function loadInitialState(): DrillState {
@@ -212,7 +222,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
       const to = setupMove.substring(2, 4);
       const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
 
-      const move = tempChess.move({ from, to, promotion: promotion as any });
+      const move = tempChess.move({ from, to, promotion: promotion as 'q' | 'r' | 'b' | 'n' | undefined });
 
       if (move) {
         const pgn = tempChess.pgn();
@@ -236,7 +246,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     // Only initialize when the puzzle actually changes (new puzzle from queue), not when puzzle state changes
     if (state.currentPuzzle && state.currentPuzzle !== prevPuzzleRef.current) {
       prevPuzzleRef.current = state.currentPuzzle;
-      initializePuzzleFromFen(state.currentPuzzle as any);
+      initializePuzzleFromFen(state.currentPuzzle as LichessPuzzle & { _setupMove?: string; _fen?: string });
     }
   }, [state.currentPuzzle, initializePuzzleFromFen]);
 
@@ -292,7 +302,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
           throw new Error(`Failed to load puzzle file: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const data = await response.json() as { puzzles: RawPuzzle[] };
         const sampled = sampleArray(data.puzzles, 200);
         const puzzles = convertToLichessPuzzleFormat(sampled);
 
@@ -317,7 +327,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     dispatch({ type: 'PUZZLE_COMPLETED' });
   }, []);
 
-  const isMoveCorrect = (move: any, expectedMove: string): boolean => {
+  const isMoveCorrect = (move: Move, expectedMove: string): boolean => {
     return move.lan === expectedMove;
   };
 

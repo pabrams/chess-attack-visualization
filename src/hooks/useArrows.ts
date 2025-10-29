@@ -4,6 +4,7 @@ import { Arrow } from '../types/arrows';
 import { createArrowsFromAttackers, createArrowsForSquaresAroundTarget } from '../utils/arrowUtils';
 import { getAdjacentSquares } from '../utils/squareUtils';
 import { invertColor } from '../utils/chessPieceUtils';
+import type { ChessGame } from './useChessGame';
 
 export const useArrows = () => {
   const [arrows, setArrows] = useState<Arrow[]>([]);
@@ -45,7 +46,7 @@ export const useArrows = () => {
   };
 
   const showCheckmaters = (
-    chessGame: any,
+    chessGame: ChessGame,
     currentThemeColors: { whiteArrowColor: string; blackArrowColor: string }
   ) => {
     const checksColor = chessGame.getTurn();
@@ -62,7 +63,7 @@ export const useArrows = () => {
     const newArrows: Arrow[] = [];
 
     // Show who's attacking the king
-    const kingAttackers = chessGame.getAttackers(kingSquare as any, checkmatingColor);
+    const kingAttackers = chessGame.getAttackers(kingSquare, checkmatingColor);
     newArrows.push(...createArrowsFromAttackers(kingAttackers, kingSquare, arrowColor));
 
     // Show who's attacking the squares around the king

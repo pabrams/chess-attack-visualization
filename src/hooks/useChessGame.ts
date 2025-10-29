@@ -21,7 +21,7 @@ export const useChessGame = () => {
 
   const makeMove = (sourceSquare: Square, targetSquare: Square, promotion?: string) => {
     try {
-      const moveOptions: any = {
+      const moveOptions: { from: Square; to: Square; promotion?: string } = {
         from: sourceSquare,
         to: targetSquare,
       };
@@ -81,7 +81,7 @@ export const useChessGame = () => {
   };
 
   const findPiece = (piece: { type: string; color: Color }) => {
-    return chessGameRef.current.findPiece({ type: piece.type as any, color: piece.color });
+    return chessGameRef.current.findPiece({ type: piece.type as 'p' | 'n' | 'b' | 'r' | 'q' | 'k', color: piece.color });
   };
 
   const getTurn = (): Color => {
