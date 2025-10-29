@@ -15,11 +15,9 @@ interface UseArrowsProps {
 
 export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseArrowsProps) => {
   const [arrows, setArrows] = useState<Arrow[]>([]);
-  const [lastClickedSquare, setLastClickedSquare] = useState<Square | null>(null);
 
   const clearArrows = useCallback(() => {
     setArrows([]);
-    setLastClickedSquare(null);
   }, []);
 
   const addArrows = useCallback((newArrows: Arrow[]) => {
@@ -44,13 +42,8 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
 
   const handleSquareRightClick = useCallback(({ square }: SquareHandlerArgs) => {
     const clickedSquare = square as Square;
-    if (clickedSquare === lastClickedSquare && arrows.length > 0) {
-      clearArrows();
-    } else {
-      showAttackersForSquare(clickedSquare);
-      setLastClickedSquare(clickedSquare);
-    }
-  }, [lastClickedSquare, arrows.length, showAttackersForSquare, clearArrows]);
+    showAttackersForSquare(clickedSquare);
+  }, [showAttackersForSquare]);
 
   const showCheckmaters = useCallback(() => {
     const checksColor = chessGame.getTurn();

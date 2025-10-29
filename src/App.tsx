@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { Square } from 'chess.js';
+import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
 import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
@@ -26,6 +29,19 @@ const App = () => {
     whiteArrowColor: currentThemeColors.whiteArrowColor,
     blackArrowColor: currentThemeColors.blackArrowColor,
   });
+
+  const [lastClickedSquare, setLastClickedSquare] = useState<Square | null>(null);
+
+  const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
+    const clickedSquare = square as Square;
+    if (clickedSquare === lastClickedSquare && arrows.arrows.length > 0) {
+      arrows.clearArrows();
+      setLastClickedSquare(null);
+    } else {
+      arrows.handleSquareRightClick({ square });
+      setLastClickedSquare(clickedSquare);
+    }
+  };
 
   const handleMoveComplete = () => {
     if (drillState.active) {
@@ -96,7 +112,7 @@ const App = () => {
           }
           onPieceDrop={handlePieceDrop}
           onSquareClick={handleSquareClick}
-          onSquareRightClick={arrows.handleSquareRightClick}
+          onSquareRightClick={handleSquareRightClick}
           puzzleAttempts={puzzleAttempts}
           rating={rating}
           lastPuzzleResult={lastPuzzleResult}
