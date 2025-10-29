@@ -1,4 +1,4 @@
-import { Color as PieceColor } from 'chess.js';
+import { Color as PieceColor, Square } from 'chess.js';
 import { PlayerColor } from '../types/drill';
 
 /**
@@ -7,7 +7,7 @@ import { PlayerColor } from '../types/drill';
 export const invertColor = (color: PieceColor): PieceColor =>
   color === 'w' ? 'b' : 'w';
 
-export const isBackRank = (square: string): boolean =>
+export const isBackRank = (square: Square): boolean =>
   square[1] === '8' || square[1] === '1';
 
 /**

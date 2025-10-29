@@ -7,7 +7,7 @@ import { invertColor } from '../utils/chessPieceUtils';
 
 export const useArrows = () => {
   const [arrows, setArrows] = useState<Arrow[]>([]);
-  const [lastClickedSquare, setLastClickedSquare] = useState<string | null>(null);
+  const [lastClickedSquare, setLastClickedSquare] = useState<Square | null>(null);
 
   const clearArrows = () => {
     setArrows([]);
@@ -19,7 +19,7 @@ export const useArrows = () => {
   };
 
   const showAttackersForSquare = (
-    square: string,
+    square: Square,
     getAttackers: (square: Square, color: PieceColor) => Square[],
     whiteArrowColor: string,
     blackArrowColor: string
@@ -29,12 +29,12 @@ export const useArrows = () => {
     } else {
       const newArrows: Arrow[] = [];
 
-      const whiteAttackers = getAttackers(square as Square, 'w');
+      const whiteAttackers = getAttackers(square, 'w');
       newArrows.push(
         ...createArrowsFromAttackers(whiteAttackers, square, whiteArrowColor)
       );
 
-      const blackAttackers = getAttackers(square as Square, 'b');
+      const blackAttackers = getAttackers(square, 'b');
       newArrows.push(
         ...createArrowsFromAttackers(blackAttackers, square, blackArrowColor)
       );

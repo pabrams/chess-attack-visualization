@@ -5,8 +5,8 @@ import { Square, Color } from 'chess.js';
  * Creates a single arrow from one square to another
  */
 const createArrow = (
-  fromSquare: string,
-  toSquare: string,
+  fromSquare: Square,
+  toSquare: Square,
   color: string
 ): Arrow => ({
   startSquare: fromSquare,
@@ -19,11 +19,11 @@ const createArrow = (
  */
 export const createArrowsFromAttackers = (
   attackerSquares: Square[],
-  targetSquare: string,
+  targetSquare: Square,
   arrowColor: string
 ): Arrow[] =>
   attackerSquares.map(attackerSquare =>
-    createArrow(attackerSquare as string, targetSquare, arrowColor)
+    createArrow(attackerSquare, targetSquare, arrowColor)
   );
 
 /**
@@ -37,10 +37,10 @@ export const createArrowsFromAttackers = (
  * Does NOT show arrows to squares with the king's own pieces
  */
 export const createArrowsForSquaresAroundTarget = (
-  targetSquares: string[],
+  targetSquares: Square[],
   getAttackers: (square: Square, color: Color) => Square[],
   attackingColor: Color,
-  getPieceAt: (square: string) => any,
+  getPieceAt: (square: Square) => any,
   arrowColor: string
 ): Arrow[] => {
   const arrows: Arrow[] = [];
@@ -48,7 +48,7 @@ export const createArrowsForSquaresAroundTarget = (
   for (const square of targetSquares) {
     const piece = getPieceAt(square);
     if (!piece || piece.color === attackingColor) {
-      const attackers = getAttackers(square as Square, attackingColor);
+      const attackers = getAttackers(square, attackingColor);
       arrows.push(...createArrowsFromAttackers(attackers, square, arrowColor));
     }
   }

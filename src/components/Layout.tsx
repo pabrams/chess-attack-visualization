@@ -1,4 +1,5 @@
 import React from 'react';
+import { Square } from 'chess.js';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow } from '../types/arrows';
 import { PuzzleAttempt, PlayerColor } from '../types/drill';
@@ -9,10 +10,10 @@ import styles from './Layout.module.css';
 interface LayoutProps {
   chessPosition: string;
   arrows: Arrow[];
-  sourceSquare: string | null;
-  targetSquare: string | null;
-  selectedSquare: string | null;
-  legalMoves: string[];
+  sourceSquare: Square | null;
+  targetSquare: Square | null;
+  selectedSquare: Square | null;
+  legalMoves: Square[];
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
   onSquareClick: (args: SquareHandlerArgs) => void;
   onSquareRightClick: (args: SquareHandlerArgs) => void;

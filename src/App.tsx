@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
-import { Color } from 'chess.js';
+import { Color, Square } from 'chess.js';
 import { useChessGame } from './hooks/useChessGame';
 import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
@@ -26,24 +26,24 @@ const App = () => {
   });
 
   const [pendingPromotion, setPendingPromotion] = useState<{
-    sourceSquare: string;
-    targetSquare: string;
+    sourceSquare: Square;
+    targetSquare: Square;
     pieceColor: Color;
   } | null>(null);
 
-  const [selectedSquare, setSelectedSquare] = useState<string | null>(null);
+  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const legalMoves = selectedSquare ? chessGame.getLegalMoves(selectedSquare) : [];
 
   const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
     arrows.showAttackersForSquare(
-      square,
+      square as Square,
       chessGame.getAttackers,
       currentThemeColors.whiteArrowColor,
       currentThemeColors.blackArrowColor
     );
   };
 
-  const isPawnPromotion = (sourceSquare: string, targetSquare: string): boolean => {
+  const isPawnPromotion = (sourceSquare: Square, targetSquare: Square): boolean => {
     const piece = chessGame.getPieceAt(sourceSquare);
     if (!piece) return false;
 
@@ -51,7 +51,7 @@ const App = () => {
     return isPawn && isBackRank(targetSquare);
   };
 
-  const attemptMove = (sourceSquare: string, targetSquare: string): boolean => {
+  const attemptMove = (sourceSquare: Square, targetSquare: Square): boolean => {
     if (isPawnPromotion(sourceSquare, targetSquare)) {
       const piece = chessGame.getPieceAt(sourceSquare)!;
       setPendingPromotion({ sourceSquare, targetSquare, pieceColor: piece.color });
@@ -66,14 +66,14 @@ const App = () => {
     return false;
   };
 
-  const selectPieceForMove = (square: string) => {
+  const selectPieceForMove = (square: Square) => {
     const piece = chessGame.getPieceAt(square);
     if (piece) {
       setSelectedSquare(square);
     }
   };
 
-  const executeSelectedMove = (targetSquare: string) => {
+  const executeSelectedMove = (targetSquare: Square) => {
     if (!selectedSquare) return;
 
     const sourceSquare = selectedSquare;
@@ -86,9 +86,9 @@ const App = () => {
 
   const handleSquareClick = ({ square }: SquareHandlerArgs) => {
     if (!selectedSquare) {
-      selectPieceForMove(square);
+      selectPieceForMove(square as Square);
     } else {
-      executeSelectedMove(square);
+      executeSelectedMove(square as Square);
     }
   };
 
@@ -97,7 +97,7 @@ const App = () => {
       return false;
     }
 
-    return attemptMove(sourceSquare, targetSquare);
+    return attemptMove(sourceSquare as Square, targetSquare as Square);
   };
 
   const handlePromotionSelect = (promotionPiece: 'q' | 'r' | 'b' | 'n') => {

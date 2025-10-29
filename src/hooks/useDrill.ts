@@ -1,4 +1,5 @@
 import { useReducer, useCallback, useEffect, useRef } from 'react';
+import { Square } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
 import { PuzzleAttempt, PlayerColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
@@ -320,7 +321,7 @@ export const useDrill = ({ chessGame, rating, addPoints }: UseDrillProps) => {
     return move.lan === expectedMove;
   };
 
-  const handlePuzzleMove = useCallback((sourceSquare: string, targetSquare: string, promotion?: string) => {
+  const handlePuzzleMove = useCallback((sourceSquare: Square, targetSquare: Square, promotion?: string) => {
 
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
 

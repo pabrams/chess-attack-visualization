@@ -19,7 +19,7 @@ export const useChessGame = () => {
     };
   };
 
-  const makeMove = (sourceSquare: string, targetSquare: string, promotion?: string) => {
+  const makeMove = (sourceSquare: Square, targetSquare: Square, promotion?: string) => {
     try {
       const moveOptions: any = {
         from: sourceSquare,
@@ -71,12 +71,12 @@ export const useChessGame = () => {
     return chessGameRef.current.attackers(square, color, true);
   };
 
-  const getPieceAt = (square: string) => {
-    return chessGameRef.current.get(square as Square);
+  const getPieceAt = (square: Square) => {
+    return chessGameRef.current.get(square);
   };
 
-  const getLegalMoves = (square: string): string[] => {
-    const moves = chessGameRef.current.moves({ square: square as Square, verbose: true });
+  const getLegalMoves = (square: Square): Square[] => {
+    const moves = chessGameRef.current.moves({ square, verbose: true });
     return moves.map(move => move.to);
   };
 
