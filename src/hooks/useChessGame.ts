@@ -40,7 +40,7 @@ export const useChessGame = () => {
       setMoveHistory(prev => [...prev, move]);
       return move;
     } catch (e) {
-      console.error(e);
+      console.debug('Invalid move attempted:', e);
       return null;
     }
   };
