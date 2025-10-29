@@ -7,6 +7,7 @@ import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
 import { useMoveHandler } from './hooks/useMoveHandler';
+import { usePuzzleResults } from './hooks/usePuzzleResults';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
 import { LoadingOverlay } from './components/LoadingOverlay';
@@ -18,10 +19,15 @@ const App = () => {
   const { theme, currentThemeColors, toggleTheme } = useThemeContext();
   const { rating, addPoints } = useRating();
 
-  const { drillState, puzzleAttempts, lastPuzzleResult, handlePuzzleMove } = useDrill({
+  const { attempts, lastResult, recordResult } = usePuzzleResults({
+    rating,
+    onPointsAdded: addPoints,
+  });
+
+  const { drillState, puzzleState, handlePuzzleMove } = useDrill({
     chessGame,
     rating,
-    addPoints,
+    onResultRecorded: recordResult,
   });
 
   const arrows = useArrows({
@@ -32,13 +38,15 @@ const App = () => {
 
   const [lastClickedSquare, setLastClickedSquare] = useState<Square | null>(null);
 
-  const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
-    const clickedSquare = square as Square;
+  const handleSquareRightClick = (args: SquareHandlerArgs) => {
+    if (!args.square) return;
+
+    const clickedSquare = args.square as Square;
     if (clickedSquare === lastClickedSquare && arrows.arrows.length > 0) {
       arrows.clearArrows();
       setLastClickedSquare(null);
     } else {
-      arrows.handleSquareRightClick({ square });
+      arrows.handleSquareRightClick(args);
       setLastClickedSquare(clickedSquare);
     }
   };
@@ -113,9 +121,9 @@ const App = () => {
           onPieceDrop={handlePieceDrop}
           onSquareClick={handleSquareClick}
           onSquareRightClick={handleSquareRightClick}
-          puzzleAttempts={puzzleAttempts}
+          puzzleAttempts={attempts}
           rating={rating}
-          lastPuzzleResult={lastPuzzleResult}
+          lastPuzzleResult={lastResult}
           userColor={drillState.userColor}
         />
       </div>
