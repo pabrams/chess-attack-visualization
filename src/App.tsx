@@ -1,12 +1,9 @@
-import { useState } from 'react';
-import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
-import { Color, Square } from 'chess.js';
 import { useChessGame } from './hooks/useChessGame';
 import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
-import { isBackRank } from './utils/chessPieceUtils';
+import { useMoveHandler } from './hooks/useMoveHandler';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
 import { LoadingOverlay } from './components/LoadingOverlay';
@@ -16,7 +13,6 @@ import './App.css';
 const App = () => {
   const chessGame = useChessGame();
   const { theme, currentThemeColors, toggleTheme } = useThemeContext();
-  const arrows = useArrows();
   const { rating, addPoints } = useRating();
 
   const { drillState, puzzleAttempts, lastPuzzleResult, handlePuzzleMove } = useDrill({
@@ -25,105 +21,15 @@ const App = () => {
     addPoints,
   });
 
-  const [pendingPromotion, setPendingPromotion] = useState<{
-    sourceSquare: Square;
-    targetSquare: Square;
-    pieceColor: Color;
-  } | null>(null);
-
-  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
-  const [lastClickedSquare, setLastClickedSquare] = useState<Square | null>(null);
-  const legalMoves = selectedSquare ? chessGame.getLegalMoves(selectedSquare) : [];
-
-  const handleSquareRightClick = ({ square }: SquareHandlerArgs) => {
-    square = square as Square;
-    if (square === lastClickedSquare && arrows.arrows.length > 0) {
-      arrows.clearArrows();
-      setLastClickedSquare(null);
-    } else {
-      arrows.showAttackersForSquare(
-        square,
-        chessGame.getAttackers,
-        currentThemeColors.whiteArrowColor,
-        currentThemeColors.blackArrowColor
-      );
-      setLastClickedSquare(square);
-    }
-  };
-
-  const isPawnPromotion = (sourceSquare: Square, targetSquare: Square): boolean => {
-    const piece = chessGame.getPieceAt(sourceSquare);
-    if (!piece) return false;
-
-    const isPawn = piece.type === 'p';
-    return isPawn && isBackRank(targetSquare);
-  };
-
-  const attemptMove = (sourceSquare: Square, targetSquare: Square): boolean => {
-    if (isPawnPromotion(sourceSquare, targetSquare)) {
-      const piece = chessGame.getPieceAt(sourceSquare)!;
-      setPendingPromotion({ sourceSquare, targetSquare, pieceColor: piece.color });
-      return false;
-    }
-
-    const move = handlePuzzleMove(sourceSquare, targetSquare);
-    if (move) {
-      handleMoveComplete();
-      return true;
-    }
-    return false;
-  };
-
-  const selectPieceForMove = (square: Square) => {
-    const piece = chessGame.getPieceAt(square);
-    if (piece) {
-      setSelectedSquare(square);
-    }
-  };
-
-  const executeSelectedMove = (targetSquare: Square) => {
-    if (!selectedSquare) return;
-
-    const sourceSquare = selectedSquare;
-    setSelectedSquare(null);
-
-    if (sourceSquare === targetSquare) return;
-
-    attemptMove(sourceSquare, targetSquare);
-  };
-
-  const handleSquareClick = ({ square }: SquareHandlerArgs) => {
-    if (!selectedSquare) {
-      selectPieceForMove(square as Square);
-    } else {
-      executeSelectedMove(square as Square);
-    }
-  };
-
-  const handlePieceDrop = ({ sourceSquare, targetSquare }: PieceDropHandlerArgs) => {
-    if (!targetSquare) {
-      return false;
-    }
-
-    return attemptMove(sourceSquare as Square, targetSquare as Square);
-  };
-
-  const handlePromotionSelect = (promotionPiece: 'q' | 'r' | 'b' | 'n') => {
-    if (!pendingPromotion) return;
-
-    const { sourceSquare, targetSquare } = pendingPromotion;
-    const move = handlePuzzleMove(sourceSquare, targetSquare, promotionPiece);
-
-    setPendingPromotion(null);
-
-    if (move) {
-      handleMoveComplete();
-    }
-  };
+  const arrows = useArrows({
+    chessGame,
+    whiteArrowColor: currentThemeColors.whiteArrowColor,
+    blackArrowColor: currentThemeColors.blackArrowColor,
+  });
 
   const handleMoveComplete = () => {
     if (drillState.active) {
-      arrows.showCheckmaters(chessGame, currentThemeColors);
+      arrows.showCheckmaters();
       setTimeout(() => {
         arrows.clearArrows();
       }, 5000);
@@ -131,6 +37,19 @@ const App = () => {
       arrows.clearArrows();
     }
   };
+
+  const {
+    selectedSquare,
+    legalMoves,
+    pendingPromotion,
+    handleSquareClick,
+    handlePieceDrop,
+    handlePromotionSelect,
+  } = useMoveHandler({
+    chessGame,
+    handlePuzzleMove,
+    onMoveComplete: handleMoveComplete,
+  });
 
   const lastMove = chessGame.getLastMove();
   const sourceSquare = lastMove ? lastMove.from : null;
@@ -177,7 +96,7 @@ const App = () => {
           }
           onPieceDrop={handlePieceDrop}
           onSquareClick={handleSquareClick}
-          onSquareRightClick={handleSquareRightClick}
+          onSquareRightClick={arrows.handleSquareRightClick}
           puzzleAttempts={puzzleAttempts}
           rating={rating}
           lastPuzzleResult={lastPuzzleResult}
