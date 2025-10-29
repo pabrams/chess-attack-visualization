@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ThemeColors } from '../types/theme';
 
 const LIGHT_THEME_COLORS: ThemeColors = {
@@ -25,7 +25,10 @@ export const useTheme = () => {
     return savedTheme || 'dark';
   });
 
-  const currentThemeColors = theme === 'dark' ? DARK_THEME_COLORS : LIGHT_THEME_COLORS;
+  const currentThemeColors = useMemo(
+    () => theme === 'dark' ? DARK_THEME_COLORS : LIGHT_THEME_COLORS,
+    [theme]
+  );
 
   useEffect(() => {
     localStorage.setItem('theme', theme);
