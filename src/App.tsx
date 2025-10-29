@@ -10,7 +10,6 @@ import { useMoveHandler } from './hooks/useMoveHandler';
 import { usePuzzleResults } from './hooks/usePuzzleResults';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
-import { LoadingOverlay } from './components/LoadingOverlay';
 import { PromotionDialog } from './components/PromotionDialog';
 import './App.css';
 
@@ -91,8 +90,6 @@ const App = () => {
         theme={theme}
         onToggleTheme={toggleTheme}
       />
-
-      {drillState.loading && <LoadingOverlay />}
 
       {pendingPromotion && (
         <PromotionDialog

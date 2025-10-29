@@ -50,7 +50,6 @@ const convertToLichessPuzzleFormat = (rawPuzzles: RawPuzzle[]): LichessPuzzle[] 
 export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps) => {
   // Drill state
   const [active, setActive] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [userColor, setUserColor] = useState<UserColor>('white');
   const [puzzleQueue, setPuzzleQueue] = useState<LichessPuzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<LichessPuzzle | null>(null);
@@ -153,7 +152,6 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
       const newUserColor = selectRandomUserColor();
       setUserColor(newUserColor);
       setActive(true);
-      setLoading(true);
 
       try {
         const playerLevel = getLevelFromRating(initialRatingRef.current);
@@ -170,11 +168,9 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
         const puzzles = convertToLichessPuzzleFormat(sampled);
 
         setPuzzleQueue(puzzles);
-        setLoading(false);
         loadNextPuzzle();
       } catch (error) {
         console.error('Error loading puzzles:', error);
-        setLoading(false);
         setActive(false);
       }
     };
@@ -208,7 +204,6 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
   return {
     drillState: {
       active,
-      loading,
       puzzleQueue,
       userColor,
       currentPuzzle,
