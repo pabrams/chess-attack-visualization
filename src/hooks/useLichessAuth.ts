@@ -11,20 +11,17 @@ export const useLichessAuth = () => {
 
   useEffect(() => {
     const initAuth = async () => {
-
       try {
         const accessToken = await handleRedirect();
-        if (accessToken) {
+        const tokenToUse = accessToken || localStorage.getItem('lichessToken');
+
+        if (tokenToUse && accessToken) {
           localStorage.setItem('lichessToken', accessToken);
-          setToken(accessToken);
-        } else {
-          const storedToken = localStorage.getItem('lichessToken');
-          if (storedToken) {
-            setToken(storedToken);
-          }
         }
+
+        setToken(tokenToUse);
       } catch (error) {
-        console.error('Error in initAuth:', error);
+        console.error('Error initializing auth:', error);
       } finally {
         setLoading(false);
       }
@@ -40,25 +37,29 @@ export const useLichessAuth = () => {
   }, []);
 
   useEffect(() => {
+    if (!token) {
+      setUser(null);
+      return;
+    }
+
     const fetchUser = async () => {
-      if (token) {
-        try {
-          const response = await fetch(`${LICHESS_HOST}/api/account`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setUser(userData);
-          } else {
-            // Token might be expired, log out
-            logout();
-          }
-        } catch (error) {
-          console.error('Failed to fetch user data', error);
+      try {
+        const response = await fetch(`${LICHESS_HOST}/api/account`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
           logout();
+          return;
         }
+
+        const userData = await response.json();
+        setUser(userData);
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        logout();
       }
     };
 
