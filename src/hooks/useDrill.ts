@@ -5,18 +5,9 @@ import { UserColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
 import { getLevelFromRating } from '../utils/ratingCalculation';
 import { sampleArray } from '../utils/arrayUtils';
+import { convertToLichessPuzzleFormat, type RawPuzzle } from '../utils/puzzleUtils';
 
 export const SOLVE_COMPLETION_DELAY_MS = 1500;
-
-interface RawPuzzle {
-  id: string;
-  rating: number;
-  themes: string[];
-  fen: string;
-  solution: string;
-  setupMove: string;
-  gameUrl: string;
-}
 
 interface UseDrillProps {
   chessGame: ChessGame;
@@ -26,25 +17,6 @@ interface UseDrillProps {
 
 const selectRandomUserColor = (): UserColor => {
   return Math.random() < 0.5 ? 'white' : 'black';
-};
-
-const convertToLichessPuzzleFormat = (rawPuzzles: RawPuzzle[]): LichessPuzzle[] => {
-  return rawPuzzles.map((p: RawPuzzle) => ({
-    game: {
-      pgn: '',
-      id: p.gameUrl.split('/')[3] || p.id,
-    },
-    puzzle: {
-      id: p.id,
-      initialPly: 0,
-      plays: 0,
-      rating: p.rating,
-      solution: [p.solution],
-      themes: p.themes,
-    },
-    _fen: p.fen,
-    _setupMove: p.setupMove,
-  } as LichessPuzzle & { _fen?: string; _setupMove?: string }));
 };
 
 interface PuzzleState {
