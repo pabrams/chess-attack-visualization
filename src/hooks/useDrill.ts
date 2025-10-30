@@ -164,7 +164,6 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
         const sampled = sampleArray(data.puzzles, 200);
         const puzzles = convertToLichessPuzzleFormat(sampled);
 
-        setPuzzleQueue(puzzles);
         if (puzzles.length > 0) {
           setCurrentPuzzle(puzzles[0]);
           setPuzzleQueue(puzzles.slice(1));
