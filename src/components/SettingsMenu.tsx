@@ -10,14 +10,7 @@ interface SettingsMenuProps {
   username?: string;
 }
 
-export const SettingsMenu: React.FC<SettingsMenuProps> = ({
-  theme,
-  onToggleTheme,
-  isLoggedIn,
-  onLogin,
-  onLogout,
-  username,
-}) => {
+export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -26,7 +19,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <button className={`${styles.gearButton} ${theme === 'light' ? styles.gearButtonLight : ''}`} aria-label="Settings">
+      <button className={`${styles.gearButton} ${props.theme === 'light' ? styles.gearButtonLight : ''}`} aria-label="Settings">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
           <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24" />
@@ -34,16 +27,16 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
       </button>
 
       {isOpen && (
-        <div className={`${styles.dropdown} ${theme === 'light' ? styles.dropdownLight : ''}`}>
+        <div className={`${styles.dropdown} ${props.theme === 'light' ? styles.dropdownLight : ''}`}>
           <button
-            className={`${styles.menuButton} ${styles.themeButton} ${theme === 'light' ? `${styles.menuButtonLight} ${styles.themeButtonLight}` : ''}`}
+            className={`${styles.menuButton} ${styles.themeButton} ${props.theme === 'light' ? `${styles.menuButtonLight} ${styles.themeButtonLight}` : ''}`}
             onClick={() => {
               setIsOpen(false);
-              onToggleTheme();
+              props.onToggleTheme();
             }}
           >
             <span className={styles.icon}>
-              {theme === 'dark' ? (
+              {props.theme === 'dark' ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="5" />
                   <line x1="12" y1="1" x2="12" y2="3" />
@@ -61,22 +54,22 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
                 </svg>
               )}
             </span>
-            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+            <span>{props.theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
 
           <button
-            className={`${styles.menuButton} ${theme === 'light' ? styles.menuButtonLight : ''}`}
+            className={`${styles.menuButton} ${props.theme === 'light' ? styles.menuButtonLight : ''}`}
             onClick={() => {
               setIsOpen(false);
-              if (isLoggedIn) {
-                onLogout();
+              if (props.isLoggedIn) {
+                props.onLogout();
               } else {
-                onLogin();
+                props.onLogin();
               }
             }}
           >
             <span className={styles.icon}>
-              {isLoggedIn ? (
+              {props.isLoggedIn ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                   <polyline points="16 17 21 12 16 7" />
@@ -91,7 +84,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
               )}
             </span>
             <span>
-              {isLoggedIn ? (username ? `Logout (${username})` : 'Logout') : 'Login with Lichess'}
+              {props.isLoggedIn ? (props.username ? `Logout (${props.username})` : 'Logout') : 'Login with Lichess'}
             </span>
           </button>
         </div>

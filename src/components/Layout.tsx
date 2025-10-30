@@ -21,41 +21,29 @@ interface LayoutProps {
   userColor: UserColor;
 }
 
-export const Layout: React.FC<LayoutProps> = ({
-  fen,
-  arrows,
-  lastMove,
-  pendingMove,
-  onPieceDrop,
-  onSquareClick,
-  onSquareRightClick,
-  puzzleAttempts,
-  rating,
-  lastPuzzleResult,
-  userColor,
-}) => {
+export const Layout: React.FC<LayoutProps> = (props) => {
   return (
     <div className={styles.layout}>
       <div className={styles.boardResults}>
         <div className={styles.board}>
           <ChessBoard
-            fen={fen}
-            arrows={arrows}
-            lastMove={lastMove}
-            pendingMove={pendingMove}
-            onPieceDrop={onPieceDrop}
-            onSquareClick={onSquareClick}
-            onSquareRightClick={onSquareRightClick}
-            boardOrientation={userColor}
+            fen={props.fen}
+            arrows={props.arrows}
+            lastMove={props.lastMove}
+            pendingMove={props.pendingMove}
+            onPieceDrop={props.onPieceDrop}
+            onSquareClick={props.onSquareClick}
+            onSquareRightClick={props.onSquareRightClick}
+            boardOrientation={props.userColor}
           />
         </div>
 
         <div className={styles.infoPanels}>
           <InfoPanelLayout
-            attempts={puzzleAttempts}
-            rating={rating}
-            lastResult={lastPuzzleResult}
-            userColor={userColor}
+            attempts={props.puzzleAttempts}
+            rating={props.rating}
+            lastResult={props.lastPuzzleResult}
+            userColor={props.userColor}
           />
         </div>
       </div>

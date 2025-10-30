@@ -17,20 +17,11 @@ interface ChessBoardProps {
   boardOrientation?: UserColor;
 }
 
-export const ChessBoard: React.FC<ChessBoardProps> = ({
-  fen,
-  arrows,
-  lastMove,
-  pendingMove,
-  onPieceDrop,
-  onSquareClick,
-  onSquareRightClick,
-  boardOrientation = 'white',
-}) => {
+export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   const { theme, currentThemeColors } = useThemeContext();
   const customPieces = getCustomPieces(theme);
 
-  const legalMoveStyles = pendingMove ? pendingMove.legalTargets.reduce((styles, square) => {
+  const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
     styles[square] = {
       background: 'radial-gradient(circle, rgba(0, 0, 0, 0.3) 25%, transparent 25%)',
       borderRadius: '50%',
@@ -39,13 +30,13 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
   }, {} as Record<string, any>) : {};
 
   const chessboardOptions = {
-    onPieceDrop,
-    onSquareClick,
-    onSquareRightClick,
-    arrows,
+    onPieceDrop: props.onPieceDrop,
+    onSquareClick: props.onSquareClick,
+    onSquareRightClick: props.onSquareRightClick,
+    arrows: props.arrows,
     id: 'chessboard-options',
-    position: fen,
-    boardOrientation,
+    position: props.fen,
+    boardOrientation: props.boardOrientation ?? 'white',
     ...(customPieces && { pieces: customPieces }),
     allowDrawingArrows: false,
     arrowOptions: {
@@ -69,11 +60,11 @@ export const ChessBoard: React.FC<ChessBoardProps> = ({
     },
     squareStyles: {
       ...legalMoveStyles,
-      ...(lastMove ? {
-        [lastMove.from]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
-        [lastMove.to]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
+      ...(props.lastMove ? {
+        [props.lastMove.from]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
+        [props.lastMove.to]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
       } : {}),
-      ...(pendingMove ? { [pendingMove.sourceSquare]: { backgroundColor: 'rgba(0, 255, 0, 0.5)' } } : {}),
+      ...(props.pendingMove ? { [props.pendingMove.sourceSquare]: { backgroundColor: 'rgba(0, 255, 0, 0.5)' } } : {}),
     },
   };
 

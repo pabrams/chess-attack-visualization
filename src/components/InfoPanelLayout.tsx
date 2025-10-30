@@ -12,7 +12,7 @@ interface InfoPanelLayoutProps {
   userColor: UserColor;
 }
 
-export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, rating, lastResult, userColor }) => {
+export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
   const { theme, currentThemeColors } = useThemeContext();
   const {
     sortedAttempts,
@@ -22,21 +22,21 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = ({ attempts, rati
     succeededCount,
     successRatio,
     handleLoadMore,
-  } = usePuzzleStats(attempts);
+  } = usePuzzleStats(props.attempts);
 
   return (
     <div className={styles.wrapper}>
       <fieldset className={styles.playerInfoContainer}>
         <legend>Monkey Drill Info</legend>
         <div className={styles.moveInstruction}>
-          Move the <span style={{ color: userColor === 'white' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor, fontWeight: 'bold' }}>
-            {userColor}
+          Move the <span style={{ color: props.userColor === 'white' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor, fontWeight: 'bold' }}>
+            {props.userColor}
           </span> pieces
         </div>
         <div className={styles.playerInfoContent}>
           <div className={styles.ratingSection}>
             <span className={styles.ratingLabel}>Rating</span>
-            <span className={`${styles.ratingValue} ${lastResult === true ? styles.ratingSuccess : lastResult === false ? styles.ratingFailure : ''}`}>{rating}</span>
+            <span className={`${styles.ratingValue} ${props.lastResult === true ? styles.ratingSuccess : props.lastResult === false ? styles.ratingFailure : ''}`}>{props.rating}</span>
           </div>
           <div className={styles.puzzleStats}>
             <span className={styles.puzzleStatsLabel}>Success Rate</span>

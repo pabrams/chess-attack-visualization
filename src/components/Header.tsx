@@ -9,14 +9,14 @@ interface HeaderProps {
   onToggleTheme: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ theme, onToggleTheme }) => {
+const Header: React.FC<HeaderProps> = (props) => {
   const { user, loading, logout } = useLichessAuth();
 
   return (
-    <header className={`${styles.header} ${theme === 'light' ? styles.headerLight : ''}`}>
+    <header className={`${styles.header} ${props.theme === 'light' ? styles.headerLight : ''}`}>
       <div className={styles.titleSection}>
         <img src="monkey.jpeg" alt="Monkey" className={styles.monkeyImage} />
-        <h1 className={`${styles.title} ${theme === 'light' ? styles.titleLight : ''}`}>Monkey Drill</h1>
+        <h1 className={`${styles.title} ${props.theme === 'light' ? styles.titleLight : ''}`}>Monkey Drill</h1>
       </div>
 
       <div className={styles.actions}>
@@ -25,8 +25,8 @@ const Header: React.FC<HeaderProps> = ({ theme, onToggleTheme }) => {
           <div className={styles.loading}>Loading...</div>
         ) : (
           <SettingsMenu
-            theme={theme}
-            onToggleTheme={onToggleTheme}
+            theme={props.theme}
+            onToggleTheme={props.onToggleTheme}
             isLoggedIn={!!user}
             onLogin={login}
             onLogout={logout}
