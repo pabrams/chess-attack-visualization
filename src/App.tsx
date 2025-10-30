@@ -51,11 +51,7 @@ const App = () => {
   };
 
   const handleMoveComplete = () => {
-    if (drillState.active) {
-      arrows.showCheckmaters();
-    } else {
-      arrows.clearArrows();
-    }
+    arrows.showCheckmaters();
   };
 
   useEffect(() => {
