@@ -47,25 +47,33 @@ const convertToLichessPuzzleFormat = (rawPuzzles: RawPuzzle[]): LichessPuzzle[] 
   } as LichessPuzzle & { _fen?: string; _setupMove?: string }));
 };
 
+interface PuzzleState {
+  active: boolean;
+  solution: string[];
+  completed: boolean;
+  failed: boolean;
+  startTime: number | undefined;
+}
+
+const initialPuzzleState: PuzzleState = {
+  active: false,
+  solution: [],
+  completed: false,
+  failed: false,
+  startTime: undefined,
+};
+
 export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps) => {
   const [userColor, setUserColor] = useState<UserColor>('white');
   const [puzzleQueue, setPuzzleQueue] = useState<LichessPuzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<LichessPuzzle | null>(null);
-  const [puzzleActive, setPuzzleActive] = useState(false);
-  const [puzzleSolution, setPuzzleSolution] = useState<string[]>([]);
-  const [puzzleCompleted, setPuzzleCompleted] = useState(false);
-  const [puzzleFailed, setPuzzleFailed] = useState(false);
-  const [puzzleStartTime, setPuzzleStartTime] = useState<number | undefined>();
+  const [puzzleState, setPuzzleState] = useState<PuzzleState>(initialPuzzleState);
 
   const initialRatingRef = useRef(rating);
   const prevPuzzleRef = useRef<LichessPuzzle | null>(null);
 
   const resetPuzzleState = useCallback(() => {
-    setPuzzleActive(false);
-    setPuzzleSolution([]);
-    setPuzzleCompleted(false);
-    setPuzzleFailed(false);
-    setPuzzleStartTime(undefined);
+    setPuzzleState(initialPuzzleState);
   }, []);
 
   const initializePuzzleFromFen = useCallback((puzzle: LichessPuzzle & { _setupMove?: string; _fen?: string }) => {
@@ -92,11 +100,13 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
           const setupSuccess = chessGame.loadPgn(pgn);
 
           if (setupSuccess) {
-            setPuzzleActive(true);
-            setPuzzleSolution(puzzle.puzzle.solution);
-            setPuzzleCompleted(false);
-            setPuzzleFailed(false);
-            setPuzzleStartTime(Date.now());
+            setPuzzleState({
+              active: true,
+              solution: puzzle.puzzle.solution,
+              completed: false,
+              failed: false,
+              startTime: Date.now(),
+            });
           }
         }
       }, 600);
@@ -112,14 +122,14 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
 
   // Handle puzzle completion/failure: record result and load next puzzle
   useEffect(() => {
-    if (!currentPuzzle || (!puzzleCompleted && !puzzleFailed)) {
+    if (!currentPuzzle || (!puzzleState.completed && !puzzleState.failed)) {
       return;
     }
 
     const handlePuzzleEnd = () => {
       const puzzleRating = currentPuzzle.puzzle.rating;
       const puzzleId = currentPuzzle.puzzle.id;
-      const success = puzzleCompleted;
+      const success = puzzleState.completed;
 
       onResultRecorded(success, puzzleRating, puzzleId);
       resetPuzzleState();
@@ -136,11 +146,11 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
       });
     };
 
-    const delayMs = puzzleCompleted ? SOLVE_COMPLETION_DELAY_MS : 0;
+    const delayMs = puzzleState.completed ? SOLVE_COMPLETION_DELAY_MS : 0;
     const timer = setTimeout(handlePuzzleEnd, delayMs);
 
     return () => clearTimeout(timer);
-  }, [puzzleCompleted, puzzleFailed, currentPuzzle, onResultRecorded, resetPuzzleState, puzzleQueue]);
+  }, [puzzleState.completed, puzzleState.failed, currentPuzzle, onResultRecorded, resetPuzzleState, puzzleQueue]);
 
   // Initialize drill on mount
   useEffect(() => {
@@ -185,17 +195,17 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
       return move;
     }
 
-    const expectedMove = puzzleSolution[0];
+    const expectedMove = puzzleState.solution[0];
 
     if (!isMoveCorrect(move, expectedMove)) {
       chessGame.undoLastMove();
-      setPuzzleFailed(true);
+      setPuzzleState(prev => ({ ...prev, failed: true }));
       return null;
     }
 
-    setPuzzleCompleted(true);
+    setPuzzleState(prev => ({ ...prev, completed: true }));
     return move;
-  }, [puzzleSolution, chessGame]);
+  }, [puzzleState.solution, chessGame]);
 
   return {
     drillState: {
@@ -203,13 +213,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
       userColor,
       currentPuzzle,
     },
-    puzzleState: {
-      active: puzzleActive,
-      solution: puzzleSolution,
-      completed: puzzleCompleted,
-      failed: puzzleFailed,
-      puzzleStartTime,
-    },
+    puzzleState,
     handlePuzzleMove,
   };
 };
