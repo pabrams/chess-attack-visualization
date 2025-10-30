@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Square } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
@@ -23,12 +23,6 @@ const App = () => {
     onPointsAdded: addPoints,
   });
 
-  const { drillState, puzzleState, handlePuzzleMove } = useDrill({
-    chessGame,
-    rating,
-    onResultRecorded: recordResult,
-  });
-
   const arrows = useArrows({
     chessGame,
     whiteArrowColor: currentThemeColors.whiteArrowColor,
@@ -50,18 +44,19 @@ const App = () => {
     }
   };
 
-  const handleMoveComplete = () => {
+  const handlePuzzleResult = useCallback(() => {
     arrows.showCheckmaters();
-  };
+    setTimeout(() => {
+      arrows.clearArrows();
+    }, SOLVE_COMPLETION_DELAY_MS);
+  }, [arrows]);
 
-  useEffect(() => {
-    if (puzzleState.completed || puzzleState.failed) {
-      const timer = setTimeout(() => {
-        arrows.clearArrows();
-      }, SOLVE_COMPLETION_DELAY_MS);
-      return () => clearTimeout(timer);
-    }
-  }, [puzzleState.completed, puzzleState.failed, arrows]);
+  const { drillState, handlePuzzleMove } = useDrill({
+    chessGame,
+    rating,
+    onResultRecorded: recordResult,
+    onPuzzleResult: handlePuzzleResult,
+  });
 
   const {
     selectedSquare,
@@ -73,7 +68,7 @@ const App = () => {
   } = useMoveHandler({
     chessGame,
     handlePuzzleMove,
-    onMoveComplete: handleMoveComplete,
+    onMoveComplete: handlePuzzleResult,
   });
 
   const lastMove = chessGame.getLastMove();

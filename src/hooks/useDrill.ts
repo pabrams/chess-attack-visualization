@@ -7,126 +7,29 @@ import { getLevelFromRating } from '../utils/ratingCalculation';
 import { sampleArray } from '../utils/arrayUtils';
 import { convertToLichessPuzzleFormat, type RawPuzzle } from '../utils/puzzleUtils';
 
-export const SOLVE_COMPLETION_DELAY_MS = 1500;
+export const SOLVE_COMPLETION_DELAY_MS = 1000;
 
 interface UseDrillProps {
   chessGame: ChessGame;
   rating: number;
   onResultRecorded: (success: boolean, puzzleRating: number, puzzleId: string) => void;
+  onPuzzleResult: () => void;
 }
 
 const selectRandomUserColor = (): UserColor => {
   return Math.random() < 0.5 ? 'white' : 'black';
 };
 
-interface PuzzleState {
-  active: boolean;
-  solution: string[];
-  completed: boolean;
-  failed: boolean;
-  startTime: number | undefined;
-}
-
-const initialPuzzleState: PuzzleState = {
-  active: false,
-  solution: [],
-  completed: false,
-  failed: false,
-  startTime: undefined,
-};
-
-export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps) => {
+export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }: UseDrillProps) => {
   const [userColor, setUserColor] = useState<UserColor>('white');
-  const [puzzleQueue, setPuzzleQueue] = useState<LichessPuzzle[]>([]);
+  const [puzzles, setPuzzles] = useState<LichessPuzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<LichessPuzzle | null>(null);
-  const [puzzleState, setPuzzleState] = useState<PuzzleState>(initialPuzzleState);
 
   const initialRatingRef = useRef(rating);
-  const prevPuzzleRef = useRef<LichessPuzzle | null>(null);
 
-  const resetPuzzleState = useCallback(() => {
-    setPuzzleState(initialPuzzleState);
-  }, []);
-
-  const initializePuzzleFromFen = useCallback((puzzle: LichessPuzzle & { _setupMove?: string; _fen?: string }) => {
-    import('chess.js').then(({ Chess }) => {
-      const setupMove = puzzle._setupMove!;
-      const fen = puzzle._fen!;
-
-      const success = chessGame.loadPgn(new Chess(fen).pgn());
-
-      if (!success) {
-        return;
-      }
-
-      setTimeout(() => {
-        const tempChess = new Chess(fen);
-        const from = setupMove.substring(0, 2);
-        const to = setupMove.substring(2, 4);
-        const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
-
-        const move = tempChess.move({ from, to, promotion: promotion as 'q' | 'r' | 'b' | 'n' | undefined });
-
-        if (move) {
-          const pgn = tempChess.pgn();
-          const setupSuccess = chessGame.loadPgn(pgn);
-
-          if (setupSuccess) {
-            setPuzzleState({
-              active: true,
-              solution: puzzle.puzzle.solution,
-              completed: false,
-              failed: false,
-              startTime: Date.now(),
-            });
-          }
-        }
-      }, 600);
-    });
-  }, [chessGame]);
-
+  // Load puzzles on mount
   useEffect(() => {
-    if (currentPuzzle && currentPuzzle !== prevPuzzleRef.current) {
-      prevPuzzleRef.current = currentPuzzle;
-      initializePuzzleFromFen(currentPuzzle as LichessPuzzle & { _setupMove?: string; _fen?: string });
-    }
-  }, [currentPuzzle, initializePuzzleFromFen]);
-
-  // Handle puzzle completion/failure: record result and load next puzzle
-  useEffect(() => {
-    if (!currentPuzzle || (!puzzleState.completed && !puzzleState.failed)) {
-      return;
-    }
-
-    const handlePuzzleEnd = () => {
-      const puzzleRating = currentPuzzle.puzzle.rating;
-      const puzzleId = currentPuzzle.puzzle.id;
-      const success = puzzleState.completed;
-
-      onResultRecorded(success, puzzleRating, puzzleId);
-      resetPuzzleState();
-
-      setPuzzleQueue(queue => {
-        if (queue.length === 0) {
-          console.error('Puzzle queue is empty!');
-          return queue;
-        }
-
-        const [nextPuzzle, ...remainingQueue] = queue;
-        setCurrentPuzzle(nextPuzzle);
-        return remainingQueue;
-      });
-    };
-
-    const delayMs = puzzleState.completed ? SOLVE_COMPLETION_DELAY_MS : 0;
-    const timer = setTimeout(handlePuzzleEnd, delayMs);
-
-    return () => clearTimeout(timer);
-  }, [puzzleState.completed, puzzleState.failed, currentPuzzle, onResultRecorded, resetPuzzleState, puzzleQueue]);
-
-  // Initialize drill on mount
-  useEffect(() => {
-    const startDrill = async () => {
+    const loadPuzzles = async () => {
       const newUserColor = selectRandomUserColor();
       setUserColor(newUserColor);
 
@@ -142,50 +45,89 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
 
         const data = await response.json() as { puzzles: RawPuzzle[] };
         const sampled = sampleArray(data.puzzles, 200);
-        const puzzles = convertToLichessPuzzleFormat(sampled);
+        const converted = convertToLichessPuzzleFormat(sampled);
 
-        if (puzzles.length > 0) {
-          setCurrentPuzzle(puzzles[0]);
-          setPuzzleQueue(puzzles.slice(1));
+        setPuzzles(converted);
+        if (converted.length > 0) {
+          setCurrentPuzzle(converted[0]);
+          loadPuzzleOnBoard(converted[0]);
         }
       } catch (error) {
         console.error('Error loading puzzles:', error);
       }
     };
 
-    startDrill();
+    loadPuzzles();
   }, []);
 
-  const isMoveCorrect = (move: Move, expectedMove: string): boolean => {
-    return move.lan === expectedMove;
-  };
+  const loadPuzzleOnBoard = useCallback((puzzle: LichessPuzzle) => {
+    import('chess.js').then(({ Chess }) => {
+      const setupMove = (puzzle as any)._setupMove;
+      const fen = (puzzle as any)._fen;
+
+      if (!setupMove || !fen) return;
+
+      const success = chessGame.loadPgn(new Chess(fen).pgn());
+      if (!success) return;
+
+      setTimeout(() => {
+        const tempChess = new Chess(fen);
+        const from = setupMove.substring(0, 2);
+        const to = setupMove.substring(2, 4);
+        const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
+
+        const move = tempChess.move({ from, to, promotion: promotion as any });
+        if (move) {
+          chessGame.loadPgn(tempChess.pgn());
+        }
+      }, 600);
+    });
+  }, [chessGame]);
+
+  const recordResultAndLoadNext = useCallback((success: boolean) => {
+    if (!currentPuzzle) return;
+
+    onResultRecorded(success, currentPuzzle.puzzle.rating, currentPuzzle.puzzle.id);
+
+    setTimeout(() => {
+      setPuzzles(prev => {
+        const [, ...remaining] = prev;
+        const next = remaining[0];
+        if (next) {
+          setCurrentPuzzle(next);
+          loadPuzzleOnBoard(next);
+        }
+        return remaining;
+      });
+    }, SOLVE_COMPLETION_DELAY_MS);
+  }, [currentPuzzle, onResultRecorded, loadPuzzleOnBoard]);
 
   const handlePuzzleMove = useCallback((sourceSquare: Square, targetSquare: Square, promotion?: string) => {
+    if (!currentPuzzle) return null;
+
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
+    if (!move) return move;
 
-    if (!move) {
-      return move;
-    }
+    const expectedMove = currentPuzzle.puzzle.solution[0];
+    const isCorrect = move.lan === expectedMove;
 
-    const expectedMove = puzzleState.solution[0];
-
-    if (!isMoveCorrect(move, expectedMove)) {
+    if (!isCorrect) {
       chessGame.undoLastMove();
-      setPuzzleState(prev => ({ ...prev, failed: true }));
+      recordResultAndLoadNext(false);
+      onPuzzleResult();
       return null;
     }
 
-    setPuzzleState(prev => ({ ...prev, completed: true }));
+    recordResultAndLoadNext(true);
+    onPuzzleResult();
     return move;
-  }, [puzzleState.solution, chessGame]);
+  }, [currentPuzzle, chessGame, onPuzzleResult, recordResultAndLoadNext]);
 
   return {
     drillState: {
-      puzzleQueue,
       userColor,
       currentPuzzle,
     },
-    puzzleState,
     handlePuzzleMove,
   };
 };
