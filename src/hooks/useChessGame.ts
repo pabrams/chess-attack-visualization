@@ -14,8 +14,6 @@ export const useChessGame = () => {
     return {
       from: lastMove.from,
       to: lastMove.to,
-      promotion: lastMove.promotion,
-      san: lastMove.san,
     };
   };
 

@@ -79,8 +79,6 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
   return {
     arrows,
     clearArrows,
-    showAttackersForSquare,
-    addArrows,
     showCheckmaters,
     handleSquareRightClick,
   };

@@ -1,5 +1,3 @@
-import { LichessPuzzle } from '../types/lichess';
-
 const LICHESS_HOST = 'https://lichess.org';
 const CLIENT_ID = 'monkey-drill';
 
@@ -97,51 +95,4 @@ export const handleRedirect = async () => {
     window.history.replaceState({}, document.title, window.location.pathname);
   }
   return null;
-};
-
-export const fetchPuzzleBatch = async (nb: number = 50, retries: number = 3): Promise<LichessPuzzle[]> => {
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      const url = new URL(`${LICHESS_HOST}/api/puzzle/batch/mix`);
-      url.searchParams.set('nb', nb.toString());
-
-      const response = await fetch(url.toString(), {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/x-ndjson',
-        },
-      });
-
-      if (response.ok) {
-        const text = await response.text();
-        // Parse NDJSON
-        const puzzles = text
-          .trim()
-          .split('\n')
-          .filter(line => line.trim())
-          .map(line => JSON.parse(line) as LichessPuzzle);
-        return puzzles;
-      } else if (response.status === 429) {
-        // Rate limited - wait with exponential backoff
-        const waitTime = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s, 8s
-        console.warn(`Rate limited (429), waiting ${waitTime}ms before retry ${attempt + 1}/${retries}`);
-        if (attempt < retries) {
-          await new Promise(resolve => setTimeout(resolve, waitTime));
-          continue;
-        }
-      } else {
-        console.error('Failed to fetch puzzle batch:', response.status, response.statusText);
-        return [];
-      }
-    } catch (error) {
-      console.error('Error fetching puzzle batch:', error);
-      if (attempt < retries) {
-        const waitTime = Math.pow(2, attempt) * 1000;
-        await new Promise(resolve => setTimeout(resolve, waitTime));
-        continue;
-      }
-      return [];
-    }
-  }
-  return [];
 };
