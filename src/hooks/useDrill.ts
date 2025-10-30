@@ -59,6 +59,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
   const [puzzleStartTime, setPuzzleStartTime] = useState<number | undefined>();
 
   const initialRatingRef = useRef(rating);
+  const prevPuzzleRef = useRef<LichessPuzzle | null>(null);
 
   const resetPuzzleState = useCallback(() => {
     setPuzzleActive(false);
@@ -103,22 +104,8 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
     });
   }, [chessGame]);
 
-  const prevPuzzleRef = useRef<LichessPuzzle | null>(null);
-
-  const loadNextPuzzle = useCallback(() => {
-    setPuzzleQueue(queue => {
-      if (queue.length === 0) {
-        console.error('Puzzle queue is empty!');
-        return queue;
-      }
-
-      const [nextPuzzle, ...remainingQueue] = queue;
-      setCurrentPuzzle(nextPuzzle);
-      resetPuzzleState();
-      return remainingQueue;
-    });
-  }, [resetPuzzleState]);
-
+  // Initialize new puzzle when currentPuzzle changes
+  // prevPuzzleRef prevents re-initialization when effect re-runs due to initializePuzzleFromFen changing
   useEffect(() => {
     if (currentPuzzle && currentPuzzle !== prevPuzzleRef.current) {
       prevPuzzleRef.current = currentPuzzle;
@@ -126,24 +113,39 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
     }
   }, [currentPuzzle, initializePuzzleFromFen]);
 
+  // Handle puzzle completion/failure: record result and load next puzzle
   useEffect(() => {
     if (!currentPuzzle || (!puzzleCompleted && !puzzleFailed)) {
       return;
     }
 
-    const puzzleRating = currentPuzzle.puzzle.rating;
-    const puzzleId = currentPuzzle.puzzle.id;
-    const success = puzzleCompleted;
+    const handlePuzzleEnd = () => {
+      const puzzleRating = currentPuzzle.puzzle.rating;
+      const puzzleId = currentPuzzle.puzzle.id;
+      const success = puzzleCompleted;
 
-    onResultRecorded(success, puzzleRating, puzzleId);
-    resetPuzzleState();
+      onResultRecorded(success, puzzleRating, puzzleId);
+      resetPuzzleState();
 
-    const delayMs = success ? SOLVE_COMPLETION_DELAY_MS : 0;
-    setTimeout(() => {
-      loadNextPuzzle();
-    }, delayMs);
-  }, [puzzleCompleted, puzzleFailed, currentPuzzle, onResultRecorded, resetPuzzleState, loadNextPuzzle]);
+      setPuzzleQueue(queue => {
+        if (queue.length === 0) {
+          console.error('Puzzle queue is empty!');
+          return queue;
+        }
 
+        const [nextPuzzle, ...remainingQueue] = queue;
+        setCurrentPuzzle(nextPuzzle);
+        return remainingQueue;
+      });
+    };
+
+    const delayMs = puzzleCompleted ? SOLVE_COMPLETION_DELAY_MS : 0;
+    const timer = setTimeout(handlePuzzleEnd, delayMs);
+
+    return () => clearTimeout(timer);
+  }, [puzzleCompleted, puzzleFailed, currentPuzzle, onResultRecorded, resetPuzzleState, puzzleQueue]);
+
+  // Initialize drill on mount
   useEffect(() => {
     const startDrill = async () => {
       const newUserColor = selectRandomUserColor();
@@ -165,7 +167,10 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
         const puzzles = convertToLichessPuzzleFormat(sampled);
 
         setPuzzleQueue(puzzles);
-        loadNextPuzzle();
+        if (puzzles.length > 0) {
+          setCurrentPuzzle(puzzles[0]);
+          setPuzzleQueue(puzzles.slice(1));
+        }
       } catch (error) {
         console.error('Error loading puzzles:', error);
         setActive(false);
@@ -173,7 +178,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
     };
 
     startDrill();
-  }, [loadNextPuzzle]);
+  }, []);
 
   const isMoveCorrect = (move: Move, expectedMove: string): boolean => {
     return move.lan === expectedMove;
