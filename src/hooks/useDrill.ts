@@ -103,8 +103,6 @@ export const useDrill = ({ chessGame, rating, onResultRecorded }: UseDrillProps)
     });
   }, [chessGame]);
 
-  // Initialize new puzzle when currentPuzzle changes
-  // prevPuzzleRef prevents re-initialization when effect re-runs due to initializePuzzleFromFen changing
   useEffect(() => {
     if (currentPuzzle && currentPuzzle !== prevPuzzleRef.current) {
       prevPuzzleRef.current = currentPuzzle;
