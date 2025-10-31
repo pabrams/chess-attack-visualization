@@ -41,15 +41,11 @@ export function getLevelFromRating(rating: number): string {
 
   for (const [levelName, bounds] of Object.entries(levels)) {
     if (rating >= bounds.lowerBound && rating <= bounds.upperBound) {
-      // Cap at super-grandmaster for puzzle loading purposes
-      // since there are no "undefined" level puzzle files
       if (levelName === 'undefined') {
         return 'super-grandmaster';
       }
       return levelName;
     }
   }
-
-  // Fallback to "beginner" if no match found
   return 'beginner';
 }
