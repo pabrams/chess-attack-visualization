@@ -48,8 +48,7 @@ for (const { name, patchFile } of patches) {
     console.log(`✓ ${name} patched successfully\n`);
     applied++;
   } catch (error) {
-    console.error(`Could not patch ${name} (may already be patched)`);
-    console.error(`See CHESS_JS_PATCHING.md for manual patching instructions\n`);
+    console.warn(`Could not patch ${name} (may already be patched)`);
     failed++;
   }
 }
