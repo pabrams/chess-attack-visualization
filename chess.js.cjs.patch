@@ -1,0 +1,565 @@
+--- dist/cjs/chess.js
++++ dist/cjs/chess.js
+@@ -7,18 +7,14 @@
+ 
+ 
+   function rootNode(comment) {
+-  	return comment !== null ? { comment, variations: [] } : { variations: []}
++  	return comment !== null ? { comment, nags: [], variations: [] } : { nags: [], variations: []}
+   }
+ 
+-  function node(move, suffix, nag, comment, variations) {
+-  	const node = { move, variations };
++  function node(move, suffixAnnotation, nags, comment, variations) {
++  	const node = { move, nags, variations };
+ 
+-    if (suffix) {
+-    	node.suffix = suffix;
+-    }
+-
+-    if (nag) {
+-    	node.nag = nag;
++    if (suffixAnnotation) {
++    	node.suffixAnnotation = suffixAnnotation;
+     }
+ 
+     if (comment !== null) {
+@@ -312,8 +308,8 @@
+   var peg$f2 = function(tagName, tagValue) { return [tagName, tagValue] };
+   var peg$f3 = function(root, marker) { return { root, marker} };
+   var peg$f4 = function(comment, moves) { return lineToTree(rootNode(comment), ...moves.flat()) };
+-  var peg$f5 = function(san, suffix, nag, comment, variations) { return node(san, suffix, nag, comment, variations) };
+-  var peg$f6 = function(nag) { return nag };
++  var peg$f5 = function(san, suffixAnnotation, nags, comment, variations) { return node(san, suffixAnnotation, nags, comment, variations) };
++  var peg$f6 = function(nag) { return parseInt(nag, 10) };
+   var peg$f7 = function(comment) { return comment.replace(/[\r\n]+/g, " ") };
+   var peg$f8 = function(comment) { return comment.trim() };
+   var peg$f9 = function(line) { return line };
+@@ -854,35 +850,41 @@
+   }
+ 
+   function peg$parsesuffixAnnotation() {
+-    var s0, s1, s2;
++    var s0, s1, s2, s3;
+ 
+     peg$silentFails++;
+     s0 = peg$currPos;
+-    s1 = [];
+-    s2 = input.charAt(peg$currPos);
+-    if (peg$r6.test(s2)) {
++    s1 = peg$currPos;
++    s2 = [];
++    s3 = input.charAt(peg$currPos);
++    if (peg$r6.test(s3)) {
+       peg$currPos++;
+     } else {
+-      s2 = peg$FAILED;
++      s3 = peg$FAILED;
+       if (peg$silentFails === 0) { peg$fail(peg$e20); }
+     }
+-    while (s2 !== peg$FAILED) {
+-      s1.push(s2);
+-      if (s1.length >= 2) {
+-        s2 = peg$FAILED;
++    while (s3 !== peg$FAILED) {
++      s2.push(s3);
++      if (s2.length >= 2) {
++        s3 = peg$FAILED;
+       } else {
+-        s2 = input.charAt(peg$currPos);
+-        if (peg$r6.test(s2)) {
++        s3 = input.charAt(peg$currPos);
++        if (peg$r6.test(s3)) {
+           peg$currPos++;
+         } else {
+-          s2 = peg$FAILED;
++          s3 = peg$FAILED;
+           if (peg$silentFails === 0) { peg$fail(peg$e20); }
+         }
+       }
+     }
+-    if (s1.length < 1) {
+-      peg$currPos = s0;
+-      s0 = peg$FAILED;
++    if (s2.length < 1) {
++      peg$currPos = s1;
++      s1 = peg$FAILED;
++    } else {
++      s1 = s2;
++    }
++    if (s1 !== peg$FAILED) {
++      s0 = input.substring(s0, peg$currPos);
+     } else {
+       s0 = s1;
+     }
+@@ -1293,6 +1295,36 @@
+ const ROOK = 'r';
+ const QUEEN = 'q';
+ const KING = 'k';
++const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'];
++// NAG (Numeric Annotation Glyph) to symbol mapping
++/* eslint-disable @typescript-eslint/naming-convention */
++const NAG_TO_SYMBOL = {
++    7: '□', // Only move
++    22: '⨀', // Zugzwang
++    10: '=', // Equal position
++    13: '∞', // Unclear position
++    14: '⩲', // White is slightly better
++    15: '⩱', // Black is slightly better
++    16: '±', // White is better
++    17: '∓', // Black is better
++    18: '+−', // White is winning
++    19: '-+', // Black is winning
++    146: 'N', // Novelty
++    32: '↑↑', // Development
++    36: '↑', // Initiative
++    40: '→', // Attack
++    132: '⇆', // Counterplay
++    138: '⊕', // Time trouble
++    44: '=∞', // With compensation
++    140: '∆', // With the idea
++};
++/**
++ * Convert a NAG (Numeric Annotation Glyph) to its text symbol representation.
++ * Returns undefined if the NAG has no corresponding symbol.
++ */
++function nagToGlyph(nag) {
++    return NAG_TO_SYMBOL[nag];
++}
+ const DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+ class Move {
+     color;
+@@ -1312,7 +1344,7 @@
+     lan;
+     before;
+     after;
+-    constructor(chess, internal) {
++    constructor(internal, san, before, after) {
+         const { color, piece, from, to, flags, captured, promotion } = internal;
+         const fromAlgebraic = algebraic(from);
+         const toAlgebraic = algebraic(to);
+@@ -1320,18 +1352,10 @@
+         this.piece = piece;
+         this.from = fromAlgebraic;
+         this.to = toAlgebraic;
+-        /*
+-         * HACK: The chess['_method']() calls below invoke private methods in the
+-         * Chess class to generate SAN and FEN. It's a bit of a hack, but makes the
+-         * code cleaner elsewhere.
+-         */
+-        this.san = chess['_moveToSan'](internal, chess['_moves']({ legal: true }));
++        this.san = san;
+         this.lan = fromAlgebraic + toAlgebraic;
+-        this.before = chess.fen();
+-        // Generate the FEN for the 'after' key
+-        chess['_makeMove'](internal);
+-        this.after = chess.fen();
+-        chess['_undoMove']();
++        this.before = before;
++        this.after = after;
+         // Build the text representation of the move flags
+         this.flags = '';
+         for (const flag in BITS) {
+@@ -1365,6 +1389,9 @@
+     isBigPawn() {
+         return this.flags.indexOf(FLAGS['BIG_PAWN']) > -1;
+     }
++    isNullMove() {
++        return this.flags.indexOf(FLAGS['NULL_MOVE']) > -1;
++    }
+ }
+ const EMPTY = -1;
+ const FLAGS = {
+@@ -1803,15 +1830,21 @@
+     _header = {};
+     _kings = { w: EMPTY, b: EMPTY };
+     _epSquare = -1;
++    _fenEpSquare = -1;
+     _halfMoves = 0;
+     _moveNumber = 0;
+     _history = [];
+     _comments = {};
++    _suffixes = {};
++    _nags = {};
+     _castling = { w: 0, b: 0 };
+     _hash = 0n;
+     // tracks number of times a position has been seen for repetition checking
+     _positionCount = new Map();
+     constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
++        this._comments = {};
++        this._suffixes = {};
++        this._nags = {};
+         this.load(fen, { skipValidation });
+     }
+     clear({ preserveHeaders = false } = {}) {
+@@ -1820,6 +1853,7 @@
+         this._turn = WHITE;
+         this._castling = { w: 0, b: 0 };
+         this._epSquare = EMPTY;
++        this._fenEpSquare = EMPTY;
+         this._halfMoves = 0;
+         this._moveNumber = 1;
+         this._history = [];
+@@ -1879,7 +1913,9 @@
+         if (tokens[2].indexOf('q') > -1) {
+             this._castling.b |= BITS.QSIDE_CASTLE;
+         }
++        this._updateCastlingRights();
+         this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3]];
++        this._fenEpSquare = this._epSquare;
+         this._halfMoves = parseInt(tokens[4], 10);
+         this._moveNumber = parseInt(tokens[5], 10);
+         this._hash = this._computeHash();
+@@ -1932,11 +1968,11 @@
+          * only print the ep square if en passant is a valid move (pawn is present
+          * and ep capture is not pinned)
+          */
+-        if (this._epSquare !== EMPTY) {
++        if (this._fenEpSquare !== EMPTY) {
+             if (forceEnpassantSquare) {
+-                epSquare = algebraic(this._epSquare);
++                epSquare = algebraic(this._fenEpSquare);
+             }
+-            else {
++            else if (this._epSquare !== EMPTY) {
+                 const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16);
+                 const squares = [bigPawnSquare + 1, bigPawnSquare - 1];
+                 for (const square of squares) {
+@@ -2042,6 +2078,9 @@
+     }
+     reset() {
+         this.load(DEFAULT_POSITION);
++        this._comments = {};
++        this._suffixes = {};
++        this._nags = {};
+     }
+     get(square) {
+         return this._board[Ox88[square]];
+@@ -2172,7 +2211,7 @@
+             this._epSquare = EMPTY;
+         }
+     }
+-    _attacked(color, square, verbose) {
++    _attacked(color, square, verbose, xray = false) {
+         const attackers = [];
+         for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+             // did we run off the end of the board
+@@ -2217,9 +2256,11 @@
+                 const offset = RAYS[index];
+                 let j = i + offset;
+                 let blocked = false;
++                let blockingPiece = null;
+                 while (j !== square) {
+                     if (this._board[j] != null) {
+                         blocked = true;
++                        blockingPiece = this._board[j];
+                         break;
+                     }
+                     j += offset;
+@@ -2233,6 +2274,54 @@
+                         continue;
+                     }
+                 }
++                if (xray && blockingPiece != null) {
++                    // Check if the blocking piece can attack the target square
++                    const blockingIndex = square - j + 119;
++                    const blockingCanAttack = blockingIndex >= 0 &&
++                        blockingIndex < ATTACKS.length &&
++                        !!(ATTACKS[blockingIndex] & PIECE_MASKS[blockingPiece.type]);
++                    if (blockingCanAttack) {
++                        /*
++                         * The blocking piece attacks the target square, so we can x-ray through it.
++                         * First, add the sliding piece as an attacker.
++                         */
++                        if (!verbose) {
++                            return true;
++                        }
++                        else {
++                            attackers.push(algebraic(i));
++                        }
++                        // Continue looking for pieces beyond the first blocker
++                        let k = j + offset;
++                        while ((k & 0x88) === 0) {
++                            const pieceOnRay = this._board[k];
++                            if (pieceOnRay != null) {
++                                // Check if this piece is the right color and can attack the target square
++                                const rayIndex = k - square + 119;
++                                const canAttack = pieceOnRay.color === color &&
++                                    rayIndex >= 0 &&
++                                    rayIndex < ATTACKS.length &&
++                                    !!(ATTACKS[rayIndex] & PIECE_MASKS[pieceOnRay.type]);
++                                if (canAttack) {
++                                    // This piece also attacks the target, so we can continue x-raying through it
++                                    if (!verbose) {
++                                        return true;
++                                    }
++                                    else {
++                                        attackers.push(algebraic(k));
++                                    }
++                                    // Continue past this piece to look for more
++                                    k += offset;
++                                    continue;
++                                }
++                                // This piece blocks and does NOT attack the target, so stop x-raying
++                                break;
++                            }
++                            k += offset;
++                        }
++                        continue;
++                    }
++                }
+             }
+         }
+         if (verbose) {
+@@ -2242,12 +2331,12 @@
+             return false;
+         }
+     }
+-    attackers(square, attackedBy) {
++    attackers(square, attackedBy, xray = false) {
+         if (!attackedBy) {
+-            return this._attacked(this._turn, Ox88[square], true);
++            return this._attacked(this._turn, Ox88[square], true, xray);
+         }
+         else {
+-            return this._attacked(attackedBy, Ox88[square], true);
++            return this._attacked(attackedBy, Ox88[square], true, xray);
+         }
+     }
+     _isKingAttacked(color) {
+@@ -2344,10 +2433,21 @@
+     isGameOver() {
+         return this.isCheckmate() || this.isDraw();
+     }
++    isPromotion({ from, to }) {
++        return this._moves({ square: from, piece: 'p' }).some((move) => move.to === Ox88[to] && move.promotion);
++    }
++    _createMove(internal) {
++        const san = this._moveToSan(internal, this._moves({ legal: true }));
++        const before = this.fen();
++        this._makeMove(internal);
++        const after = this.fen();
++        this._undoMove();
++        return new Move(internal, san, before, after);
++    }
+     moves({ verbose = false, square = undefined, piece = undefined, } = {}) {
+         const moves = this._moves({ square, piece });
+         if (verbose) {
+-            return moves.map((move) => new Move(this, move));
++            return moves.map((move) => this._createMove(move));
+         }
+         else {
+             return moves.map((move) => this._moveToSan(move, moves));
+@@ -2540,7 +2640,7 @@
+          * need to make a copy of move because we can't generate SAN after the move
+          * is made
+          */
+-        const prettyMove = new Move(this, moveObj);
++        const prettyMove = this._createMove(moveObj);
+         this._makeMove(moveObj);
+         this._incPositionCount();
+         return prettyMove;
+@@ -2552,6 +2652,7 @@
+             turn: this._turn,
+             castling: { b: this._castling.b, w: this._castling.w },
+             epSquare: this._epSquare,
++            fenEpSquare: this._fenEpSquare,
+             halfMoves: this._halfMoves,
+             moveNumber: this._moveNumber,
+         });
+@@ -2642,6 +2743,7 @@
+             else {
+                 epSquare = move.to + 16;
+             }
++            this._fenEpSquare = epSquare;
+             if ((!((move.to - 1) & 0x88) &&
+                 this._board[move.to - 1]?.type === PAWN &&
+                 this._board[move.to - 1]?.color === them) ||
+@@ -2657,6 +2759,7 @@
+         }
+         else {
+             this._epSquare = EMPTY;
++            this._fenEpSquare = EMPTY;
+         }
+         // reset the 50 move counter if a pawn is moved or a piece is captured
+         if (move.piece === PAWN) {
+@@ -2678,7 +2781,7 @@
+         const hash = this._hash;
+         const move = this._undoMove();
+         if (move) {
+-            const prettyMove = new Move(this, move);
++            const prettyMove = this._createMove(move);
+             this._decPositionCount(hash);
+             return prettyMove;
+         }
+@@ -2696,6 +2799,7 @@
+         this._turn = old.turn;
+         this._castling = old.castling;
+         this._epSquare = old.epSquare;
++        this._fenEpSquare = old.fenEpSquare;
+         this._halfMoves = old.halfMoves;
+         this._moveNumber = old.moveNumber;
+         this._hash ^= this._epKey();
+@@ -2958,13 +3062,21 @@
+         let node = parsedPgn.root;
+         while (node) {
+             if (node.move) {
++                const suffixAnnotation = node.suffixAnnotation;
+                 const move = this._moveFromSan(node.move, strict);
+-                if (move == null) {
++                if (!move) {
+                     throw new Error(`Invalid move in PGN: ${node.move}`);
+                 }
+                 else {
+                     this._makeMove(move);
+                     this._incPositionCount();
++                    if (suffixAnnotation) {
++                        this._suffixes[this.fen()] = suffixAnnotation;
++                    }
++                    // Store NAGs
++                    if (node.nags && node.nags.length > 0) {
++                        this._nags[this.fen()] = node.nags;
++                    }
+                 }
+             }
+             if (node.comment !== undefined) {
+@@ -3252,7 +3364,7 @@
+                 break;
+             }
+             if (verbose) {
+-                moveHistory.push(new Move(this, move));
++                moveHistory.push(this._createMove(move));
+             }
+             else {
+                 moveHistory.push(this._moveToSan(move, this._moves()));
+@@ -3321,9 +3433,111 @@
+     }
+     getComments() {
+         this._pruneComments();
+-        return Object.keys(this._comments).map((fen) => {
+-            return { fen: fen, comment: this._comments[fen] };
+-        });
++        const allFenKeys = new Set();
++        Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen));
++        Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen));
++        Object.keys(this._nags).forEach((fen) => allFenKeys.add(fen));
++        const result = [];
++        for (const fen of allFenKeys) {
++            const commentContent = this._comments[fen];
++            const suffixAnnotation = this._suffixes[fen];
++            const nags = this._nags[fen];
++            const entry = {
++                fen: fen,
++                nags: nags ?? [],
++            };
++            if (commentContent !== undefined) {
++                entry.comment = commentContent;
++            }
++            if (suffixAnnotation !== undefined) {
++                entry.suffixAnnotation = suffixAnnotation;
++            }
++            result.push(entry);
++        }
++        return result;
++    }
++    /**
++     * Get the suffix annotation for the given position (or current one).
++     */
++    getSuffixAnnotation(fen) {
++        const key = fen ?? this.fen();
++        return this._suffixes[key];
++    }
++    /**
++     * Set or overwrite the suffix annotation for the given position (or current).
++     * Throws if the suffix isn't one of the allowed SUFFIX_LIST values.
++     */
++    setSuffixAnnotation(suffix, fen) {
++        if (!SUFFIX_LIST.includes(suffix)) {
++            throw new Error(`Invalid suffix: ${suffix}`);
++        }
++        this._suffixes[fen || this.fen()] = suffix;
++    }
++    /**
++     * Remove the suffix annotation for the given position (or current).
++     */
++    removeSuffixAnnotation(fen) {
++        const key = fen || this.fen();
++        const old = this._suffixes[key];
++        delete this._suffixes[key];
++        return old;
++    }
++    /**
++     * Get the NAGs for the given position (or current one).
++     */
++    getNags(fen) {
++        const key = fen ?? this.fen();
++        return this._nags[key] ?? [];
++    }
++    /**
++     * Add a NAG to the given position (or current).
++     * Supports multiple NAGs per position.
++     */
++    addNag(nag, fen) {
++        const key = fen || this.fen();
++        if (!this._nags[key]) {
++            this._nags[key] = [];
++        }
++        // Avoid duplicates
++        if (!this._nags[key].includes(nag)) {
++            this._nags[key].push(nag);
++        }
++    }
++    /**
++     * Set NAGs for the given position (or current), replacing any existing NAGs.
++     */
++    setNags(nags, fen) {
++        const key = fen || this.fen();
++        this._nags[key] = [...nags]; // Create a copy
++    }
++    /**
++     * Remove all NAGs for the given position (or current).
++     * Returns the removed NAGs.
++     */
++    removeNags(fen) {
++        const key = fen || this.fen();
++        const old = this._nags[key] ?? [];
++        delete this._nags[key];
++        return old;
++    }
++    /**
++     * Remove a specific NAG from the given position (or current).
++     * Returns true if the NAG was found and removed.
++     */
++    removeNag(nag, fen) {
++        const key = fen || this.fen();
++        const nags = this._nags[key];
++        if (!nags)
++            return false;
++        const index = nags.indexOf(nag);
++        if (index === -1)
++            return false;
++        nags.splice(index, 1);
++        // Clean up empty arrays
++        if (nags.length === 0) {
++            delete this._nags[key];
++        }
++        return true;
+     }
+     /**
+      * @deprecated Renamed to `removeComments` for consistency
+@@ -3373,12 +3587,15 @@
+ exports.KING = KING;
+ exports.KNIGHT = KNIGHT;
+ exports.Move = Move;
++exports.NAG_TO_SYMBOL = NAG_TO_SYMBOL;
+ exports.PAWN = PAWN;
+ exports.QUEEN = QUEEN;
+ exports.ROOK = ROOK;
+ exports.SEVEN_TAG_ROSTER = SEVEN_TAG_ROSTER;
+ exports.SQUARES = SQUARES;
++exports.SUFFIX_LIST = SUFFIX_LIST;
+ exports.WHITE = WHITE;
++exports.nagToGlyph = nagToGlyph;
+ exports.validateFen = validateFen;
+ exports.xoroshiro128 = xoroshiro128;
+ //# sourceMappingURL=chess.js.map
