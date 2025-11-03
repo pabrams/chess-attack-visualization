@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Chess, Square, Move, Color } from 'chess.js';
 
 export const useChessGame = () => {
   const chessGameRef = useRef(new Chess());
+
   const [fen, setFen] = useState(chessGameRef.current.fen());
   const [moveHistory, setMoveHistory] = useState<Move[]>([]);
 
@@ -19,23 +20,18 @@ export const useChessGame = () => {
 
   const makeMove = (sourceSquare: Square, targetSquare: Square, promotion?: string) => {
     try {
-      const moveOptions: { from: Square; to: Square; promotion?: string } = {
+      const move = chessGameRef.current.move({
         from: sourceSquare,
         to: targetSquare,
-      };
-
-      if (promotion) {
-        moveOptions.promotion = promotion;
-      }
-
-      const move = chessGameRef.current.move(moveOptions);
+        promotion,
+      });
 
       if (!move) {
         return null;
       }
 
       setFen(chessGameRef.current.fen());
-      setMoveHistory(prev => [...prev, move]);
+      setMoveHistory((prev) => [...prev, move]);
       return move;
     } catch (e) {
       console.debug('Invalid move attempted:', e);
@@ -75,29 +71,35 @@ export const useChessGame = () => {
 
   const getLegalMoves = (square: Square): Square[] => {
     const moves = chessGameRef.current.moves({ square, verbose: true });
-    return moves.map(move => move.to);
+    return moves.map((move) => move.to);
   };
 
   const findPiece = (piece: { type: string; color: Color }) => {
-    return chessGameRef.current.findPiece({ type: piece.type as 'p' | 'n' | 'b' | 'r' | 'q' | 'k', color: piece.color });
+    return chessGameRef.current.findPiece({
+      type: piece.type as 'p' | 'n' | 'b' | 'r' | 'q' | 'k',
+      color: piece.color,
+    });
   };
 
   const getTurn = (): Color => {
     return chessGameRef.current.turn();
   };
 
-  return {
-    fen,
-    getLastMove,
-    makeMove,
-    undoLastMove,
-    loadPgn,
-    getAttackers,
-    getPieceAt,
-    getLegalMoves,
-    findPiece,
-    getTurn,
-  };
+  return useMemo(
+    () => ({
+      fen,
+      getLastMove,
+      makeMove,
+      undoLastMove,
+      loadPgn,
+      getAttackers,
+      getPieceAt,
+      getLegalMoves,
+      findPiece,
+      getTurn,
+    }),
+    [fen]
+  );
 };
 
 export type ChessGame = ReturnType<typeof useChessGame>;
