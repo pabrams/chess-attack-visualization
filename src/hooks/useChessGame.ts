@@ -1,22 +1,10 @@
 import { useState, useRef, useMemo } from 'react';
-import { Chess, Square, Move, Color } from 'chess.js';
+import { Chess, Square, Color } from 'chess.js';
 
 export const useChessGame = () => {
   const chessGameRef = useRef(new Chess());
 
   const [fen, setFen] = useState(chessGameRef.current.fen());
-  const [moveHistory, setMoveHistory] = useState<Move[]>([]);
-
-  const getLastMove = () => {
-    if (moveHistory.length === 0) {
-      return null;
-    }
-    const lastMove = moveHistory[moveHistory.length - 1];
-    return {
-      from: lastMove.from,
-      to: lastMove.to,
-    };
-  };
 
   const makeMove = (sourceSquare: Square, targetSquare: Square, promotion?: string) => {
     try {
@@ -31,7 +19,6 @@ export const useChessGame = () => {
       }
 
       setFen(chessGameRef.current.fen());
-      setMoveHistory((prev) => [...prev, move]);
       return move;
     } catch (e) {
       console.debug('Invalid move attempted:', e);
@@ -43,7 +30,6 @@ export const useChessGame = () => {
     try {
       chessGameRef.current.loadPgn(pgn);
       setFen(chessGameRef.current.fen());
-      setMoveHistory(chessGameRef.current.history({ verbose: true }));
       return true;
     } catch (e) {
       console.error('Failed to load PGN:', e);
@@ -55,10 +41,21 @@ export const useChessGame = () => {
     const move = chessGameRef.current.undo();
     if (move) {
       setFen(chessGameRef.current.fen());
-      setMoveHistory(chessGameRef.current.history({ verbose: true }));
       return true;
     }
     return false;
+  };
+
+  const getLastMove = () => {
+    const moves = chessGameRef.current.moves({ verbose: true });
+    if (moves.length === 0) {
+      return null;
+    }
+    const lastMove = moves[moves.length - 1];
+    return {
+      from: lastMove.from,
+      to: lastMove.to,
+    };
   };
 
   const getAttackers = (square: Square, color: Color) => {

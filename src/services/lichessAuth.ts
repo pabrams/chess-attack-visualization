@@ -1,24 +1,26 @@
 const LICHESS_HOST = 'https://lichess.org';
 const CLIENT_ID = 'monkey-drill';
 
+// Helper function to convert base64 to base64url encoding
+function toBase64Url(base64: string): string {
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+}
+
 // Manual PKCE implementation
 function generateCodeVerifier() {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return btoa(String.fromCharCode.apply(null, Array.from(array)))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  return toBase64Url(btoa(String.fromCharCode.apply(null, Array.from(array))));
 }
 
 async function generateCodeChallenge(verifier: string) {
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
   const digest = await crypto.subtle.digest('SHA-256', data);
-  return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(digest))))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  return toBase64Url(btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(digest)))));
 }
 
 export const login = async () => {

@@ -1,38 +1,19 @@
-import { useState, useEffect, useMemo } from 'react';
-import { ThemeColors } from '../types/theme';
-
-const LIGHT_THEME_COLORS: ThemeColors = {
-  pageBackgroundColor: '#ffffff',
-  pageForegroundColor: '#000000',
-  lightSquareColor: '#f0d9b5',
-  darkSquareColor: '#b58863',
-  whiteArrowColor: '#cc0033',
-  blackArrowColor: '#0066cc'
-};
-
-const DARK_THEME_COLORS: ThemeColors = {
-  pageBackgroundColor: '#000000',
-  pageForegroundColor: '#ffffff',
-  lightSquareColor: '#444444',
-  darkSquareColor: '#000000',
-  whiteArrowColor: '#aa0033',
-  blackArrowColor: '#0088ff'
-};
+import { useMemo, useEffect } from 'react';
+import { useLocalStorage } from './useLocalStorage';
+import { DARK_THEME_COLORS, LIGHT_THEME_COLORS } from '../config/themeColors';
 
 export const useTheme = () => {
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
-    return savedTheme || 'dark';
-  });
+  const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(
+    'theme',
+    'dark',
+    (value) => (value === 'light' ? 'light' : 'dark'),
+    (value) => value
+  );
 
   const currentThemeColors = useMemo(
     () => theme === 'dark' ? DARK_THEME_COLORS : LIGHT_THEME_COLORS,
     [theme]
   );
-
-  useEffect(() => {
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
   useEffect(() => {
     document.body.className = `theme-${theme}`;

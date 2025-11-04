@@ -1,40 +1,27 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { PuzzleAttempt } from '../types/drill';
 import { calculateRatingChange } from '../utils/ratingCalculation';
+import { useLocalStorage } from './useLocalStorage';
 
 interface UsePuzzleResultsProps {
   rating: number;
   onPointsAdded: (puzzleRating: number, success: boolean) => void;
 }
 
-function loadInitialAttempts(): PuzzleAttempt[] {
-  const stored = localStorage.getItem('puzzleAttempts');
-
-  if (stored) {
-    try {
-      return JSON.parse(stored);
-    } catch (error) {
-      console.error('Failed to parse puzzle attempts from localStorage:', error);
-    }
-  }
-  return [];
-}
-
 export const usePuzzleResults = ({ rating, onPointsAdded }: UsePuzzleResultsProps) => {
-  const [attempts, setAttempts] = useState<PuzzleAttempt[]>(loadInitialAttempts());
+  const [attempts, setAttempts] = useLocalStorage<PuzzleAttempt[]>(
+    'puzzleAttempts',
+    [],
+  );
   const [lastResult, setLastResult] = useState<boolean | null>(null);
 
+  // Skip persisting on first render
   const isFirstRenderRef = useRef(true);
-
-  // Persist attempts to localStorage
   useEffect(() => {
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
-      return;
     }
-
-    localStorage.setItem('puzzleAttempts', JSON.stringify(attempts));
-  }, [attempts]);
+  }, []);
 
   const recordResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
     const ratingChange = calculateRatingChange(rating, puzzleRating, success);
@@ -50,7 +37,7 @@ export const usePuzzleResults = ({ rating, onPointsAdded }: UsePuzzleResultsProp
     setAttempts(prev => [attempt, ...prev]);
     setLastResult(success);
     onPointsAdded(puzzleRating, success);
-  }, [rating, onPointsAdded]);
+  }, [rating, onPointsAdded, setAttempts]);
 
   return {
     attempts,

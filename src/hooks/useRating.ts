@@ -1,22 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useLocalStorage } from './useLocalStorage';
 import { calculateRatingChange } from '../utils/ratingCalculation';
 
 const RATING_STORAGE_KEY = 'monkeyDrill_userRating';
 const DEFAULT_RATING = 1;
 
 export const useRating = () => {
-  const [rating, setRating] = useState<number>(() => {
-    const stored = localStorage.getItem(RATING_STORAGE_KEY);
-    if (stored) {
-      const parsed = parseFloat(stored);
+  const [rating, setRating] = useLocalStorage<number>(
+    RATING_STORAGE_KEY,
+    DEFAULT_RATING,
+    (value) => {
+      const parsed = parseFloat(value);
       return isNaN(parsed) ? DEFAULT_RATING : parsed;
-    }
-    return DEFAULT_RATING;
-  });
-
-  useEffect(() => {
-    localStorage.setItem(RATING_STORAGE_KEY, rating.toString());
-  }, [rating]);
+    },
+    (value) => value.toString()
+  );
 
   const addPoints = (puzzleRating: number, success: boolean) => {
     const points = calculateRatingChange(rating, puzzleRating, success);

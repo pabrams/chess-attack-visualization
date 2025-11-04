@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LichessUser } from '../types/lichess';
 import { handleRedirect } from '../services/lichessAuth';
+import { useLocalStorage } from './useLocalStorage';
 
 const LICHESS_HOST = 'https://lichess.org';
 
 export const useLichessAuth = () => {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useLocalStorage<string | null>('lichessToken', null);
   const [user, setUser] = useState<LichessUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -13,13 +14,9 @@ export const useLichessAuth = () => {
     const initAuth = async () => {
       try {
         const accessToken = await handleRedirect();
-        const tokenToUse = accessToken || localStorage.getItem('lichessToken');
-
-        if (tokenToUse && accessToken) {
-          localStorage.setItem('lichessToken', accessToken);
+        if (accessToken) {
+          setToken(accessToken);
         }
-
-        setToken(tokenToUse);
       } catch (error) {
         console.error('Error initializing auth:', error);
       } finally {
@@ -28,13 +25,12 @@ export const useLichessAuth = () => {
     };
 
     initAuth();
-  }, []);
+  }, [setToken]);
 
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
-    localStorage.removeItem('lichessToken');
-  }, []);
+  }, [setToken]);
 
   useEffect(() => {
     if (!token) {

@@ -29,20 +29,19 @@ const App = () => {
     blackArrowColor: currentThemeColors.blackArrowColor,
   });
 
-  const [lastClickedSquare, setLastClickedSquare] = useState<Square | null>(null);
-
-  const handleSquareRightClick = (args: SquareHandlerArgs) => {
+  const handleSquareRightClick = useCallback((args: SquareHandlerArgs) => {
     if (!args.square) return;
 
     const clickedSquare = args.square as Square;
-    if (clickedSquare === lastClickedSquare && arrows.arrows.length > 0) {
+    // Toggle arrows off if clicking the same square again
+    if (arrows.arrows.length > 0 && arrows.arrows.every(arrow =>
+      arrow.endSquare === clickedSquare
+    )) {
       arrows.clearArrows();
-      setLastClickedSquare(null);
     } else {
       arrows.handleSquareRightClick(args);
-      setLastClickedSquare(clickedSquare);
     }
-  };
+  }, [arrows]);
 
   const handlePuzzleResult = useCallback(() => {
     arrows.showCheckmaters();
