@@ -1,4 +1,4 @@
-import { useReducer, useCallback } from 'react';
+import { useReducer, useCallback, useEffect } from 'react';
 import { Square, Color } from 'chess.js';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { isBackRank } from '../utils/chessPieceUtils';
@@ -8,6 +8,7 @@ interface UseMoveHandlerProps {
   chessGame: ChessGame;
   handlePuzzleMove: (sourceSquare: Square, targetSquare: Square, promotion?: string) => any;
   onMoveComplete: () => void;
+  fen?: string;
 }
 
 interface MoveHandlerState {
@@ -45,8 +46,14 @@ const moveHandlerReducer = (state: MoveHandlerState, action: MoveHandlerAction):
   }
 };
 
-export const useMoveHandler = ({ chessGame, handlePuzzleMove, onMoveComplete }: UseMoveHandlerProps) => {
+export const useMoveHandler = ({ chessGame, handlePuzzleMove, onMoveComplete, fen }: UseMoveHandlerProps) => {
   const [state, dispatch] = useReducer(moveHandlerReducer, initialState);
+
+  // Clear selection and promotion when puzzle changes (FEN changes)
+  useEffect(() => {
+    dispatch({ type: 'CLEAR_SQUARE' });
+    dispatch({ type: 'CLEAR_PENDING_PROMOTION' });
+  }, [fen]);
 
   const legalMoves = state.selectedSquare ? chessGame.getLegalMoves(state.selectedSquare) : [];
 

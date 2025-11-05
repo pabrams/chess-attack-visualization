@@ -68,6 +68,7 @@ const App = () => {
     chessGame,
     handlePuzzleMove,
     onMoveComplete: handlePuzzleResult,
+    fen: chessGame.fen,
   });
 
   const lastMove = chessGame.getLastMove();
