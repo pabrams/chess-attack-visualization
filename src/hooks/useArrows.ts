@@ -38,7 +38,7 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     );
 
     setArrows(newArrows);
-  }, [chessGame]);
+  }, [chessGame, whiteArrowColor, blackArrowColor]);
 
   const handleSquareRightClick = useCallback(({ square }: SquareHandlerArgs) => {
     const clickedSquare = square as Square;
@@ -74,12 +74,20 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     );
 
     addArrows(newArrows);
-  }, [chessGame, addArrows]);
+  }, [chessGame, addArrows, whiteArrowColor, blackArrowColor]);
+
+  const showCheckmatersWithDelay = useCallback((delayMs: number) => {
+    showCheckmaters();
+    setTimeout(() => {
+      clearArrows();
+    }, delayMs);
+  }, [showCheckmaters, clearArrows]);
 
   return {
     arrows,
     clearArrows,
     showCheckmaters,
+    showCheckmatersWithDelay,
     handleSquareRightClick,
   };
 };
