@@ -1,9 +1,9 @@
 import React, { createContext, useContext, ReactNode } from 'react';
+import { ThemeMode, ThemeColors } from '../types';
 import { useTheme } from '../hooks/useTheme';
-import { ThemeColors } from '../types/theme';
 
 interface ThemeContextValue {
-  theme: 'dark' | 'light';
+  theme: ThemeMode;
   currentThemeColors: ThemeColors;
   toggleTheme: () => void;
 }

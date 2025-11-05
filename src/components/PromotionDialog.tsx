@@ -1,11 +1,12 @@
 import React from 'react';
 import { Color as PieceColor } from 'chess.js';
+import { ThemeMode } from '../types';
 import styles from './PromotionDialog.module.css';
 
 interface PromotionDialogProps {
   color: PieceColor;
   onSelect: (piece: 'q' | 'r' | 'b' | 'n') => void;
-  theme: 'dark' | 'light';
+  theme: ThemeMode;
 }
 
 export const PromotionDialog: React.FC<PromotionDialogProps> = (props) => {

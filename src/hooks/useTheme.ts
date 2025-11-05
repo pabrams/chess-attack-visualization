@@ -1,9 +1,10 @@
 import { useMemo, useEffect } from 'react';
+import { ThemeMode } from '../types';
 import { useLocalStorage } from './useLocalStorage';
 import { DARK_THEME_COLORS, LIGHT_THEME_COLORS } from '../config/themeColors';
 
 export const useTheme = () => {
-  const [theme, setTheme] = useLocalStorage<'dark' | 'light'>(
+  const [theme, setTheme] = useLocalStorage<ThemeMode>(
     'theme',
     'dark',
     (value) => (value === 'light' ? 'light' : 'dark'),

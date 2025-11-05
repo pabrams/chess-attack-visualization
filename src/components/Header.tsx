@@ -1,11 +1,12 @@
 import React from 'react';
+import { ThemeMode } from '../types';
 import { useLichessAuth } from '../hooks/useLichessAuth';
 import { login } from '../services/lichessAuth';
 import { SettingsMenu } from './SettingsMenu';
 import styles from './Header.module.css';
 
 interface HeaderProps {
-  theme: 'dark' | 'light';
+  theme: ThemeMode;
   onToggleTheme: () => void;
 }
 

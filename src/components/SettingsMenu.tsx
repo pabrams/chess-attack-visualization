@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import { ThemeMode } from '../types';
 import styles from './SettingsMenu.module.css';
 
 interface SettingsMenuProps {
-  theme: 'dark' | 'light';
+  theme: ThemeMode;
   onToggleTheme: () => void;
   isLoggedIn: boolean;
   onLogin: () => void;

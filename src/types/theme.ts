@@ -1,3 +1,5 @@
+export type ThemeMode = 'dark' | 'light';
+
 export interface ThemeColors {
   pageBackgroundColor: string;
   pageForegroundColor: string;
