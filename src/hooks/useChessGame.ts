@@ -47,11 +47,11 @@ export const useChessGame = () => {
   };
 
   const getLastMove = () => {
-    const moves = chessGameRef.current.moves({ verbose: true });
-    if (moves.length === 0) {
+    const history = chessGameRef.current.history({ verbose: true });
+    if (history.length === 0) {
       return null;
     }
-    const lastMove = moves[moves.length - 1];
+    const lastMove = history[history.length - 1];
     return {
       from: lastMove.from,
       to: lastMove.to,
