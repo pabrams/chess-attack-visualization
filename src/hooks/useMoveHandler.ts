@@ -122,10 +122,10 @@ export const useMoveHandler = ({ chessGame, handlePuzzleMove, onMoveComplete }: 
 
   return {
     selectedSquare: state.selectedSquare,
-    legalMoves,
+    legalMoves: legalMoves,
     pendingPromotion: state.pendingPromotion,
-    handleSquareClick,
-    handlePieceDrop,
-    handlePromotionSelect,
+    handleSquareClick: handleSquareClick,
+    handlePieceDrop: handlePieceDrop,
+    handlePromotionSelect: handlePromotionSelect,
   };
 };
