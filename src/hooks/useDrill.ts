@@ -25,7 +25,6 @@ interface DrillState {
 type DrillAction =
   | { type: 'INITIALIZE_COLOR'; payload: UserColor }
   | { type: 'LOAD_PUZZLES'; payload: LichessPuzzle[] }
-  | { type: 'SET_CURRENT_PUZZLE'; payload: LichessPuzzle | null }
   | { type: 'ADVANCE_PUZZLE'; payload: LichessPuzzle | null };
 
 const initialState: DrillState = {
@@ -40,8 +39,6 @@ const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
       return { ...state, userColor: action.payload };
     case 'LOAD_PUZZLES':
       return { ...state, puzzles: action.payload };
-    case 'SET_CURRENT_PUZZLE':
-      return { ...state, currentPuzzle: action.payload };
     case 'ADVANCE_PUZZLE': {
       const [, ...remaining] = state.puzzles;
       return {
@@ -86,7 +83,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }
 
         dispatch({ type: 'LOAD_PUZZLES', payload: converted });
         if (converted.length > 0) {
-          dispatch({ type: 'SET_CURRENT_PUZZLE', payload: converted[0] });
+          dispatch({ type: 'ADVANCE_PUZZLE', payload: converted[0] });
           loadPuzzleOnBoard(converted[0]);
         }
       } catch (error) {
