@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useReducer, useCallback, useEffect, useRef } from 'react';
 import { Square, Move } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
 import { UserColor } from '../types/drill';
@@ -16,14 +16,51 @@ interface UseDrillProps {
   onPuzzleResult: () => void;
 }
 
+interface DrillState {
+  userColor: UserColor;
+  puzzles: LichessPuzzle[];
+  currentPuzzle: LichessPuzzle | null;
+}
+
+type DrillAction =
+  | { type: 'INITIALIZE_COLOR'; payload: UserColor }
+  | { type: 'LOAD_PUZZLES'; payload: LichessPuzzle[] }
+  | { type: 'SET_CURRENT_PUZZLE'; payload: LichessPuzzle | null }
+  | { type: 'ADVANCE_PUZZLE'; payload: LichessPuzzle | null };
+
+const initialState: DrillState = {
+  userColor: 'white',
+  puzzles: [],
+  currentPuzzle: null,
+};
+
+const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
+  switch (action.type) {
+    case 'INITIALIZE_COLOR':
+      return { ...state, userColor: action.payload };
+    case 'LOAD_PUZZLES':
+      return { ...state, puzzles: action.payload };
+    case 'SET_CURRENT_PUZZLE':
+      return { ...state, currentPuzzle: action.payload };
+    case 'ADVANCE_PUZZLE': {
+      const [, ...remaining] = state.puzzles;
+      return {
+        ...state,
+        puzzles: remaining,
+        currentPuzzle: action.payload,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
 const selectRandomUserColor = (): UserColor => {
   return Math.random() < 0.5 ? 'white' : 'black';
 };
 
 export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }: UseDrillProps) => {
-  const [userColor, setUserColor] = useState<UserColor>('white');
-  const [puzzles, setPuzzles] = useState<LichessPuzzle[]>([]);
-  const [currentPuzzle, setCurrentPuzzle] = useState<LichessPuzzle | null>(null);
+  const [state, dispatch] = useReducer(drillReducer, initialState);
 
   const initialRatingRef = useRef(rating);
 
@@ -31,7 +68,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }
   useEffect(() => {
     const loadPuzzles = async () => {
       const newUserColor = selectRandomUserColor();
-      setUserColor(newUserColor);
+      dispatch({ type: 'INITIALIZE_COLOR', payload: newUserColor });
 
       try {
         const playerLevel = getLevelFromRating(initialRatingRef.current);
@@ -47,9 +84,9 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }
         const sampled = sampleArray(data.puzzles, 200);
         const converted = convertToLichessPuzzleFormat(sampled);
 
-        setPuzzles(converted);
+        dispatch({ type: 'LOAD_PUZZLES', payload: converted });
         if (converted.length > 0) {
-          setCurrentPuzzle(converted[0]);
+          dispatch({ type: 'SET_CURRENT_PUZZLE', payload: converted[0] });
           loadPuzzleOnBoard(converted[0]);
         }
       } catch (error) {
@@ -85,30 +122,27 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }
   }, [chessGame]);
 
   const recordResultAndLoadNext = useCallback((success: boolean) => {
-    if (!currentPuzzle) return;
+    if (!state.currentPuzzle) return;
 
-    onResultRecorded(success, currentPuzzle.puzzle.rating, currentPuzzle.puzzle.id);
+    onResultRecorded(success, state.currentPuzzle.puzzle.rating, state.currentPuzzle.puzzle.id);
 
     setTimeout(() => {
-      setPuzzles(prev => {
-        const [, ...remaining] = prev;
-        const next = remaining[0];
-        if (next) {
-          setCurrentPuzzle(next);
-          loadPuzzleOnBoard(next);
-        }
-        return remaining;
-      });
+      const [, ...remaining] = state.puzzles;
+      const next = remaining[0] ?? null;
+      dispatch({ type: 'ADVANCE_PUZZLE', payload: next });
+      if (next) {
+        loadPuzzleOnBoard(next);
+      }
     }, SOLVE_COMPLETION_DELAY_MS);
-  }, [currentPuzzle, onResultRecorded, loadPuzzleOnBoard]);
+  }, [state, onResultRecorded, loadPuzzleOnBoard]);
 
   const handlePuzzleMove = useCallback((sourceSquare: Square, targetSquare: Square, promotion?: string) => {
-    if (!currentPuzzle) return null;
+    if (!state.currentPuzzle) return null;
 
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
     if (!move) return move;
 
-    const expectedMove = currentPuzzle.puzzle.solution[0];
+    const expectedMove = state.currentPuzzle.puzzle.solution[0];
     const isCorrect = move.lan === expectedMove;
 
     if (!isCorrect) {
@@ -121,12 +155,12 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }
     recordResultAndLoadNext(true);
     onPuzzleResult();
     return move;
-  }, [currentPuzzle, chessGame, onPuzzleResult, recordResultAndLoadNext]);
+  }, [state.currentPuzzle, chessGame, onPuzzleResult, recordResultAndLoadNext]);
 
   return {
     drillState: {
-      userColor,
-      currentPuzzle,
+      userColor: state.userColor,
+      currentPuzzle: state.currentPuzzle,
     },
     handlePuzzleMove,
   };

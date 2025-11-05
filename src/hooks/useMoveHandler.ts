@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useReducer, useCallback } from 'react';
 import { Square, Color } from 'chess.js';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { isBackRank } from '../utils/chessPieceUtils';
@@ -10,15 +10,45 @@ interface UseMoveHandlerProps {
   onMoveComplete: () => void;
 }
 
-export const useMoveHandler = ({ chessGame, handlePuzzleMove, onMoveComplete }: UseMoveHandlerProps) => {
-  const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
-  const [pendingPromotion, setPendingPromotion] = useState<{
+interface MoveHandlerState {
+  selectedSquare: Square | null;
+  pendingPromotion: {
     sourceSquare: Square;
     targetSquare: Square;
     pieceColor: Color;
-  } | null>(null);
+  } | null;
+}
 
-  const legalMoves = selectedSquare ? chessGame.getLegalMoves(selectedSquare) : [];
+type MoveHandlerAction =
+  | { type: 'SELECT_SQUARE'; payload: Square }
+  | { type: 'CLEAR_SQUARE' }
+  | { type: 'SET_PENDING_PROMOTION'; payload: { sourceSquare: Square; targetSquare: Square; pieceColor: Color } }
+  | { type: 'CLEAR_PENDING_PROMOTION' };
+
+const initialState: MoveHandlerState = {
+  selectedSquare: null,
+  pendingPromotion: null,
+};
+
+const moveHandlerReducer = (state: MoveHandlerState, action: MoveHandlerAction): MoveHandlerState => {
+  switch (action.type) {
+    case 'SELECT_SQUARE':
+      return { ...state, selectedSquare: action.payload };
+    case 'CLEAR_SQUARE':
+      return { ...state, selectedSquare: null };
+    case 'SET_PENDING_PROMOTION':
+      return { ...state, pendingPromotion: action.payload };
+    case 'CLEAR_PENDING_PROMOTION':
+      return { ...state, pendingPromotion: null };
+    default:
+      return state;
+  }
+};
+
+export const useMoveHandler = ({ chessGame, handlePuzzleMove, onMoveComplete }: UseMoveHandlerProps) => {
+  const [state, dispatch] = useReducer(moveHandlerReducer, initialState);
+
+  const legalMoves = state.selectedSquare ? chessGame.getLegalMoves(state.selectedSquare) : [];
 
   const isPawnPromotion = useCallback((sourceSquare: Square, targetSquare: Square): boolean => {
     const piece = chessGame.getPieceAt(sourceSquare);
@@ -31,7 +61,7 @@ export const useMoveHandler = ({ chessGame, handlePuzzleMove, onMoveComplete }: 
   const attemptMove = useCallback((sourceSquare: Square, targetSquare: Square): boolean => {
     if (isPawnPromotion(sourceSquare, targetSquare)) {
       const piece = chessGame.getPieceAt(sourceSquare)!;
-      setPendingPromotion({ sourceSquare, targetSquare, pieceColor: piece.color });
+      dispatch({ type: 'SET_PENDING_PROMOTION', payload: { sourceSquare, targetSquare, pieceColor: piece.color } });
       return false;
     }
 
@@ -46,28 +76,28 @@ export const useMoveHandler = ({ chessGame, handlePuzzleMove, onMoveComplete }: 
   const selectPieceForMove = useCallback((square: Square) => {
     const piece = chessGame.getPieceAt(square);
     if (piece) {
-      setSelectedSquare(square);
+      dispatch({ type: 'SELECT_SQUARE', payload: square });
     }
   }, [chessGame]);
 
   const executeSelectedMove = useCallback((targetSquare: Square) => {
-    if (!selectedSquare) return;
+    if (!state.selectedSquare) return;
 
-    const sourceSquare = selectedSquare;
-    setSelectedSquare(null);
+    const sourceSquare = state.selectedSquare;
+    dispatch({ type: 'CLEAR_SQUARE' });
 
     if (sourceSquare === targetSquare) return;
 
     attemptMove(sourceSquare, targetSquare);
-  }, [selectedSquare, attemptMove]);
+  }, [state.selectedSquare, attemptMove]);
 
   const handleSquareClick = useCallback(({ square }: SquareHandlerArgs) => {
-    if (!selectedSquare) {
+    if (!state.selectedSquare) {
       selectPieceForMove(square as Square);
     } else {
       executeSelectedMove(square as Square);
     }
-  }, [selectedSquare, selectPieceForMove, executeSelectedMove]);
+  }, [state.selectedSquare, selectPieceForMove, executeSelectedMove]);
 
   const handlePieceDrop = useCallback(({ sourceSquare, targetSquare }: PieceDropHandlerArgs) => {
     if (!targetSquare) {
@@ -78,22 +108,22 @@ export const useMoveHandler = ({ chessGame, handlePuzzleMove, onMoveComplete }: 
   }, [attemptMove]);
 
   const handlePromotionSelect = useCallback((promotionPiece: 'q' | 'r' | 'b' | 'n') => {
-    if (!pendingPromotion) return;
+    if (!state.pendingPromotion) return;
 
-    const { sourceSquare, targetSquare } = pendingPromotion;
+    const { sourceSquare, targetSquare } = state.pendingPromotion;
     const move = handlePuzzleMove(sourceSquare, targetSquare, promotionPiece);
 
-    setPendingPromotion(null);
+    dispatch({ type: 'CLEAR_PENDING_PROMOTION' });
 
     if (move) {
       onMoveComplete();
     }
-  }, [pendingPromotion, handlePuzzleMove, onMoveComplete]);
+  }, [state.pendingPromotion, handlePuzzleMove, onMoveComplete]);
 
   return {
-    selectedSquare,
+    selectedSquare: state.selectedSquare,
     legalMoves,
-    pendingPromotion,
+    pendingPromotion: state.pendingPromotion,
     handleSquareClick,
     handlePieceDrop,
     handlePromotionSelect,
