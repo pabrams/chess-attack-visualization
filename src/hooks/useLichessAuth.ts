@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback, useRef } from 'react';
 import { LichessUser } from '../types/lichess';
 import { handleRedirect } from '../services/lichessAuth';
 import { useLocalStorage } from './useLocalStorage';
@@ -12,9 +12,10 @@ interface AuthState {
 }
 
 type AuthAction =
-  | { type: 'SET_TOKEN'; payload: string | null }
-  | { type: 'SET_USER'; payload: LichessUser | null }
-  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'INIT_AUTH' }
+  | { type: 'AUTH_SUCCESS'; payload: { token: string | null; user: LichessUser | null } }
+  | { type: 'AUTH_FAILED' }
+  | { type: 'USER_FETCHED'; payload: LichessUser }
   | { type: 'LOGOUT' };
 
 const initialState: AuthState = {
@@ -25,14 +26,24 @@ const initialState: AuthState = {
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
-    case 'SET_TOKEN':
-      return { ...state, token: action.payload };
-    case 'SET_USER':
-      return { ...state, user: action.payload };
-    case 'SET_LOADING':
-      return { ...state, loading: action.payload };
+    case 'INIT_AUTH':
+      return { ...state, loading: true };
+    case 'AUTH_SUCCESS':
+      return {
+        token: action.payload.token,
+        user: action.payload.user,
+        loading: false,
+      };
+    case 'AUTH_FAILED':
+      return {
+        token: null,
+        user: null,
+        loading: false,
+      };
+    case 'USER_FETCHED':
+      return { ...state, user: action.payload, loading: false };
     case 'LOGOUT':
-      return { ...state, token: null, user: null };
+      return { token: null, user: null, loading: false };
     default:
       return state;
   }
@@ -41,59 +52,76 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 export const useLichessAuth = () => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const [persistedToken, setPersistedToken] = useLocalStorage<string | null>('lichessToken', null);
+  const initializedRef = useRef(false);
 
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const accessToken = await handleRedirect();
-        if (accessToken) {
-          dispatch({ type: 'SET_TOKEN', payload: accessToken });
-          setPersistedToken(accessToken);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
-        dispatch({ type: 'SET_LOADING', payload: false });
+  const fetchUserData = useCallback(async (token: string): Promise<LichessUser | null> => {
+    try {
+      const response = await fetch(`${LICHESS_HOST}/api/account`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user');
       }
-    };
 
-    initAuth();
-  }, [setPersistedToken]);
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+      return null;
+    }
+  }, []);
 
   const logout = useCallback(() => {
     dispatch({ type: 'LOGOUT' });
     setPersistedToken(null);
   }, [setPersistedToken]);
 
+  // Initialize auth on mount - check for OAuth redirect only
+  useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
+    const initializeAuth = async () => {
+      dispatch({ type: 'INIT_AUTH' });
+
+      try {
+        const accessToken = await handleRedirect();
+
+        if (accessToken) {
+          // New token from OAuth - save and fetch user
+          setPersistedToken(accessToken);
+          const user = await fetchUserData(accessToken);
+          dispatch({ type: 'AUTH_SUCCESS', payload: { token: accessToken, user } });
+        } else {
+          // No new token - just restore persisted state without fetching
+          dispatch({ type: 'AUTH_SUCCESS', payload: { token: persistedToken, user: null } });
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        dispatch({ type: 'AUTH_FAILED' });
+      }
+    };
+
+    initializeAuth();
+  }, []);
+
+  // Fetch user data only when token changes (new login or logout)
   useEffect(() => {
     if (!state.token) {
-      dispatch({ type: 'SET_USER', payload: null });
-      return;
+      return; // No token, nothing to fetch
     }
 
     const fetchUser = async () => {
-      try {
-        const response = await fetch(`${LICHESS_HOST}/api/account`, {
-          headers: {
-            'Authorization': `Bearer ${state.token}`,
-          },
-        });
-
-        if (!response.ok) {
-          logout();
-          return;
-        }
-
-        const userData = await response.json();
-        dispatch({ type: 'SET_USER', payload: userData });
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
-        logout();
+      const user = await fetchUserData(state.token!);
+      if (user) {
+        dispatch({ type: 'USER_FETCHED', payload: user });
       }
     };
 
     fetchUser();
-  }, [state.token, logout]);
+  }, [state.token, fetchUserData]);
 
   return { token: state.token, user: state.user, loading: state.loading, logout };
 };
