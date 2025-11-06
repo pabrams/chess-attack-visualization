@@ -11,28 +11,37 @@ This project is configured to deploy to GitHub Pages automatically via GitHub Ac
 
 The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically deploys to GitHub Pages when you push to the `trunk` or `main` branch.
 
-### Initial Setup
+### Initial Setup (REQUIRED)
+
+Follow these steps exactly to enable GitHub Pages:
 
 1. **Enable GitHub Pages** in your repository settings:
-   - Go to: Settings → Pages
-   - Under "Build and deployment"
-   - Select "Deploy from a branch"
-   - Choose the branch as `gh-pages` and `/ (root)` as the directory
+   - Go to: https://github.com/pabrams/monkey-drill/settings/pages
+   - Under "Build and deployment" section
+   - Select the source:
+     - Choose "Deploy from a branch"
+     - Select branch: `gh-pages` (will be auto-created by Actions)
+     - Select folder: `/ (root)`
    - Click "Save"
 
 2. **Grant Permissions to GitHub Actions**:
-   - Go to: Settings → Actions → General
-   - Under "Workflow permissions"
-   - Select "Read and write permissions"
-   - Enable "Allow GitHub Actions to create and approve pull requests"
+   - Go to: https://github.com/pabrams/monkey-drill/settings/actions/general
+   - Scroll to "Workflow permissions"
+   - Select: "Read and write permissions"
+   - Enable: "Allow GitHub Actions to create and approve pull requests"
    - Click "Save"
 
 3. **Push to trigger deployment**:
-   - Make a commit and push to `trunk` or `main` branch
+   - Make a commit and push to `trunk` or `main` branch:
+     ```bash
+     git add .
+     git commit -m "Enable GitHub Pages deployment"
+     git push origin trunk
+     ```
    - GitHub Actions will automatically:
-     - Install dependencies
-     - Build the project with `GH_PAGES=true` environment variable
-     - Deploy to GitHub Pages
+     - Build the project with proper base path configuration
+     - Deploy to GitHub Pages `gh-pages` branch
+     - Create the GitHub Pages site (may take a few minutes)
 
 ### Accessing Your Deployed Site
 
@@ -68,20 +77,45 @@ If you need to manually deploy without GitHub Actions, you can:
 
 ## Troubleshooting
 
+### Deployment Failed Error (404)
+**Error Message**: "Failed to create deployment (status: 404)"
+
+**Solution**: GitHub Pages is not enabled yet. Follow these steps:
+1. Go to: https://github.com/pabrams/monkey-drill/settings/pages
+2. Under "Build and deployment"
+3. Select source: "Deploy from a branch"
+4. Choose branch: `gh-pages` and folder: `/ (root)`
+5. Click "Save"
+6. The workflow will automatically create the `gh-pages` branch on the next push
+7. Re-run the failed workflow from the Actions tab
+
 ### Site not updating after push
-- Check the "Actions" tab in your GitHub repository
-- Look for the "Deploy to GitHub Pages" workflow
-- Check if there are any errors in the workflow run
+- Check the "Actions" tab: https://github.com/pabrams/monkey-drill/actions
+- Click the "Deploy to GitHub Pages" workflow
+- Check the build and deploy steps for errors
+- If "build" succeeded but "deploy" failed, GitHub Pages is likely not enabled (see above)
 
-### Assets not loading
-- Ensure the base path is correctly set in `vite.config.ts`
-- The `GH_PAGES=true` environment variable sets the base to `/monkey-drill/`
-- Check that all relative imports use the correct paths
+### Assets not loading (blank page, console errors like 404)
+- Verify the base path is correct in `vite.config.ts`
+- The build should output assets with `/monkey-drill/` prefix
+- Check the browser console for 404 errors
+- Verify the site is serving from `https://<username>.github.io/monkey-drill/` (not just `/`)
 
-### 404 errors on refresh
-- GitHub Pages requires single-page apps to redirect all routes to `index.html`
-- This is typically handled by adding a `_redirects` file or using a 404.html redirect
-- The current setup should handle this automatically with the vite build
+### 404 errors on page refresh
+- This is expected behavior for single-page apps on GitHub Pages
+- Routes like `/puzzle/123` will 404 on direct access
+- Solution: Users should navigate through the app normally from the home page
+- To fix: Configure `_redirects` or 404.html redirect (advanced)
+
+### Pages are showing old content
+- GitHub Pages CDN may have cached old files
+- Clear your browser cache (Ctrl+Shift+Delete on Windows/Linux, Cmd+Shift+Delete on Mac)
+- Try accessing the site in an incognito/private window
+- Wait 5-10 minutes for CDN to update
+
+### Repository is private
+- GitHub Pages is only available on public repositories (for free)
+- Make your repository public in Settings → Danger Zone → Change repository visibility
 
 ## Configuration Details
 
