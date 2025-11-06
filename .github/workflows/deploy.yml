@@ -40,7 +40,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        run: pnpm run build:gh-pages
+        run: pnpm run build
 
       - name: Deploy to gh-pages branch
         if: github.event_name == 'push' && (github.ref == 'refs/heads/trunk' || github.ref == 'refs/heads/main')

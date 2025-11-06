@@ -1,9 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const isProduction = process.env.NODE_ENV === 'production';
-const ghPagesMode = process.env.GH_PAGES === 'true';
-
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -16,5 +13,5 @@ export default defineConfig({
       usePolling: true,
     },
   },
-  base: ghPagesMode ? '/monkey-drill/' : '/',
+  base: '/monkey-drill/',
 });
