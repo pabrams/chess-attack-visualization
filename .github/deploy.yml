@@ -1,4 +1,4 @@
-name: Publish Monkey-drill to github Pages
+name: Publish Monkey-drill to gh pages
 on:
   push:
     branches:
