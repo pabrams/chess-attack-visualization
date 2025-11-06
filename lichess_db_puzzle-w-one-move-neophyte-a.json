@@ -1,0 +1,165 @@
+{
+  "_source": "Lichess Puzzle Database",
+  "_license": "CC0 Public Domain",
+  "_url": "https://database.lichess.org/#puzzles",
+  "_generated": "2025-10-19T15:00:51.468Z",
+  "_count": 10,
+  "_level": "neophyte",
+  "_ratingRange": "400-799",
+  "puzzles": [
+    {
+      "id": "00c89",
+      "fen": "2r2rk1/6pp/p1q5/1pn2p2/1B1pPP2/3Pn1QB/1PP2R1P/6RK b - - 3 24",
+      "setupMove": "f8f6",
+      "solution": "g3g7",
+      "rating": 400,
+      "themes": [
+        "kingsideAttack",
+        "master",
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/qy4azPDa/black#48"
+    },
+    {
+      "id": "025sW",
+      "fen": "r2q1rk1/1b2bpp1/2p1p2p/1pPp4/1P4Q1/P3P2P/1B1N1PP1/R3R1K1 b - - 0 18",
+      "setupMove": "b7c8",
+      "solution": "g4g7",
+      "rating": 400,
+      "themes": [
+        "kingsideAttack",
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/EISOdGDe/black#36"
+    },
+    {
+      "id": "02c59",
+      "fen": "1k6/1P2r3/PK6/2N1B3/8/8/8/8 b - - 4 80",
+      "setupMove": "e7e5",
+      "solution": "a6a7",
+      "rating": 400,
+      "themes": [
+        "advancedPawn",
+        "endgame",
+        "mate",
+        "mateIn1",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/pQWoN6N0/black#160"
+    },
+    {
+      "id": "06Lee",
+      "fen": "5R1k/5Q1p/p5pq/1p3p2/1P6/4p3/P6N/7K b - - 0 34",
+      "setupMove": "h6f8",
+      "solution": "f7f8",
+      "rating": 400,
+      "themes": [
+        "endgame",
+        "hangingPiece",
+        "mate",
+        "mateIn1",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/sfMeww7F/black#68"
+    },
+    {
+      "id": "06w7m",
+      "fen": "1r2R1k1/p4ppp/1p6/3r1p2/P2P4/2P1R3/1P4PP/6K1 b - - 1 30",
+      "setupMove": "b8e8",
+      "solution": "e3e8",
+      "rating": 400,
+      "themes": [
+        "backRankMate",
+        "endgame",
+        "mate",
+        "mateIn1",
+        "oneMove",
+        "rookEndgame"
+      ],
+      "gameUrl": "https://lichess.org/0db7yzZ3/black#60"
+    },
+    {
+      "id": "07fuD",
+      "fen": "1rQ1kb1r/p2npppp/8/6n1/3P4/8/PPR3PP/4KBNR b Kk - 1 13",
+      "setupMove": "b8c8",
+      "solution": "c2c8",
+      "rating": 400,
+      "themes": [
+        "backRankMate",
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/Pt1zs0uD/black#26"
+    },
+    {
+      "id": "09HbA",
+      "fen": "1r4k1/5p1p/1R3Pp1/1p6/8/7P/6P1/3R2K1 b - - 0 31",
+      "setupMove": "b8b6",
+      "solution": "d1d8",
+      "rating": 400,
+      "themes": [
+        "endgame",
+        "mate",
+        "mateIn1",
+        "oneMove",
+        "rookEndgame"
+      ],
+      "gameUrl": "https://lichess.org/vkxkONWy/black#62"
+    },
+    {
+      "id": "09OqV",
+      "fen": "r4rk1/1p3ppp/p1nq1B2/3p4/2pP4/N1P2P2/PPQ2P1b/RB3R1K b - - 0 17",
+      "setupMove": "d6f6",
+      "solution": "c2h7",
+      "rating": 400,
+      "themes": [
+        "kingsideAttack",
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/4oVshgdV/black#34"
+    },
+    {
+      "id": "09YeT",
+      "fen": "rnb1k2r/p2pppbp/6p1/qB2P3/3P4/2Q2N2/PP3PPP/R1B1K2R b KQkq - 0 10",
+      "setupMove": "a5b5",
+      "solution": "c3c8",
+      "rating": 400,
+      "themes": [
+        "hangingPiece",
+        "mate",
+        "mateIn1",
+        "oneMove",
+        "opening"
+      ],
+      "gameUrl": "https://lichess.org/yqTtx6BP/black#20"
+    },
+    {
+      "id": "0CBPG",
+      "fen": "6k1/pp3rp1/6P1/8/8/P2R4/1KP5/8 b - - 0 30",
+      "setupMove": "f7c7",
+      "solution": "d3d8",
+      "rating": 400,
+      "themes": [
+        "endgame",
+        "mate",
+        "mateIn1",
+        "oneMove",
+        "rookEndgame"
+      ],
+      "gameUrl": "https://lichess.org/DRbgdUNh/black#60"
+    }
+  ],
+  "_chunk": 1,
+  "_totalChunks": 2
+}

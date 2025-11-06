@@ -1,0 +1,90 @@
+{
+  "_source": "Lichess Puzzle Database",
+  "_license": "CC0 Public Domain",
+  "_url": "https://database.lichess.org/#puzzles",
+  "_generated": "2025-10-18T19:59:29.354Z",
+  "_count": 10,
+  "puzzles": [
+    {
+      "id": "1nech",
+      "fen": "r1b5/3n3R/2p2p2/p4P2/qpkP4/1P2P3/5PQ1/1NK5 b - - 0 32",
+      "setupMove": "c4b3",
+      "solution": "g2g8",
+      "rating": 2407,
+      "themes": [
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/JSCePhNf/black#64"
+    },
+    {
+      "id": "2j6zI",
+      "fen": "r3r1k1/pp1b2pp/3n4/3pPpN1/8/q1PB1P2/2Q3PP/2R1R1K1 b - - 0 19",
+      "setupMove": "d6c4",
+      "solution": "d3f5",
+      "rating": 2468,
+      "themes": [
+        "crushing",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/BQw1Ijn3/black#38"
+    },
+    {
+      "id": "LBWx5",
+      "fen": "3rr3/pk3ppp/1p1p1q2/NP1Pp3/5b2/2PP1P2/4K1R1/R5Q1 b - - 1 26",
+      "setupMove": "b7c7",
+      "solution": "a5c4",
+      "rating": 2593,
+      "themes": [
+        "crushing",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/rkb3P0S2/black#52"
+    },
+    {
+      "id": "Y5l4l",
+      "fen": "r1bqk2r/1p1n2p1/p2pp3/6bB/4P2P/2N5/PPP5/R2QK2R b KQkq - 1 15",
+      "setupMove": "e8f8",
+      "solution": "h4g5",
+      "rating": 2412,
+      "themes": [
+        "equality",
+        "hangingPiece",
+        "oneMove",
+        "opening"
+      ],
+      "gameUrl": "https://lichess.org/mW2XM4YJ/black#30"
+    },
+    {
+      "id": "Z7oxF",
+      "fen": "7r/1k1Q1pp1/p1p1pq2/1p3r1p/8/P7/P5PP/1R1R2K1 b - - 3 27",
+      "setupMove": "b7b6",
+      "solution": "b1c1",
+      "rating": 2412,
+      "themes": [
+        "crushing",
+        "endgame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/fbyvtO0a/black#54"
+    },
+    {
+      "id": "w3bv5",
+      "fen": "8/1p1qp3/p2p1krQ/3PPp2/5P1P/N2RK2b/PPr4P/8 b - - 0 42",
+      "setupMove": "d6e5",
+      "solution": "h6f8",
+      "rating": 2407,
+      "themes": [
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/SrjDw8W7/black#84"
+    }
+  ]
+}

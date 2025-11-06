@@ -1,0 +1,155 @@
+{
+  "_source": "Lichess Puzzle Database",
+  "_license": "CC0 Public Domain",
+  "_url": "https://database.lichess.org/#puzzles",
+  "_generated": "2025-10-19T15:00:51.468Z",
+  "_count": 10,
+  "_level": "neophyte",
+  "_ratingRange": "400-799",
+  "puzzles": [
+    {
+      "id": "cw7rJ",
+      "fen": "r2qk2r/pp1n3p/2p1p1B1/1n1p4/3P4/B2Q1P2/P1P3PP/R4RK1 b kq - 0 15",
+      "setupMove": "h7g6",
+      "solution": "d3g6",
+      "rating": 637,
+      "themes": [
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/bMSOfXqQ/black#30"
+    },
+    {
+      "id": "dfaw3",
+      "fen": "rn2q1rk/5p1Q/1p2pPp1/p1p1P3/2PpPR2/6P1/2P3BP/2R3K1 b - - 0 26",
+      "setupMove": "h8h7",
+      "solution": "f4h4",
+      "rating": 637,
+      "themes": [
+        "master",
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/S4wvbZD5/black#52"
+    },
+    {
+      "id": "e55jd",
+      "fen": "r1bq1k1r/1p3pb1/p1n3p1/2pB2p1/P7/3P1Q2/1PP2PPP/R1B2RK1 b - - 0 14",
+      "setupMove": "d8d6",
+      "solution": "f3f7",
+      "rating": 637,
+      "themes": [
+        "mate",
+        "mateIn1",
+        "oneMove",
+        "opening"
+      ],
+      "gameUrl": "https://lichess.org/2COW7Qi3/black#28"
+    },
+    {
+      "id": "e5ewB",
+      "fen": "r4Q1k/1p4pp/3p4/2p5/4P3/3Bn3/r1P3PP/5RK1 b - - 1 23",
+      "setupMove": "a8f8",
+      "solution": "f1f8",
+      "rating": 637,
+      "themes": [
+        "backRankMate",
+        "endgame",
+        "mate",
+        "mateIn1",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/ZKC8q2f4/black#46"
+    },
+    {
+      "id": "eW2qT",
+      "fen": "r3Q1kr/p1p2ppp/1p6/3q4/6b1/5N2/PP3PPP/R1B1R1K1 b - - 3 19",
+      "setupMove": "a8e8",
+      "solution": "e1e8",
+      "rating": 637,
+      "themes": [
+        "backRankMate",
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/0DYTty67/black#38"
+    },
+    {
+      "id": "ec1Lt",
+      "fen": "R7/5Npk/7p/2b2P2/1r6/8/6KP/8 b - - 0 40",
+      "setupMove": "b4b7",
+      "solution": "a8h8",
+      "rating": 637,
+      "themes": [
+        "endgame",
+        "mate",
+        "mateIn1",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/E0CkZ8Vu/black#80"
+    },
+    {
+      "id": "ehSQt",
+      "fen": "r1bq1rk1/p2nbppp/1pn1p3/3pP3/3P4/3Q1N1P/PPB2PP1/RNB1K2R b KQ - 1 11",
+      "setupMove": "c6b4",
+      "solution": "d3h7",
+      "rating": 637,
+      "themes": [
+        "kingsideAttack",
+        "mate",
+        "mateIn1",
+        "oneMove",
+        "opening"
+      ],
+      "gameUrl": "https://lichess.org/qhPPzoRY/black#22"
+    },
+    {
+      "id": "endVo",
+      "fen": "r4rk1/1ppn2pp/3n1q2/pP1P2N1/2P5/P2Q4/2KB3P/4R2R b - - 1 23",
+      "setupMove": "d7c5",
+      "solution": "d3h7",
+      "rating": 637,
+      "themes": [
+        "master",
+        "middlegame"
+      ],
+      "gameUrl": "https://lichess.org/8pe7K633/black#46"
+    },
+    {
+      "id": "ep7hw",
+      "fen": "r4rk1/ppq1bp2/2p1p1p1/7p/3B2R1/6NQ/PPP2PPP/3R2K1 b - - 0 22",
+      "setupMove": "h5g4",
+      "solution": "h3h8",
+      "rating": 637,
+      "themes": [
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/vM4BwXND/black#44"
+    },
+    {
+      "id": "f9NlK",
+      "fen": "r4rk1/1b1n1ppp/2p1p3/p1ppP1N1/3P2q1/2P1B3/PPQ2PP1/R3R1K1 b - - 3 16",
+      "setupMove": "h7h6",
+      "solution": "c2h7",
+      "rating": 637,
+      "themes": [
+        "mate",
+        "mateIn1",
+        "middlegame",
+        "oneMove"
+      ],
+      "gameUrl": "https://lichess.org/iZrcVfvJ/black#32"
+    }
+  ],
+  "_chunk": 2,
+  "_totalChunks": 2
+}
