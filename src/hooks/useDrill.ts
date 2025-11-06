@@ -70,7 +70,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }
       try {
         const playerLevel = getLevelFromRating(initialRatingRef.current);
         const colorPrefix = newUserColor === 'white' ? 'w' : 'b';
-        const puzzleFile = `/lichess_db_puzzle-${colorPrefix}-one-move-${playerLevel}.json`;
+        const puzzleFile = `${import.meta.env.BASE_URL}lichess_db_puzzle-${colorPrefix}-one-move-${playerLevel}.json`;
         const response = await fetch(puzzleFile);
 
         if (!response.ok) {
