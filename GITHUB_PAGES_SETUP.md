@@ -24,15 +24,8 @@ Follow these steps exactly to enable GitHub Pages:
      - Select folder: `/ (root)`
    - Click "Save"
 
-2. **Grant Permissions to GitHub Actions**:
-   - Go to: https://github.com/pabrams/monkey-drill/settings/actions/general
-   - Scroll to "Workflow permissions"
-   - Select: "Read and write permissions"
-   - Enable: "Allow GitHub Actions to create and approve pull requests"
-   - Click "Save"
-
-3. **Push to trigger deployment**:
-   - Make a commit and push to `trunk` or `main` branch:
+2. **Push to trigger deployment**:
+   - Make a commit and push to `trunk` branch:
      ```bash
      git add .
      git commit -m "Enable GitHub Pages deployment"
@@ -40,8 +33,9 @@ Follow these steps exactly to enable GitHub Pages:
      ```
    - GitHub Actions will automatically:
      - Build the project with proper base path configuration
-     - Deploy to GitHub Pages `gh-pages` branch
-     - Create the GitHub Pages site (may take a few minutes)
+     - Deploy the `dist` folder to the `gh-pages` branch
+     - GitHub Pages will serve from: `https://pabrams.github.io/monkey-drill/`
+     - Site should be live within 1-2 minutes
 
 ### Accessing Your Deployed Site
 
