@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "build:gh-pages": "GH_PAGES=true vite build",
     "docker:build": "./build_docker.sh chess",
     "test": "vitest",
     "docker:test": "docker run -t chess ./run_tests.sh",
