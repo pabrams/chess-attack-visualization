@@ -17,14 +17,20 @@ export const usePuzzleResults = ({ rating, onPointsAdded }: UsePuzzleResultsProp
 
   // Skip persisting on first render
   const isFirstRenderRef = useRef(true);
+  const ratingRef = useRef(rating);
+
   useEffect(() => {
     if (isFirstRenderRef.current) {
       isFirstRenderRef.current = false;
     }
   }, []);
 
+  useEffect(() => {
+    ratingRef.current = rating;
+  }, [rating]);
+
   const recordResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
-    const ratingChange = calculateRatingChange(rating, puzzleRating, success);
+    const ratingChange = calculateRatingChange(ratingRef.current, puzzleRating, success);
 
     const attempt: PuzzleAttempt = {
       puzzleId,
@@ -37,7 +43,7 @@ export const usePuzzleResults = ({ rating, onPointsAdded }: UsePuzzleResultsProp
     setAttempts(prev => [attempt, ...prev]);
     setLastResult(success);
     onPointsAdded(puzzleRating, success);
-  }, [rating, onPointsAdded, setAttempts]);
+  }, [onPointsAdded, setAttempts]);
 
   return {
     attempts,
