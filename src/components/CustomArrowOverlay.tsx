@@ -8,7 +8,7 @@ interface CustomArrowOverlayProps {
   boardSize: number;
   boardOrientation?: 'white' | 'black';
   opacity?: number;
-  isDarkTheme?: boolean;
+  arrowBorderColor?: string;
 }
 
 const squareToCoords = (
@@ -144,7 +144,7 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
   boardSize,
   boardOrientation = 'white',
   opacity,
-  isDarkTheme = false,
+  arrowBorderColor = '#000000',
 }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
 
@@ -159,12 +159,11 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
     const xMarkOpacity = parseFloat(getCSSVariable('--opacity-x-mark')) || 0.5;
     const xMarkBorderOpacity = parseFloat(getCSSVariable('--opacity-x-mark-border')) || 0.3;
 
-    const borderColor = isDarkTheme ? 'white' : 'black';
     ctx.clearRect(0, 0, boardSize, boardSize);
 
     marks.forEach((mark) => {
       const coords = squareToCoords(mark.square, boardSize, boardOrientation);
-      drawXMark(ctx, coords.x, coords.y, mark.color, boardSize / 14, boardSize / 80, borderColor, xMarkOpacity, xMarkBorderOpacity);
+      drawXMark(ctx, coords.x, coords.y, mark.color, boardSize / 14, boardSize / 80, arrowBorderColor, xMarkOpacity, xMarkBorderOpacity);
     });
 
     const sortedArrows = [...arrows].sort((a, b) => {
@@ -186,11 +185,11 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const headSize = boardSize / 20;
       const lineWidth = boardSize / 60;
 
-      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, borderColor, lineWidth, arrowOpacity);
+      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, arrowOpacity);
     });
 
     ctx.globalAlpha = 1;
-  }, [arrows, marks, boardSize, boardOrientation, isDarkTheme]);
+  }, [arrows, marks, boardSize, boardOrientation, arrowBorderColor]);
 
   return (
     <canvas

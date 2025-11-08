@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { Square } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
-import { useThemeContext } from './contexts/ThemeContext';
+import { useThemeContext } from './hooks/useThemeContext';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';

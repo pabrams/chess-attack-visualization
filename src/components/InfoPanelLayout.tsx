@@ -1,7 +1,7 @@
 import React from 'react';
 import { PuzzleAttempt, UserColor } from '../types/drill';
 import { usePuzzleStats } from '../hooks/usePuzzleStats';
-import { useThemeContext } from '../contexts/ThemeContext';
+import { useThemeContext } from '../hooks/useThemeContext';
 import { formatDate, formatFullTimestamp, constructPuzzleUrl } from '../utils/formatters';
 import styles from './InfoPanelLayout.module.css';
 

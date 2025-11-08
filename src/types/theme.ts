@@ -7,4 +7,5 @@ export interface ThemeColors {
   darkSquareColor: string;
   whiteArrowColor: string;
   blackArrowColor: string;
+  arrowBorderColor: string;
 }

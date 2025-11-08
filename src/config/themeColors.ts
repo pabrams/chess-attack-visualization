@@ -6,7 +6,8 @@ export const LIGHT_THEME_COLORS: ThemeColors = {
   lightSquareColor: '#f0d9b5',
   darkSquareColor: '#b58863',
   whiteArrowColor: '#cc0033',
-  blackArrowColor: '#0066cc'
+  blackArrowColor: '#0066cc',
+  arrowBorderColor: '#000000'
 };
 
 export const DARK_THEME_COLORS: ThemeColors = {
@@ -15,5 +16,6 @@ export const DARK_THEME_COLORS: ThemeColors = {
   lightSquareColor: '#444444',
   darkSquareColor: '#000000',
   whiteArrowColor: '#aa0033',
-  blackArrowColor: '#0088ff'
+  blackArrowColor: '#0088ff',
+  arrowBorderColor: '#ffffff'
 };

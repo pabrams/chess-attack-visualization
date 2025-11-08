@@ -3,10 +3,10 @@ import { Square } from 'chess.js';
 import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow } from '../types/arrows';
 import { UserColor } from '../types/drill';
-import { useThemeContext } from '../contexts/ThemeContext';
+import { useThemeContext } from '../hooks/useThemeContext';
 import { getCustomPieces } from './customPieces';
 import { CustomArrowOverlay } from './CustomArrowOverlay';
-import { BOARD_STYLES } from '../constants/boardStyles';
+import { BOARD_STYLES } from '../utils/boardStyles';
 
 interface ChessBoardProps {
   fen: string;
@@ -87,7 +87,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
           marks={props.marks}
           boardSize={boardSize}
           boardOrientation={props.boardOrientation ?? 'white'}
-          isDarkTheme={theme === 'dark'}
+          arrowBorderColor={currentThemeColors.arrowBorderColor}
         />
       )}
     </div>
