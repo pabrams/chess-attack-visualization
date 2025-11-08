@@ -102,7 +102,7 @@ const drawXMark = (
   const borderWidth = 2;
 
   ctx.strokeStyle = borderColor;
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha = OPACITY.X_MARK_BORDER;
   ctx.lineWidth = lineWidth + borderWidth;
   ctx.lineCap = 'round';
 
@@ -155,7 +155,7 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
 
     marks.forEach((mark) => {
       const coords = squareToCoords(mark.square, boardSize, boardOrientation);
-      drawXMark(ctx, coords.x, coords.y, mark.color, boardSize / 14, boardSize / 60, borderColor);
+      drawXMark(ctx, coords.x, coords.y, mark.color, boardSize / 14, boardSize / 80, borderColor);
     });
 
     const sortedArrows = [...arrows].sort((a, b) => {

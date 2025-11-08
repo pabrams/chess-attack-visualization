@@ -86,6 +86,24 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     newArrows.push(...escapeArrows);
     newMarks.push(...escapeMarks.map(mark => ({ ...mark, color: defendingArrowColor })));
 
+    const arrowEndSquares = new Set<Square>();
+
+    // From king attacker arrows
+    newArrows.slice(0, kingAttackers.length).forEach(arrow => {
+      arrowEndSquares.add(arrow.endSquare);
+    });
+
+    escapeArrows.forEach(arrow => {
+      arrowEndSquares.add(arrow.endSquare);
+    });
+
+    arrowEndSquares.forEach(square => {
+      const markExists = newMarks.some(mark => mark.square === square);
+      if (!markExists) {
+        newMarks.push({ square, color: arrowColor });
+      }
+    });
+
     setArrows(newArrows);
     setMarks(newMarks);
   }, [chessGame, whiteArrowColor, blackArrowColor, clearArrows]);
