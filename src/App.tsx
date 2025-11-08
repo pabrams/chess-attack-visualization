@@ -44,7 +44,7 @@ const App = () => {
   }, [arrows]);
 
   const handlePuzzleResult = useCallback(() => {
-    arrows.showCheckmatersWithDelay(SOLVE_COMPLETION_DELAY_MS);
+    arrows.showCheckmaters();
   }, [arrows]);
 
   const { drillState, handlePuzzleMove } = useDrill({

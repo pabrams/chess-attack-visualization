@@ -82,6 +82,10 @@ export const useChessGame = () => {
     return chessGameRef.current.turn();
   };
 
+  const isCheckmate = (): boolean => {
+    return chessGameRef.current.isCheckmate();
+  };
+
   return useMemo(
     () => ({
       fen,
@@ -94,6 +98,7 @@ export const useChessGame = () => {
       getLegalMoves,
       findPiece,
       getTurn,
+      isCheckmate,
     }),
     [fen]
   );

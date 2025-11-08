@@ -48,6 +48,12 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
   }, [showAttackersForSquare]);
 
   const showCheckmaters = useCallback(() => {
+    // Only show arrows if checkmate has been achieved
+    if (!chessGame.isCheckmate()) {
+      clearArrows();
+      return;
+    }
+
     const checksColor = chessGame.getTurn();
     const checkmatingColor = invertColor(checksColor);
 
@@ -79,26 +85,17 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     );
 
     newArrows.push(...escapeArrows);
-    // Add marks with defending color instead of attacking color
     newMarks.push(...escapeMarks.map(mark => ({ ...mark, color: defendingArrowColor })));
 
     setArrows(newArrows);
     setMarks(newMarks);
-  }, [chessGame, whiteArrowColor, blackArrowColor]);
-
-  const showCheckmatersWithDelay = useCallback((delayMs: number) => {
-    showCheckmaters();
-    setTimeout(() => {
-      clearArrows();
-    }, delayMs);
-  }, [showCheckmaters, clearArrows]);
+  }, [chessGame, whiteArrowColor, blackArrowColor, clearArrows]);
 
   return {
     arrows,
     marks,
     clearArrows,
     showCheckmaters,
-    showCheckmatersWithDelay,
     handleSquareRightClick,
   };
 };
