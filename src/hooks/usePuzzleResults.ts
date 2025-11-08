@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { PuzzleAttempt } from '../types/drill';
 import { calculateRatingChange } from '../utils/ratingCalculation';
 import { useLocalStorage } from './useLocalStorage';
@@ -14,14 +14,6 @@ export const usePuzzleResults = ({ rating, onPointsAdded }: UsePuzzleResultsProp
     [],
   );
   const [lastResult, setLastResult] = useState<boolean | null>(null);
-
-  // Skip persisting on first render
-  const isFirstRenderRef = useRef(true);
-  useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-    }
-  }, []);
 
   const recordResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
     const ratingChange = calculateRatingChange(rating, puzzleRating, success);

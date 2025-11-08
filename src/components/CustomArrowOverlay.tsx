@@ -142,7 +142,6 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
   isDarkTheme = false,
 }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const borderColor = isDarkTheme ? 'white' : 'black';
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
@@ -151,6 +150,7 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const borderColor = isDarkTheme ? 'white' : 'black';
     ctx.clearRect(0, 0, boardSize, boardSize);
 
     marks.forEach((mark) => {
@@ -181,7 +181,7 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
     });
 
     ctx.globalAlpha = 1;
-  }, [arrows, marks, boardSize, boardOrientation, opacity, borderColor]);
+  }, [arrows, marks, boardSize, boardOrientation, opacity, isDarkTheme]);
 
   return (
     <canvas

@@ -5,7 +5,7 @@ import { useChessGame } from './hooks/useChessGame';
 import { useThemeContext } from './contexts/ThemeContext';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
-import { useDrill, SOLVE_COMPLETION_DELAY_MS } from './hooks/useDrill';
+import { useDrill } from './hooks/useDrill';
 import { useMoveHandler } from './hooks/useMoveHandler';
 import { usePuzzleResults } from './hooks/usePuzzleResults';
 import Header from './components/Header';
@@ -47,11 +47,16 @@ const App = () => {
     arrows.showCheckmaters();
   }, [arrows]);
 
+  const handleLoadNextPuzzle = useCallback(() => {
+    arrows.clearArrows();
+  }, [arrows]);
+
   const { drillState, handlePuzzleMove } = useDrill({
     chessGame,
     rating,
     onResultRecorded: recordResult,
     onPuzzleResult: handlePuzzleResult,
+    onPuzzleLoad: handleLoadNextPuzzle,
   });
 
   const {

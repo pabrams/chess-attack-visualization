@@ -14,6 +14,7 @@ interface UseDrillProps {
   rating: number;
   onResultRecorded: (success: boolean, puzzleRating: number, puzzleId: string) => void;
   onPuzzleResult: () => void;
+  onPuzzleLoad?: () => void;
 }
 
 interface DrillState {
@@ -56,7 +57,7 @@ const selectRandomUserColor = (): UserColor => {
   return Math.random() < 0.5 ? 'white' : 'black';
 };
 
-export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }: UseDrillProps) => {
+export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, onPuzzleLoad }: UseDrillProps) => {
   const [state, dispatch] = useReducer(drillReducer, initialState);
 
   const initialRatingRef = useRef(rating);
@@ -113,10 +114,11 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult }
         const move = tempChess.move({ from, to, promotion: promotion as any });
         if (move) {
           chessGame.loadPgn(tempChess.pgn());
+          onPuzzleLoad?.();
         }
       }, 600);
     });
-  }, [chessGame]);
+  }, [chessGame, onPuzzleLoad]);
 
   const recordResultAndLoadNext = useCallback((success: boolean) => {
     if (!state.currentPuzzle) return;

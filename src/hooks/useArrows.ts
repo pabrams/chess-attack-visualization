@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Square, Color as PieceColor } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { Arrow, Mark } from '../types/arrows';
@@ -48,7 +48,6 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
   }, [showAttackersForSquare]);
 
   const showCheckmaters = useCallback(() => {
-    // Only show arrows if checkmate has been achieved
     if (!chessGame.isCheckmate()) {
       clearArrows();
       return;
@@ -90,6 +89,12 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     setArrows(newArrows);
     setMarks(newMarks);
   }, [chessGame, whiteArrowColor, blackArrowColor, clearArrows]);
+
+  // When board position changes, clear and re-evaluate for checkmate
+  useEffect(() => {
+    clearArrows();
+    showCheckmaters();
+  }, [chessGame.fen, clearArrows, showCheckmaters]);
 
   return {
     arrows,
