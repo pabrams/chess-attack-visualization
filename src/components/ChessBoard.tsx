@@ -6,10 +6,12 @@ import { UserColor } from '../types/drill';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { getCustomPieces } from './customPieces';
 import { CustomArrowOverlay } from './CustomArrowOverlay';
+import { OPACITY } from '../constants/opacity';
 
 interface ChessBoardProps {
   fen: string;
   arrows: Arrow[];
+  marks?: any[];
   lastMove: { from: Square; to: Square } | null;
   pendingMove: { sourceSquare: Square; legalTargets: Square[] } | null;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
@@ -85,9 +87,11 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
       {boardSize > 0 && (
         <CustomArrowOverlay
           arrows={props.arrows}
+          marks={props.marks}
           boardSize={boardSize}
           boardOrientation={props.boardOrientation ?? 'white'}
-          opacity={0.9}
+          opacity={OPACITY.ARROW}
+          isDarkTheme={theme === 'dark'}
         />
       )}
     </div>

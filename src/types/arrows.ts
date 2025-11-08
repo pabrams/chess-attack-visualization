@@ -5,3 +5,8 @@ export interface Arrow {
   endSquare: Square;
   color: string;
 }
+
+export interface Mark {
+  square: Square;
+  color: string;
+}

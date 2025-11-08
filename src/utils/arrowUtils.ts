@@ -1,9 +1,7 @@
-import { Arrow } from '../types/arrows';
+import { Arrow, Mark } from '../types/arrows';
 import { Square, Color } from 'chess.js';
 
-/**
- * Creates a single arrow from one square to another
- */
+
 const createArrow = (
   fromSquare: Square,
   toSquare: Square,
@@ -14,9 +12,7 @@ const createArrow = (
   color,
 });
 
-/**
- * Creates arrows from multiple attacker squares to a target square
- */
+
 export const createArrowsFromAttackers = (
   attackerSquares: Square[],
   targetSquare: Square,
@@ -26,32 +22,28 @@ export const createArrowsFromAttackers = (
     createArrow(attackerSquare, targetSquare, arrowColor)
   );
 
-/**
- * Creates arrows showing attackers of squares around a center square
- * Useful for checkmate visualization
- *
- * Shows arrows to:
- * - Empty squares (king can move there)
- * - Squares with enemy pieces (king can capture if not defended)
- *
- * Does NOT show arrows to squares with the king's own pieces
- */
-export const createArrowsForSquaresAroundTarget = (
+
+export const createArrowsForSquaresAroundKing = (
   targetSquares: Square[],
   getAttackers: (square: Square, color: Color) => Square[],
   attackingColor: Color,
   getPieceAt: (square: Square) => any,
-  arrowColor: string
-): Arrow[] => {
+  arrowColor: string,
+  defendingColor?: Color
+): { arrows: Arrow[]; marks: Mark[] } => {
   const arrows: Arrow[] = [];
+  const marks: Mark[] = [];
 
   for (const square of targetSquares) {
     const piece = getPieceAt(square);
     if (!piece || piece.color === attackingColor) {
       const attackers = getAttackers(square, attackingColor);
       arrows.push(...createArrowsFromAttackers(attackers, square, arrowColor));
+    } else if (defendingColor && piece.color === defendingColor) {
+      // Add a mark for squares with defending pieces
+      marks.push({ square, color: arrowColor });
     }
   }
 
-  return arrows;
+  return { arrows, marks };
 };

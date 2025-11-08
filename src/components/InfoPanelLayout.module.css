@@ -1,3 +1,7 @@
+:root {
+  --opacity-panel: 0.8;
+}
+
 .wrapper {
   display: flex;
   flex-direction: column;
@@ -50,7 +54,7 @@
 .ratingLabel {
   font-size: 12px;
   font-weight: 500;
-  opacity: 0.7;
+  opacity: var(--opacity-panel);
   letter-spacing: 0.5px;
 }
 
@@ -74,7 +78,7 @@
 .levelLabel {
   font-size: 14px;
   font-weight: 500;
-  opacity: 0.8;
+  opacity: var(--opacity-panel);
   text-transform: capitalize;
   margin-top: 4px;
 }
@@ -89,7 +93,7 @@
 .puzzleStatsLabel {
   font-size: 12px;
   font-weight: 500;
-  opacity: 0.7;
+  opacity: var(--opacity-panel);
 }
 
 .puzzleStatsValue {
@@ -106,7 +110,7 @@
 }
 
 .percentage {
-  opacity: 0.8;
+  opacity: var(--opacity-panel);
   font-size: 16px;
 }
 

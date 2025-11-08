@@ -99,6 +99,7 @@ const App = () => {
         <Layout
           fen={chessGame.fen}
           arrows={arrows.arrows}
+          marks={arrows.marks}
           lastMove={
             sourceSquare && targetSquare
               ? { from: sourceSquare, to: targetSquare }

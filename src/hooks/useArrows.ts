@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Square, Color as PieceColor } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
-import { Arrow } from '../types/arrows';
-import { createArrowsFromAttackers, createArrowsForSquaresAroundTarget } from '../utils/arrowUtils';
+import { Arrow, Mark } from '../types/arrows';
+import { createArrowsFromAttackers, createArrowsForSquaresAroundKing } from '../utils/arrowUtils';
 import { getAdjacentSquares } from '../utils/squareUtils';
 import { invertColor } from '../utils/chessPieceUtils';
 import type { ChessGame } from './useChessGame';
@@ -15,9 +15,11 @@ interface UseArrowsProps {
 
 export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseArrowsProps) => {
   const [arrows, setArrows] = useState<Arrow[]>([]);
+  const [marks, setMarks] = useState<Mark[]>([]);
 
   const clearArrows = useCallback(() => {
     setArrows([]);
+    setMarks([]);
   }, []);
 
   const addArrows = useCallback((newArrows: Arrow[]) => {
@@ -57,24 +59,32 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     }
 
     const arrowColor = checkmatingColor === 'w' ? whiteArrowColor : blackArrowColor;
+    const defendingColor = checksColor;
+    const defendingArrowColor = defendingColor === 'w' ? whiteArrowColor : blackArrowColor;
+
     const newArrows: Arrow[] = [];
+    const newMarks: Mark[] = [];
 
     const kingAttackers = chessGame.getAttackers(kingSquare, checkmatingColor);
     newArrows.push(...createArrowsFromAttackers(kingAttackers, kingSquare, arrowColor));
 
     const aroundSquares = getAdjacentSquares(kingSquare);
-    newArrows.push(
-      ...createArrowsForSquaresAroundTarget(
-        aroundSquares,
-        chessGame.getAttackers,
-        checkmatingColor,
-        chessGame.getPieceAt,
-        arrowColor
-      )
+    const { arrows: escapeArrows, marks: escapeMarks } = createArrowsForSquaresAroundKing(
+      aroundSquares,
+      chessGame.getAttackers,
+      checkmatingColor,
+      chessGame.getPieceAt,
+      arrowColor,
+      defendingColor
     );
 
-    addArrows(newArrows);
-  }, [chessGame, addArrows, whiteArrowColor, blackArrowColor]);
+    newArrows.push(...escapeArrows);
+    // Add marks with defending color instead of attacking color
+    newMarks.push(...escapeMarks.map(mark => ({ ...mark, color: defendingArrowColor })));
+
+    setArrows(newArrows);
+    setMarks(newMarks);
+  }, [chessGame, whiteArrowColor, blackArrowColor]);
 
   const showCheckmatersWithDelay = useCallback((delayMs: number) => {
     showCheckmaters();
@@ -85,6 +95,7 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
 
   return {
     arrows,
+    marks,
     clearArrows,
     showCheckmaters,
     showCheckmatersWithDelay,
