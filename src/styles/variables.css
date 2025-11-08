@@ -95,8 +95,8 @@
   --chess-page-fg: #000000;
   --chess-light-square: #f0d9b5;
   --chess-dark-square: #b58863;
-  --chess-white-arrow: #0066cc;
-  --chess-black-arrow: #cc0033;
+  --chess-black-arrow: #0066cc;
+  --chess-white-arrow: #cc0033;
   --chess-arrow-border: #000000;
 }
 
@@ -106,7 +106,7 @@
   --chess-page-fg: #ffffff;
   --chess-light-square: #444444;
   --chess-dark-square: #000000;
-  --chess-white-arrow: #0088ff;
-  --chess-black-arrow: #aa0033;
+  --chess-black-arrow: #0088ff;
+  --chess-white-arrow: #aa0033;
   --chess-arrow-border: #ffffff;
 }

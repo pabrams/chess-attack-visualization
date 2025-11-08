@@ -22,10 +22,6 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     setMarks([]);
   }, []);
 
-  const addArrows = useCallback((newArrows: Arrow[]) => {
-    setArrows(prev => [...prev, ...newArrows]);
-  }, []);
-
   const showAttackersForSquare = useCallback((square: Square) => {
     const newArrows: Arrow[] = [];
 
@@ -38,6 +34,15 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
     newArrows.push(
       ...createArrowsFromAttackers(blackAttackers, square, blackArrowColor)
     );
+
+    // Sort by arrow length so longer arrows are drawn last (on top)
+    newArrows.sort((a, b) => {
+      const aLen = Math.pow(a.endSquare.charCodeAt(0) - a.startSquare.charCodeAt(0), 2) +
+                   Math.pow(parseInt(a.endSquare[1]) - parseInt(a.startSquare[1]), 2);
+      const bLen = Math.pow(b.endSquare.charCodeAt(0) - b.startSquare.charCodeAt(0), 2) +
+                   Math.pow(parseInt(b.endSquare[1]) - parseInt(b.startSquare[1]), 2);
+      return aLen - bLen;
+    });
 
     setArrows(newArrows);
   }, [chessGame, whiteArrowColor, blackArrowColor]);
@@ -102,6 +107,15 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
       if (!markExists) {
         newMarks.push({ square, color: arrowColor });
       }
+    });
+
+    // Sort by arrow length so longer arrows are drawn last (on top)
+    newArrows.sort((a, b) => {
+      const aLen = Math.pow(a.endSquare.charCodeAt(0) - a.startSquare.charCodeAt(0), 2) +
+                   Math.pow(parseInt(a.endSquare[1]) - parseInt(a.startSquare[1]), 2);
+      const bLen = Math.pow(b.endSquare.charCodeAt(0) - b.startSquare.charCodeAt(0), 2) +
+                   Math.pow(parseInt(b.endSquare[1]) - parseInt(b.startSquare[1]), 2);
+      return aLen - bLen;
     });
 
     setArrows(newArrows);
