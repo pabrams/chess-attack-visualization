@@ -17,7 +17,7 @@
   background-color: var(--color-bg-light);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-dialog);
   min-width: 300px;
 }
 

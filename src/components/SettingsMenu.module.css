@@ -68,7 +68,7 @@
 }
 
 .menuButton:hover {
-  background-color: rgba(74, 158, 255, 0.2);
+  background-color: var(--menu-button-hover);
 }
 
 .menuButtonLight {
@@ -76,7 +76,7 @@
 }
 
 .menuButtonLight:hover {
-  background-color: rgba(74, 158, 255, 0.1);
+  background-color: var(--menu-button-light-hover);
 }
 
 .themeButton {

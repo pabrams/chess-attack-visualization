@@ -78,6 +78,18 @@
   --opacity-shadow-light: 0.15;
   --opacity-shadow-dark: 0.3;
 
+  /* Board Move Indicators */
+  --board-legal-move-bg: radial-gradient(circle, rgba(0, 0, 0, 0.3) 25%, transparent 25%);
+  --board-last-move-bg: rgba(255, 255, 0, 0.4);
+  --board-pending-move-bg: rgba(0, 255, 0, 0.5);
+
+  /* Menu Button Colors */
+  --menu-button-hover: rgba(74, 158, 255, 0.2);
+  --menu-button-light-hover: rgba(74, 158, 255, 0.1);
+
+  /* Shadows */
+  --shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.3);
+
   /* Light Theme (default) - Chess Board & Arrow Colors */
   --chess-page-bg: #ffffff;
   --chess-page-fg: #000000;

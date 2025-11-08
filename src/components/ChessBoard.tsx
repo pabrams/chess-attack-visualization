@@ -40,7 +40,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   }, []);
 
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
-    styles[square] = BOARD_STYLES.LEGAL_MOVE;
+    styles[square] = BOARD_STYLES.LEGAL_MOVE();
     return styles;
   }, {} as Record<string, any>) : {};
 
@@ -65,10 +65,10 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
     squareStyles: {
       ...legalMoveStyles,
       ...(props.lastMove ? {
-        [props.lastMove.from]: BOARD_STYLES.LAST_MOVE,
-        [props.lastMove.to]: BOARD_STYLES.LAST_MOVE,
+        [props.lastMove.from]: BOARD_STYLES.LAST_MOVE(),
+        [props.lastMove.to]: BOARD_STYLES.LAST_MOVE(),
       } : {}),
-      ...(props.pendingMove ? { [props.pendingMove.sourceSquare]: BOARD_STYLES.PENDING_MOVE } : {}),
+      ...(props.pendingMove ? { [props.pendingMove.sourceSquare]: BOARD_STYLES.PENDING_MOVE() } : {}),
     },
   };
 
