@@ -1,38 +1,40 @@
+@import '../styles/variables.css';
+
 .overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: var(--color-overlay-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: var(--z-modal);
 }
 
 .dialog {
-  background-color: white;
-  border-radius: 12px;
-  padding: 24px;
+  background-color: var(--color-bg-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   min-width: 300px;
 }
 
 .dark {
-  background-color: #2a2a2a;
-  color: #ffffff;
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-dark);
 }
 
 .dialog h3 {
-  margin: 0 0 16px 0;
+  margin: 0 0 var(--spacing-lg) 0;
   font-size: 18px;
   text-align: center;
 }
 
 .pieces {
   display: flex;
-  gap: 12px;
+  gap: var(--spacing-md);
   justify-content: center;
 }
 
@@ -40,30 +42,30 @@
   width: 60px;
   height: 60px;
   font-size: 36px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  background-color: #f5f5f5;
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-secondary-light);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-quick);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .dark .button {
-  background-color: #3a3a3a;
-  border-color: #555;
+  background-color: var(--color-bg-secondary-dark);
+  border-color: var(--color-border-dark);
 }
 
 .button:hover {
-  background-color: #e0e0e0;
-  border-color: #999;
+  background-color: var(--color-border-light);
+  border-color: var(--color-border-secondary-light);
   transform: scale(1.1);
 }
 
 .dark .button:hover {
-  background-color: #4a4a4a;
-  border-color: #777;
+  background-color: var(--color-bg-tertiary-dark);
+  border-color: var(--color-border-secondary-dark);
 }
 
 .button:active {

@@ -8,6 +8,8 @@ import { getCustomPieces } from './customPieces';
 import { CustomArrowOverlay } from './CustomArrowOverlay';
 import { OPACITY } from '../constants/opacity';
 
+import { BOARD_STYLES } from '../constants/boardStyles';
+
 interface ChessBoardProps {
   fen: string;
   arrows: Arrow[];
@@ -40,10 +42,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   }, []);
 
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
-    styles[square] = {
-      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.3) 25%, transparent 25%)',
-      borderRadius: '50%',
-    };
+    styles[square] = BOARD_STYLES.LEGAL_MOVE;
     return styles;
   }, {} as Record<string, any>) : {};
 
@@ -59,19 +58,19 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
     allowDrawingArrows: false,
     darkSquareStyle: {
       backgroundColor: currentThemeColors.darkSquareColor,
-      border: 'none',
+      ...BOARD_STYLES.SQUARE_DEFAULTS,
     },
     lightSquareStyle: {
       backgroundColor: currentThemeColors.lightSquareColor,
-      border: 'none',
+      ...BOARD_STYLES.SQUARE_DEFAULTS,
     },
     squareStyles: {
       ...legalMoveStyles,
       ...(props.lastMove ? {
-        [props.lastMove.from]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
-        [props.lastMove.to]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
+        [props.lastMove.from]: BOARD_STYLES.LAST_MOVE,
+        [props.lastMove.to]: BOARD_STYLES.LAST_MOVE,
       } : {}),
-      ...(props.pendingMove ? { [props.pendingMove.sourceSquare]: { backgroundColor: 'rgba(0, 255, 0, 0.5)' } } : {}),
+      ...(props.pendingMove ? { [props.pendingMove.sourceSquare]: BOARD_STYLES.PENDING_MOVE } : {}),
     },
   };
 

@@ -1,27 +1,25 @@
-:root {
-  --opacity-panel: 0.8;
-}
+@import '../styles/variables.css';
 
 .wrapper {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-md);
   width: 100%;
 }
 
 .playerInfoContainer {
-  border: 1px solid #888;
-  border-radius: 4px;
-  padding: 12px;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
   flex-shrink: 0;
   width: 100%;
   box-sizing: border-box;
 }
 
 .historyContainer {
-  border: 1px solid #888;
-  border-radius: 4px;
-  padding: 12px;
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -33,8 +31,8 @@
 .moveInstruction {
   text-align: center;
   font-size: 16px;
-  margin-bottom: 12px;
-  padding: 8px;
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
 }
 
 .playerInfoContent {
@@ -48,7 +46,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-xs);
 }
 
 .ratingLabel {
@@ -61,18 +59,18 @@
 .ratingValue {
   font-size: 72px;
   font-weight: 700;
-  color: #4a9eff;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  color: var(--color-info);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, var(--opacity-shadow-dark));
   line-height: 1;
-  transition: color 0.3s ease;
+  transition: color var(--transition-normal) ease;
 }
 
 .ratingSuccess {
-  color: #4caf50 !important;
+  color: var(--color-success) !important;
 }
 
 .ratingFailure {
-  color: #f44336 !important;
+  color: var(--color-failure) !important;
 }
 
 .levelLabel {
@@ -80,14 +78,14 @@
   font-weight: 500;
   opacity: var(--opacity-panel);
   text-transform: capitalize;
-  margin-top: 4px;
+  margin-top: var(--spacing-xs);
 }
 
 .puzzleStats {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-xs);
 }
 
 .puzzleStatsLabel {
@@ -131,18 +129,18 @@
 .table thead {
   position: sticky;
   top: 0;
-  background-color: #333;
+  background-color: var(--color-bg-secondary-dark);
   color: white;
   z-index: 1;
 }
 
 .table.tableLight thead {
-  background-color: #cccccc;
-  color: #000000;
+  background-color: var(--color-bg-header-light);
+  color: var(--color-text-light);
 }
 
 .table th {
-  padding: 8px;
+  padding: var(--spacing-sm);
   text-align: center;
   font-weight: 600;
   border-bottom: 2px solid #666;
@@ -152,9 +150,9 @@
 }
 
 .table td {
-  padding: 8px;
+  padding: var(--spacing-sm);
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .darkRow {
@@ -162,7 +160,7 @@
 }
 
 .darkRow:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(255, 255, 255, var(--opacity-hover-light));
 }
 
 .lightRow {
@@ -170,11 +168,11 @@
 }
 
 .lightRow:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 0, 0, var(--opacity-hover-light));
 }
 
 .puzzleLink {
-  color: #4a9eff;
+  color: var(--color-info);
   text-decoration: none;
 }
 
@@ -183,52 +181,52 @@
 }
 
 .positiveChange {
-  color: #4caf50;
+  color: var(--color-success);
   font-weight: 600;
 }
 
 .negativeChange {
-  color: #f44336;
+  color: var(--color-failure);
   font-weight: 600;
 }
 
 .success {
-  color: #4caf50;
+  color: var(--color-success);
   font-size: 18px;
   font-weight: bold;
 }
 
 .failure {
-  color: #f44336;
+  color: var(--color-failure);
   font-size: 18px;
   font-weight: bold;
 }
 
 .emptyState {
-  padding: 20px;
+  padding: var(--spacing-2xl);
   text-align: center;
-  color: #999;
+  color: var(--color-border-tertiary-light);
   font-style: italic;
 }
 
 .loadingMore {
-  padding: 12px;
+  padding: var(--spacing-md);
   text-align: center;
-  color: #999;
+  color: var(--color-border-tertiary-light);
   font-size: 12px;
   font-style: italic;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--color-border-light);
   cursor: pointer;
   user-select: none;
 }
 
 .loadingMore:hover {
-  color: #666;
-  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--color-border-tertiary-dark);
+  background-color: rgba(255, 255, 255, var(--opacity-hover-light));
 }
 
 .table td.rowNumber {
-  color: #999;
+  color: var(--color-border-tertiary-light);
   font-size: 12px;
   font-weight: 500;
   text-align: left;

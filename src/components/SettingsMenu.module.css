@@ -1,3 +1,5 @@
+@import '../styles/variables.css';
+
 .container {
   position: relative;
 }
@@ -10,23 +12,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #E0E0E0;
-  transition: color 0.2s ease, transform 0.2s ease;
-  border-radius: 4px;
+  color: var(--color-text-muted-dark);
+  transition: color var(--transition-quick) ease, transform var(--transition-quick) ease;
+  border-radius: var(--radius-sm);
 }
 
 .gearButton:hover {
-  color: #4a9eff;
+  color: var(--color-info);
   transform: scale(1.05);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, var(--opacity-hover-dark));
 }
 
 .gearButtonLight {
-  color: #000000;
+  color: var(--color-text-light);
 }
 
 .gearButtonLight:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, var(--opacity-hover-dark));
 }
 
 .dropdown {
@@ -34,20 +36,20 @@
   top: 100%;
   right: 0;
   margin-top: -0.25rem;
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  background-color: var(--color-bg-dark);
+  border: 1px solid var(--color-border-tertiary-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, var(--opacity-shadow-dark));
   min-width: 200px;
-  z-index: 10000;
+  z-index: var(--z-dropdown-menu);
   padding-top: 0.75rem;
   overflow: hidden;
 }
 
 .dropdownLight {
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: var(--color-bg-light);
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, var(--opacity-shadow-light));
 }
 
 .menuButton {
@@ -59,10 +61,10 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #ffffff;
+  color: var(--color-text-dark);
   font-size: 14px;
   text-align: left;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--transition-quick) ease;
 }
 
 .menuButton:hover {
@@ -70,7 +72,7 @@
 }
 
 .menuButtonLight {
-  color: #000000;
+  color: var(--color-text-light);
 }
 
 .menuButtonLight:hover {
@@ -78,11 +80,11 @@
 }
 
 .themeButton {
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid var(--color-border-tertiary-dark);
 }
 
 .themeButtonLight {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .icon {
