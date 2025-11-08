@@ -20,6 +20,10 @@
   --opacity-medium: 0.6;
   --opacity-text: 0.8;
   --opacity-overlay: 0.7;
+  --opacity-arrow: 1;
+  --opacity-x-mark: 0.5;
+  --opacity-x-mark-border: 0.3;
+  --opacity-panel: 0.8;
 
   /* Transitions */
   --transition-quick: 0.2s;

@@ -6,8 +6,6 @@ import { UserColor } from '../types/drill';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { getCustomPieces } from './customPieces';
 import { CustomArrowOverlay } from './CustomArrowOverlay';
-import { OPACITY } from '../constants/opacity';
-
 import { BOARD_STYLES } from '../constants/boardStyles';
 
 interface ChessBoardProps {
@@ -89,7 +87,6 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
           marks={props.marks}
           boardSize={boardSize}
           boardOrientation={props.boardOrientation ?? 'white'}
-          opacity={OPACITY.ARROW}
           isDarkTheme={theme === 'dark'}
         />
       )}

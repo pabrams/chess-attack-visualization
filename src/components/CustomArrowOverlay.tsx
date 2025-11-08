@@ -1,7 +1,6 @@
 import React from 'react';
 import { getRelativeCoords } from 'react-chessboard';
 import { Arrow, Mark } from '../types/arrows';
-import { OPACITY } from '../constants/opacity';
 
 interface CustomArrowOverlayProps {
   arrows: Arrow[];
@@ -89,6 +88,10 @@ const drawArrowHead = (
   ctx.fill();
 };
 
+const getCSSVariable = (varName: string): string => {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+};
+
 const drawXMark = (
   ctx: CanvasRenderingContext2D,
   centerX: number,
@@ -96,13 +99,15 @@ const drawXMark = (
   color: string,
   size: number = 35,
   lineWidth: number = 4,
-  borderColor: string = 'black'
+  borderColor: string = 'black',
+  xMarkOpacity: number = 0.5,
+  xMarkBorderOpacity: number = 0.3
 ) => {
   const offset = size / 2;
   const borderWidth = 2;
 
   ctx.strokeStyle = borderColor;
-  ctx.globalAlpha = OPACITY.X_MARK_BORDER;
+  ctx.globalAlpha = xMarkBorderOpacity;
   ctx.lineWidth = lineWidth + borderWidth;
   ctx.lineCap = 'round';
 
@@ -117,7 +122,7 @@ const drawXMark = (
   ctx.stroke();
 
   ctx.strokeStyle = color;
-  ctx.globalAlpha = OPACITY.X_MARK;
+  ctx.globalAlpha = xMarkOpacity;
   ctx.lineWidth = lineWidth;
 
   ctx.beginPath();
@@ -138,7 +143,7 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
   marks = [],
   boardSize,
   boardOrientation = 'white',
-  opacity = OPACITY.ARROW,
+  opacity,
   isDarkTheme = false,
 }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -150,12 +155,16 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const arrowOpacity = parseFloat(getCSSVariable('--opacity-arrow')) || 1;
+    const xMarkOpacity = parseFloat(getCSSVariable('--opacity-x-mark')) || 0.5;
+    const xMarkBorderOpacity = parseFloat(getCSSVariable('--opacity-x-mark-border')) || 0.3;
+
     const borderColor = isDarkTheme ? 'white' : 'black';
     ctx.clearRect(0, 0, boardSize, boardSize);
 
     marks.forEach((mark) => {
       const coords = squareToCoords(mark.square, boardSize, boardOrientation);
-      drawXMark(ctx, coords.x, coords.y, mark.color, boardSize / 14, boardSize / 80, borderColor);
+      drawXMark(ctx, coords.x, coords.y, mark.color, boardSize / 14, boardSize / 80, borderColor, xMarkOpacity, xMarkBorderOpacity);
     });
 
     const sortedArrows = [...arrows].sort((a, b) => {
@@ -177,11 +186,11 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const headSize = boardSize / 20;
       const lineWidth = boardSize / 60;
 
-      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, borderColor, lineWidth, OPACITY.ARROW);
+      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, borderColor, lineWidth, arrowOpacity);
     });
 
     ctx.globalAlpha = 1;
-  }, [arrows, marks, boardSize, boardOrientation, opacity, isDarkTheme]);
+  }, [arrows, marks, boardSize, boardOrientation, isDarkTheme]);
 
   return (
     <canvas
