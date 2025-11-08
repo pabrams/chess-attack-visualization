@@ -77,4 +77,24 @@
   --opacity-hover-dark: 0.1;
   --opacity-shadow-light: 0.15;
   --opacity-shadow-dark: 0.3;
+
+  /* Light Theme (default) - Chess Board & Arrow Colors */
+  --chess-page-bg: #ffffff;
+  --chess-page-fg: #000000;
+  --chess-light-square: #f0d9b5;
+  --chess-dark-square: #b58863;
+  --chess-white-arrow: #0066cc;
+  --chess-black-arrow: #cc0033;
+  --chess-arrow-border: #000000;
+}
+
+[data-theme="dark"] {
+  /* Dark Theme - Chess Board & Arrow Colors */
+  --chess-page-bg: #000000;
+  --chess-page-fg: #ffffff;
+  --chess-light-square: #444444;
+  --chess-dark-square: #000000;
+  --chess-white-arrow: #0088ff;
+  --chess-black-arrow: #aa0033;
+  --chess-arrow-border: #ffffff;
 }
