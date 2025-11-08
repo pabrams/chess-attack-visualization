@@ -5,6 +5,7 @@ import { Arrow } from '../types/arrows';
 import { UserColor } from '../types/drill';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { getCustomPieces } from './customPieces';
+import { CustomArrowOverlay } from './CustomArrowOverlay';
 
 interface ChessBoardProps {
   fen: string;
@@ -20,6 +21,21 @@ interface ChessBoardProps {
 export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   const { theme, currentThemeColors } = useThemeContext();
   const customPieces = getCustomPieces(theme);
+  const [boardSize, setBoardSize] = React.useState(400);
+  const boardContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (boardContainerRef.current) {
+        const size = boardContainerRef.current.offsetWidth;
+        setBoardSize(size);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
     styles[square] = {
@@ -33,23 +49,12 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
     onPieceDrop: props.onPieceDrop,
     onSquareClick: props.onSquareClick,
     onSquareRightClick: props.onSquareRightClick,
-    arrows: props.arrows,
+    arrows: [],
     id: 'chessboard-options',
     position: props.fen,
     boardOrientation: props.boardOrientation ?? 'white',
     ...(customPieces && { pieces: customPieces }),
     allowDrawingArrows: false,
-    arrowOptions: {
-      color: 'yellow',
-      secondaryColor: 'red',
-      tertiaryColor: 'blue',
-      arrowLengthReducerDenominator: 1000,
-      sameTargetArrowLengthReducerDenominator: 3,
-      arrowWidthDenominator: 8,
-      activeArrowWidthMultiplier: 1.5,
-      opacity: 0.9,
-      activeOpacity: 0.6,
-    },
     darkSquareStyle: {
       backgroundColor: currentThemeColors.darkSquareColor,
       border: 'none',
@@ -69,9 +74,22 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   };
 
   return (
-    <Chessboard 
-      options={chessboardOptions} 
-      data-testid="chessboard" 
-    />
+    <div
+      ref={boardContainerRef}
+      style={{ position: 'relative', display: 'inline-block', width: '100%' }}
+    >
+      <Chessboard
+        options={chessboardOptions}
+        data-testid="chessboard"
+      />
+      {boardSize > 0 && (
+        <CustomArrowOverlay
+          arrows={props.arrows}
+          boardSize={boardSize}
+          boardOrientation={props.boardOrientation ?? 'white'}
+          opacity={0.9}
+        />
+      )}
+    </div>
   );
 };
