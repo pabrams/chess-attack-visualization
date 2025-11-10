@@ -5,7 +5,5 @@ export interface ThemeColors {
   pageForegroundColor: string;
   lightSquareColor: string;
   darkSquareColor: string;
-  whiteArrowColor: string;
-  blackArrowColor: string;
   arrowBorderColor: string;
 }

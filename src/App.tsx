@@ -25,8 +25,6 @@ const App = () => {
 
   const arrows = useArrows({
     chessGame,
-    whiteArrowColor: currentThemeColors.whiteArrowColor,
-    blackArrowColor: currentThemeColors.blackArrowColor,
   });
 
   const handleSquareRightClick = useCallback((args: SquareHandlerArgs) => {

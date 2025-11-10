@@ -9,11 +9,14 @@ import type { ChessGame } from './useChessGame';
 
 interface UseArrowsProps {
   chessGame: ChessGame;
-  whiteArrowColor: string;
-  blackArrowColor: string;
 }
 
-export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseArrowsProps) => {
+export const useArrows = ({ chessGame }: UseArrowsProps) => {
+  const getCSSVar = (name: string) =>
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  const whiteArrowColor = getCSSVar('--chess-white-arrow');
+  const blackArrowColor = getCSSVar('--chess-black-arrow');
   const [arrows, setArrows] = useState<Arrow[]>([]);
   const [marks, setMarks] = useState<Mark[]>([]);
 
@@ -35,7 +38,6 @@ export const useArrows = ({ chessGame, whiteArrowColor, blackArrowColor }: UseAr
       ...createArrowsFromAttackers(blackAttackers, square, blackArrowColor)
     );
 
-    // Sort by arrow length so longer arrows are drawn last (on top)
     newArrows.sort((a, b) => {
       const aLen = Math.pow(a.endSquare.charCodeAt(0) - a.startSquare.charCodeAt(0), 2) +
                    Math.pow(parseInt(a.endSquare[1]) - parseInt(a.startSquare[1]), 2);

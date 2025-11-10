@@ -13,7 +13,7 @@ interface InfoPanelLayoutProps {
 }
 
 export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
-  const { theme, currentThemeColors } = useThemeContext();
+  const { theme } = useThemeContext();
   const {
     sortedAttempts,
     visibleAttempts,
@@ -29,7 +29,12 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
       <fieldset className={styles.playerInfoContainer}>
         <legend>Monkey Drill Info</legend>
         <div className={styles.moveInstruction}>
-          Move the <span style={{ color: props.userColor === 'white' ? currentThemeColors.whiteArrowColor : currentThemeColors.blackArrowColor, fontWeight: 'bold' }}>
+          Move the <span style={{
+            color: props.userColor === 'white' ?
+              getComputedStyle(document.documentElement).getPropertyValue('--chess-white-arrow').trim() :
+              getComputedStyle(document.documentElement).getPropertyValue('--chess-black-arrow').trim(),
+            fontWeight: 'bold'
+          }}>
             {props.userColor}
           </span> pieces
         </div>

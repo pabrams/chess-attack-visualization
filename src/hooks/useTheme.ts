@@ -20,8 +20,6 @@ export const useTheme = () => {
       pageForegroundColor: getCSSVar('--chess-page-fg'),
       lightSquareColor: getCSSVar('--chess-light-square'),
       darkSquareColor: getCSSVar('--chess-dark-square'),
-      whiteArrowColor: getCSSVar('--chess-white-arrow'),
-      blackArrowColor: getCSSVar('--chess-black-arrow'),
       arrowBorderColor: getCSSVar('--chess-arrow-border'),
     } as ThemeColors;
   }, [theme]);
