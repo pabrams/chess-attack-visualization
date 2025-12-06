@@ -95,8 +95,8 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, 
   }, []);
 
   const loadPuzzleOnBoard = useCallback((puzzle: LichessPuzzle) => {
-    const setupMove = (puzzle as any)._setupMove;
-    const fen = (puzzle as any)._fen;
+    const setupMove = puzzle._setupMove;
+    const fen = puzzle._fen;
 
     if (!setupMove || !fen) return;
 
@@ -105,11 +105,11 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, 
 
     setTimeout(() => {
       const tempChess = new Chess(fen);
-      const from = setupMove.substring(0, 2);
-      const to = setupMove.substring(2, 4);
-      const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
+      const from = setupMove.substring(0, 2) as Square;
+      const to = setupMove.substring(2, 4) as Square;
+      const promotion = setupMove.length > 4 ? setupMove.substring(4) as 'n' | 'b' | 'r' | 'q' : undefined;
 
-      const move = tempChess.move({ from, to, promotion: promotion as any });
+      const move = tempChess.move({ from, to, promotion });
       if (move) {
         chessGame.loadPgn(tempChess.pgn());
         onPuzzleLoad?.();

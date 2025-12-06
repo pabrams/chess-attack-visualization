@@ -57,4 +57,6 @@ export interface LichessPuzzle {
     solution: string[];
     themes: string[];
   };
+  _fen?: string;
+  _setupMove?: string;
 }

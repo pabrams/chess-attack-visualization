@@ -26,5 +26,5 @@ export const convertToLichessPuzzleFormat = (rawPuzzles: RawPuzzle[]): LichessPu
     },
     _fen: p.fen,
     _setupMove: p.setupMove,
-  } as LichessPuzzle & { _fen?: string; _setupMove?: string }));
+  }));
 };
