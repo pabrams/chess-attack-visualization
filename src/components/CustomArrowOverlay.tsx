@@ -7,7 +7,6 @@ interface CustomArrowOverlayProps {
   marks?: Mark[];
   boardSize: number;
   boardOrientation?: 'white' | 'black';
-  opacity?: number;
   arrowBorderColor?: string;
 }
 
@@ -143,7 +142,6 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
   marks = [],
   boardSize,
   boardOrientation = 'white',
-  opacity,
   arrowBorderColor = '#000000',
 }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);

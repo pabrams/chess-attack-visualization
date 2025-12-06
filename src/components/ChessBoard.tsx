@@ -1,7 +1,7 @@
 import React from 'react';
 import { Square } from 'chess.js';
 import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
-import { Arrow } from '../types/arrows';
+import { Arrow, Mark } from '../types/arrows';
 import { UserColor } from '../types/drill';
 import { useThemeContext } from '../hooks/useThemeContext';
 import { getCustomPieces } from './customPieces';
@@ -11,7 +11,7 @@ import { BOARD_STYLES } from '../utils/boardStyles';
 interface ChessBoardProps {
   fen: string;
   arrows: Arrow[];
-  marks?: any[];
+  marks?: Mark[];
   lastMove: { from: Square; to: Square } | null;
   pendingMove: { sourceSquare: Square; legalTargets: Square[] } | null;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
@@ -42,7 +42,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
     styles[square] = BOARD_STYLES.LEGAL_MOVE();
     return styles;
-  }, {} as Record<string, any>) : {};
+  }, {} as Record<Square, React.CSSProperties>) : {};
 
   const chessboardOptions = {
     onPieceDrop: props.onPieceDrop,
