@@ -1,7 +1,6 @@
 const LICHESS_HOST = 'https://lichess.org';
 const CLIENT_ID = 'monkey-drill';
 
-// Helper function to convert base64 to base64url encoding
 function toBase64Url(base64: string): string {
   return base64
     .replace(/\+/g, '-')
@@ -9,7 +8,6 @@ function toBase64Url(base64: string): string {
     .replace(/=/g, '');
 }
 
-// Manual PKCE implementation
 function generateCodeVerifier() {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
@@ -24,11 +22,9 @@ async function generateCodeChallenge(verifier: string) {
 }
 
 export const login = async () => {
-  // Clear any existing code verifier first
   sessionStorage.removeItem('codeVerifier');
   
   try {
-    // Generate PKCE challenge manually
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
     
@@ -45,8 +41,6 @@ export const login = async () => {
     authUrl.searchParams.set('scope', 'preference:read');
     authUrl.searchParams.set('code_challenge_method', 'S256');
     authUrl.searchParams.set('code_challenge', codeChallenge);
-
-    // Store verifier in session storage
     sessionStorage.setItem('codeVerifier', codeVerifier);
     window.location.href = authUrl.toString();
   } catch (error) {
@@ -88,7 +82,6 @@ export const handleRedirect = async () => {
       console.error('Failed to exchange authorization code for access token');
       console.error('Response status:', response.status);
       console.error('Response body:', errorText);
-      // Clean up the URL and session storage
       window.history.replaceState({}, document.title, window.location.pathname);
       sessionStorage.removeItem('codeVerifier');
       return null;

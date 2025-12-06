@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { Square } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
@@ -31,7 +31,6 @@ const App = () => {
     if (!args.square) return;
 
     const clickedSquare = args.square as Square;
-    // Toggle arrows off if clicking the same square again
     if (arrows.arrows.length > 0 && arrows.arrows.every(arrow =>
       arrow.endSquare === clickedSquare
     )) {

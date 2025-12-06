@@ -7,8 +7,6 @@ export const usePuzzleStats = (attempts: PuzzleAttempt[]) => {
   const sortedAttempts = [...attempts].sort((a, b) => b.timestamp - a.timestamp);
 
   const [displayCount, setDisplayCount] = useState(LAZY_RECORD_COUNT);
-
-  // Reset display count when attempts list shrinks below current display
   const effectiveDisplayCount = sortedAttempts.length < displayCount ? LAZY_RECORD_COUNT : displayCount;
 
   const handleLoadMore = () => {
