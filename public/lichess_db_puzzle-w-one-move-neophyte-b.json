@@ -3,7 +3,7 @@
   "_license": "CC0 Public Domain",
   "_url": "https://database.lichess.org/#puzzles",
   "_generated": "2025-10-19T15:00:51.468Z",
-  "_count": 10,
+  "_count": 9,
   "_level": "neophyte",
   "_ratingRange": "400-799",
   "puzzles": [
@@ -108,18 +108,6 @@
         "opening"
       ],
       "gameUrl": "https://lichess.org/qhPPzoRY/black#22"
-    },
-    {
-      "id": "endVo",
-      "fen": "r4rk1/1ppn2pp/3n1q2/pP1P2N1/2P5/P2Q4/2KB3P/4R2R b - - 1 23",
-      "setupMove": "d7c5",
-      "solution": "d3h7",
-      "rating": 637,
-      "themes": [
-        "master",
-        "middlegame"
-      ],
-      "gameUrl": "https://lichess.org/8pe7K633/black#46"
     },
     {
       "id": "ep7hw",

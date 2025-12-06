@@ -3,7 +3,7 @@
   "_license": "CC0 Public Domain",
   "_url": "https://database.lichess.org/#puzzles",
   "_generated": "2025-10-19T15:00:52.118Z",
-  "_count": 10,
+  "_count": 9,
   "_level": "adept",
   "_ratingRange": "1400-1599",
   "puzzles": [
@@ -94,19 +94,6 @@
         "queensideAttack"
       ],
       "gameUrl": "https://lichess.org/puzkX59H/black#60"
-    },
-    {
-      "id": "0sQ11",
-      "fen": "2k3rr/1ppqn3/p2p3b/1P1Pp2p/P1N1Rp1N/2P5/5PPP/R2Q2K1 b - - 0 20",
-      "setupMove": "a6b5",
-      "solution": "a4b5",
-      "rating": 1400,
-      "themes": [
-        "equality",
-        "middlegame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/CCNQ7zqs/black#40"
     },
     {
       "id": "1fasw",

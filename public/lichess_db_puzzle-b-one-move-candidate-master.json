@@ -3,24 +3,10 @@
   "_license": "CC0 Public Domain",
   "_url": "https://database.lichess.org/#puzzles",
   "_generated": "2025-10-19T15:00:50.769Z",
-  "_count": 10,
+  "_count": 6,
   "_level": "candidate-master",
   "_ratingRange": "2000-2199",
   "puzzles": [
-    {
-      "id": "oobKR",
-      "fen": "3r3k/qp1B2p1/p3Q2p/2Pp4/5P2/P7/1P4PP/6K1 w - - 1 26",
-      "setupMove": "e6d5",
-      "solution": "b7b5",
-      "rating": 2000,
-      "themes": [
-        "crushing",
-        "defensiveMove",
-        "endgame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/THyvrILV#51"
-    },
     {
       "id": "tuShd",
       "fen": "8/8/8/8/1PpBbk1P/2P1R2K/3r4/8 w - - 4 42",
@@ -92,45 +78,6 @@
         "oneMove"
       ],
       "gameUrl": "https://lichess.org/HhW9j5Mz#69"
-    },
-    {
-      "id": "TcfJT",
-      "fen": "7r/1kp2QR1/1pr5/p2p1P2/3Pq3/2B5/PPP5/2KR4 w - - 1 27",
-      "setupMove": "g7g6",
-      "solution": "h8h2",
-      "rating": 2002,
-      "themes": [
-        "advantage",
-        "middlegame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/zEF3DQk2#53"
-    },
-    {
-      "id": "cGNor",
-      "fen": "8/5ppk/1b5p/4P3/QP3P2/6PP/Pq2NK2/8 w - - 1 45",
-      "setupMove": "f2f3",
-      "solution": "b2b1",
-      "rating": 2002,
-      "themes": [
-        "endgame",
-        "equality",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/GE4xMXKu#89"
-    },
-    {
-      "id": "kb583",
-      "fen": "4r1k1/1pb2ppp/p1p1r3/8/1P6/PQ3R1P/1BP1qPP1/5RK1 w - - 2 25",
-      "setupMove": "b3c3",
-      "solution": "c7e5",
-      "rating": 2002,
-      "themes": [
-        "advantage",
-        "middlegame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/haaF15sZ#49"
     },
     {
       "id": "GEXXC",

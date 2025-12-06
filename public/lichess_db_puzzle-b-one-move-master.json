@@ -3,7 +3,7 @@
   "_license": "CC0 Public Domain",
   "_url": "https://database.lichess.org/#puzzles",
   "_generated": "2025-10-19T15:00:50.770Z",
-  "_count": 10,
+  "_count": 6,
   "_level": "master",
   "_ratingRange": "2200-2399",
   "puzzles": [
@@ -37,19 +37,6 @@
       "gameUrl": "https://lichess.org/haRfKn2K#103"
     },
     {
-      "id": "cYEtT",
-      "fen": "5rk1/p1Q1R1pp/1p4b1/2p3q1/8/3P4/PP3P2/5RK1 w - - 0 29",
-      "setupMove": "g1h2",
-      "solution": "g6d3",
-      "rating": 2206,
-      "themes": [
-        "crushing",
-        "endgame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/Y2qh2HCG#57"
-    },
-    {
       "id": "BUH6U",
       "fen": "8/8/1R4r1/5k1p/1P1P3P/2rn1KB1/5P2/1R6 w - - 2 36",
       "setupMove": "b6g6",
@@ -63,33 +50,6 @@
         "oneMove"
       ],
       "gameUrl": "https://lichess.org/bsunDmqq#71"
-    },
-    {
-      "id": "k0nc4",
-      "fen": "1k6/pp1q4/5Q2/3p3p/1P2r2r/6N1/1P3PK1/2RR4 w - - 0 32",
-      "setupMove": "d1d5",
-      "solution": "d7d5",
-      "rating": 2208,
-      "themes": [
-        "advantage",
-        "hangingPiece",
-        "middlegame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/7C1HmilR#63"
-    },
-    {
-      "id": "CneXf",
-      "fen": "r2qk2r/1p1bp2p/p5pb/3pR3/2Bn4/2Q5/PPPP1PPP/R1B3K1 w kq - 0 14",
-      "setupMove": "c3d4",
-      "solution": "d5c4",
-      "rating": 2215,
-      "themes": [
-        "advantage",
-        "middlegame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/8oO7rt7R#27"
     },
     {
       "id": "m8BAQ",
@@ -133,20 +93,6 @@
         "queenEndgame"
       ],
       "gameUrl": "https://lichess.org/03KguIHd#141"
-    },
-    {
-      "id": "CipKv",
-      "fen": "2r2rk1/1b2bppp/pq2N3/1p1pn3/4nPP1/2P1BQ2/PPB1N2P/R4RK1 w - - 0 19",
-      "setupMove": "f4e5",
-      "solution": "b6e6",
-      "rating": 2223,
-      "themes": [
-        "equality",
-        "hangingPiece",
-        "middlegame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/ODiSBu5x#37"
     }
   ]
 }

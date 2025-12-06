@@ -3,22 +3,8 @@
   "_license": "CC0 Public Domain",
   "_url": "https://database.lichess.org/#puzzles",
   "_generated": "2025-10-19T15:00:50.770Z",
-  "_count": 10,
+  "_count": 0,
   "_level": "super-grandmaster",
   "_ratingRange": "2600-2999",
-  "puzzles": [
-    {
-      "id": "mLOII",
-      "fen": "rnb2rk1/4p1bp/2pp2p1/8/1p1PP2R/2N1PNq1/1PPQB1P1/2K4R w - - 0 17",
-      "setupMove": "c3a2",
-      "solution": "c8e6",
-      "rating": 2656,
-      "themes": [
-        "advantage",
-        "middlegame",
-        "oneMove"
-      ],
-      "gameUrl": "https://lichess.org/JOD9eOhM#33"
-    }
-  ]
+  "puzzles": []
 }

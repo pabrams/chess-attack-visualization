@@ -3,7 +3,7 @@
   "_license": "CC0 Public Domain",
   "_url": "https://database.lichess.org/#puzzles",
   "_generated": "2025-10-19T15:00:50.770Z",
-  "_count": 10,
+  "_count": 1,
   "_level": "grandmaster",
   "_ratingRange": "2400-2599",
   "puzzles": [
@@ -20,20 +20,6 @@
         "oneMove"
       ],
       "gameUrl": "https://lichess.org/PtFrSqKz#33"
-    },
-    {
-      "id": "uBZOn",
-      "fen": "8/2P3pk/3Q3p/3p1q2/3P4/7P/5PK1/8 w - - 7 42",
-      "setupMove": "d6d8",
-      "solution": "f5g6",
-      "rating": 2428,
-      "themes": [
-        "endgame",
-        "equality",
-        "oneMove",
-        "queenEndgame"
-      ],
-      "gameUrl": "https://lichess.org/wGzH28Nw#83"
     }
   ]
 }
