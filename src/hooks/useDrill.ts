@@ -1,5 +1,5 @@
 import { useReducer, useCallback, useEffect, useRef } from 'react';
-import { Square, Move } from 'chess.js';
+import { Square, Move, Chess } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
 import { UserColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
@@ -62,7 +62,6 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, 
 
   const initialRatingRef = useRef(rating);
 
-  // Load puzzles on mount
   useEffect(() => {
     const loadPuzzles = async () => {
       const newUserColor = selectRandomUserColor();
@@ -96,28 +95,26 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, 
   }, []);
 
   const loadPuzzleOnBoard = useCallback((puzzle: LichessPuzzle) => {
-    import('chess.js').then(({ Chess }) => {
-      const setupMove = (puzzle as any)._setupMove;
-      const fen = (puzzle as any)._fen;
+    const setupMove = (puzzle as any)._setupMove;
+    const fen = (puzzle as any)._fen;
 
-      if (!setupMove || !fen) return;
+    if (!setupMove || !fen) return;
 
-      const success = chessGame.loadPgn(new Chess(fen).pgn());
-      if (!success) return;
+    const success = chessGame.loadPgn(new Chess(fen).pgn());
+    if (!success) return;
 
-      setTimeout(() => {
-        const tempChess = new Chess(fen);
-        const from = setupMove.substring(0, 2);
-        const to = setupMove.substring(2, 4);
-        const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
+    setTimeout(() => {
+      const tempChess = new Chess(fen);
+      const from = setupMove.substring(0, 2);
+      const to = setupMove.substring(2, 4);
+      const promotion = setupMove.length > 4 ? setupMove.substring(4) : undefined;
 
-        const move = tempChess.move({ from, to, promotion: promotion as any });
-        if (move) {
-          chessGame.loadPgn(tempChess.pgn());
-          onPuzzleLoad?.();
-        }
-      }, 600);
-    });
+      const move = tempChess.move({ from, to, promotion: promotion as any });
+      if (move) {
+        chessGame.loadPgn(tempChess.pgn());
+        onPuzzleLoad?.();
+      }
+    }, 600);
   }, [chessGame, onPuzzleLoad]);
 
   const recordResultAndLoadNext = useCallback((success: boolean) => {
