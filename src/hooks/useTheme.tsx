@@ -11,12 +11,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useLocalStorage<ThemeMode>(
-    'theme',
-    'dark',
-    (value) => (value === 'light' ? 'light' : 'dark'),
-    (value) => value
-  );
+  const [theme, setTheme] = useLocalStorage<ThemeMode>('theme', 'light');
 
   const currentThemeColors = useMemo(() => {
     const getCSSVar = (name: string) =>
@@ -39,14 +34,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  const themeValue = {
-    theme,
-    currentThemeColors,
-    toggleTheme,
-  };
-
   return (
-    <ThemeContext.Provider value={themeValue}>
+    <ThemeContext.Provider value={{ theme, currentThemeColors, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
