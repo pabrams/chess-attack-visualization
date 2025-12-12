@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { Square } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
-import { useThemeContext } from './hooks/useThemeContext';
+import { useTheme } from './hooks/useTheme';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
@@ -15,7 +15,7 @@ import './App.css';
 
 const App = () => {
   const chessGame = useChessGame();
-  const { theme, currentThemeColors, toggleTheme } = useThemeContext();
+  const { theme, currentThemeColors, toggleTheme } = useTheme();
   const { rating, addPoints } = useRating();
 
   const { attempts, lastResult, recordResult } = usePuzzleResults({

@@ -1,8 +1,16 @@
-import { useMemo, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo, useEffect } from 'react';
 import { ThemeMode, ThemeColors } from '../types';
 import { useLocalStorage } from './useLocalStorage';
 
-export const useTheme = () => {
+interface ThemeContextValue {
+  theme: ThemeMode;
+  currentThemeColors: ThemeColors;
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useLocalStorage<ThemeMode>(
     'theme',
     'dark',
@@ -11,7 +19,6 @@ export const useTheme = () => {
   );
 
   const currentThemeColors = useMemo(() => {
-    // Read CSS variables based on current theme
     const getCSSVar = (name: string) =>
       getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
@@ -32,9 +39,24 @@ export const useTheme = () => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
-  return {
+  const themeValue = {
     theme,
     currentThemeColors,
     toggleTheme,
   };
+
+  return (
+    <ThemeContext.Provider value={themeValue}>
+      {children}
+    </ThemeContext.Provider>
+  );
 };
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useTheme must be used within ThemeProvider');
+  }
+  return context;
+};
+
