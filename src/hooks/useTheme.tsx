@@ -11,7 +11,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useLocalStorage<ThemeMode>('theme', 'light');
+  const [theme, setTheme] = useLocalStorage<ThemeMode>('theme', 'dark');
 
   const currentThemeColors = useMemo(() => {
     const getCSSVar = (name: string) =>
@@ -31,7 +31,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   return (

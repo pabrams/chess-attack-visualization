@@ -55,7 +55,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
                 </svg>
               )}
             </span>
-            <span>{props.theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+            <span>{props.theme === 'light' ? 'Light Mode' : 'Dark Mode'}</span>
           </button>
 
           <button
