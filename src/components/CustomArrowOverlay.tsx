@@ -86,15 +86,16 @@ const drawArrowHead = (
   const point2X = newToX - headSize * Math.cos(newAngle + Math.PI / 6);
   const point2Y = newToY - headSize * Math.sin(newAngle + Math.PI / 6);
 
-  // Draw border
+  // Draw border on outer edges only (not on base)
   ctx.strokeStyle = borderColor;
   ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+  
   ctx.beginPath();
-  ctx.moveTo(newToX, newToY);
-  ctx.lineTo(point1X, point1Y);
+  ctx.moveTo(point1X, point1Y);
+  ctx.lineTo(newToX, newToY);
   ctx.lineTo(point2X, point2Y);
-  ctx.closePath();
   ctx.stroke();
 
   // Draw colored fill
