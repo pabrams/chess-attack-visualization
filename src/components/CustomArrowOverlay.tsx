@@ -27,18 +27,33 @@ const drawArrowHead = (
   headSize: number = 20,
   borderColor: string = 'black',
   lineWidth: number = 2,
-  opacity: number = 0.8
+  opacity: number = 0.8,
+  squareSize: number = 0
 ) => {
-  const angle = Math.atan2(toY - fromY, toX - fromX);
 
-  // Calculate shortened shaft end
+  // Calculate shortened arrow endpoints (shorten by half square size total)
   const dx = toX - fromX;
   const dy = toY - fromY;
   const distance = Math.sqrt(dx * dx + dy * dy);
-  const shaftEndDistance = distance - headSize * 1;
-  const shaftRatio = shaftEndDistance / distance;
-  const shaftEndX = fromX + dx * shaftRatio;
-  const shaftEndY = fromY + dy * shaftRatio;
+  const shortenAmount = squareSize / 2; // Half the square size
+  const shortenRatio = shortenAmount / distance;
+
+  // Move start point forward by quarter square
+  const newFromX = fromX + dx * (shortenRatio / 2);
+  const newFromY = fromY + dy * (shortenRatio / 2);
+
+  // Move end point backward by quarter square
+  const newToX = toX - dx * (shortenRatio / 2);
+  const newToY = toY - dy * (shortenRatio / 2);
+
+  // Calculate shaft end (leaving room for arrowhead)
+  const newDx = newToX - newFromX;
+  const newDy = newToY - newFromY;
+  const newDistance = Math.sqrt(newDx * newDx + newDy * newDy);
+  const shaftEndDistance = newDistance - headSize * 0.8;
+  const shaftRatio = shaftEndDistance / newDistance;
+  const shaftEndX = newFromX + newDx * shaftRatio;
+  const shaftEndY = newFromY + newDy * shaftRatio;
 
   // Draw border (thin)
   ctx.strokeStyle = borderColor;
@@ -48,7 +63,7 @@ const drawArrowHead = (
   ctx.lineJoin = 'round';
 
   ctx.beginPath();
-  ctx.moveTo(fromX, fromY);
+  ctx.moveTo(newFromX, newFromY);
   ctx.lineTo(shaftEndX, shaftEndY);
   ctx.stroke();
 
@@ -57,21 +72,23 @@ const drawArrowHead = (
   ctx.lineWidth = lineWidth;
 
   ctx.beginPath();
-  ctx.moveTo(fromX, fromY);
+  ctx.moveTo(newFromX, newFromY);
   ctx.lineTo(shaftEndX, shaftEndY);
   ctx.stroke();
 
-  const point1X = toX - headSize * Math.cos(angle - Math.PI / 6);
-  const point1Y = toY - headSize * Math.sin(angle - Math.PI / 6);
-  const point2X = toX - headSize * Math.cos(angle + Math.PI / 6);
-  const point2Y = toY - headSize * Math.sin(angle + Math.PI / 6);
+  const newAngle = Math.atan2(newToY - newFromY, newToX - newFromX);
+
+  const point1X = newToX - headSize * Math.cos(newAngle - Math.PI / 6);
+  const point1Y = newToY - headSize * Math.sin(newAngle - Math.PI / 6);
+  const point2X = newToX - headSize * Math.cos(newAngle + Math.PI / 6);
+  const point2Y = newToY - headSize * Math.sin(newAngle + Math.PI / 6);
 
   // Draw border
   ctx.strokeStyle = borderColor;
   ctx.lineWidth = 2;
   ctx.lineJoin = 'round';
   ctx.beginPath();
-  ctx.moveTo(toX, toY);
+  ctx.moveTo(newToX, newToY);
   ctx.lineTo(point1X, point1Y);
   ctx.lineTo(point2X, point2Y);
   ctx.closePath();
@@ -80,7 +97,7 @@ const drawArrowHead = (
   // Draw colored fill
   ctx.fillStyle = color;
   ctx.beginPath();
-  ctx.moveTo(toX, toY);
+  ctx.moveTo(newToX, newToY);
   ctx.lineTo(point1X, point1Y);
   ctx.lineTo(point2X, point2Y);
   ctx.closePath();
@@ -182,8 +199,9 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
 
       const headSize = boardSize / 20;
       const lineWidth = boardSize / 60;
+      const squareSize = boardSize / 8;
 
-      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, arrowOpacity);
+      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, arrowOpacity, squareSize);
     });
 
     ctx.globalAlpha = 1;
