@@ -1,5 +1,5 @@
 import { useReducer, useCallback, useEffect, useRef } from 'react';
-import { Square, Move, Chess } from 'chess.js';
+import { Square, Chess } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
 import { UserColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';

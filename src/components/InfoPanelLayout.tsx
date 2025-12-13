@@ -2,8 +2,22 @@ import React from 'react';
 import { PuzzleAttempt, UserColor } from '../types/drill';
 import { usePuzzleStats } from '../hooks/usePuzzleStats';
 import { useTheme } from '../hooks/useTheme';
-import { formatDate, formatFullTimestamp, constructPuzzleUrl } from '../utils/formatters';
 import styles from './InfoPanelLayout.module.css';
+
+const formatDate = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  return date.toLocaleDateString();
+};
+
+const formatFullTimestamp = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  return date.toLocaleString();
+};
+
+const constructPuzzleUrl = (puzzleId: string): string => {
+  return `https://lichess.org/training/${puzzleId}`;
+};
+
 
 interface InfoPanelLayoutProps {
   attempts: PuzzleAttempt[];

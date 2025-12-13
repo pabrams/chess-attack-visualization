@@ -2,11 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Square, Color as PieceColor } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { Arrow } from '../types/arrows';
-import { getAdjacentSquares } from '../utils/squareUtils';
 import type { ChessGame } from './useChessGame';
-
-export const invertColor = (color: PieceColor): PieceColor =>
-  color === 'w' ? 'b' : 'w';
 
 interface UseArrowsProps {
   chessGame: ChessGame;
@@ -116,7 +112,6 @@ const createArrow = (
   color,
 });
 
-
 const createArrowsFromAttackers = (
   attackerSquares: Square[],
   targetSquare: Square,
@@ -125,7 +120,6 @@ const createArrowsFromAttackers = (
   attackerSquares.map(attackerSquare =>
     createArrow(attackerSquare, targetSquare, arrowColor)
   );
-
 
 const createArrowsForSquaresAroundKing = (
   targetSquares: Square[],
@@ -144,4 +138,25 @@ const createArrowsForSquaresAroundKing = (
   }
 
   return { arrows };
+};
+
+const invertColor = (color: PieceColor): PieceColor =>
+  color === 'w' ? 'b' : 'w';
+
+const getAdjacentSquares = (square: Square): Square[] => {
+  const file = square.charCodeAt(0) - 'a'.charCodeAt(0); // 0-7
+  const rank = parseInt(square[1]) - 1; // 0-7
+
+  const adjacentSquares: Square[] = [];
+
+  for (let f = file - 1; f <= file + 1; f++) {
+    for (let r = rank - 1; r <= rank + 1; r++) {
+      if (f >= 0 && f <= 7 && r >= 0 && r <= 7 && !(f === file && r === rank)) {
+        const adjacentSquare = String.fromCharCode('a'.charCodeAt(0) + f) + (r + 1);
+        adjacentSquares.push(adjacentSquare as Square);
+      }
+    }
+  }
+
+  return adjacentSquares;
 };
