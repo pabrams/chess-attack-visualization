@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Square, Color as PieceColor } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
-import { Arrow, Mark } from '../types/arrows';
+import { Arrow } from '../types/arrows';
 import { getAdjacentSquares } from '../utils/squareUtils';
-import { invertColor } from '../utils/chessPieceUtils';
 import type { ChessGame } from './useChessGame';
+
+export const invertColor = (color: PieceColor): PieceColor =>
+  color === 'w' ? 'b' : 'w';
 
 interface UseArrowsProps {
   chessGame: ChessGame;

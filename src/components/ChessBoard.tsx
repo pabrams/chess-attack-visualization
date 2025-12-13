@@ -6,7 +6,29 @@ import { UserColor } from '../types/drill';
 import { useTheme } from '../hooks/useTheme';
 import { getCustomPieces } from './customPieces';
 import { CustomArrowOverlay } from './CustomArrowOverlay';
-import { BOARD_STYLES } from '../utils/boardStyles';
+
+const getCSSVar = (varName: string): string => {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+};
+
+const BOARD_STYLES = {
+  LEGAL_MOVE: () => ({
+    background: getCSSVar('--board-legal-move-bg'),
+    borderRadius: '50%',
+  }),
+
+  LAST_MOVE: () => ({
+    backgroundColor: getCSSVar('--board-last-move-bg'),
+  }),
+
+  PENDING_MOVE: () => ({
+    backgroundColor: getCSSVar('--board-pending-move-bg'),
+  }),
+
+  SQUARE_DEFAULTS: {
+    border: 'none',
+  },
+} as const;
 
 interface ChessBoardProps {
   fen: string;

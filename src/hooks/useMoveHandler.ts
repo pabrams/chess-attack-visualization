@@ -1,8 +1,10 @@
 import { useReducer, useCallback, useEffect } from 'react';
 import { Square, Color } from 'chess.js';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
-import { isBackRank } from '../utils/chessPieceUtils';
 import type { ChessGame } from './useChessGame';
+
+export const isBackRank = (square: Square): boolean =>
+  square[1] === '8' || square[1] === '1';
 
 interface UseMoveHandlerProps {
   chessGame: ChessGame;
