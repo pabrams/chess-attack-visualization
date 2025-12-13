@@ -25,6 +25,7 @@
     "@nestjs/core": "^11.1.3",
     "@nestjs/platform-express": "^11.1.3",
     "chess.js": "npm:@pabrams/chess.js@^1.5.0",
+    "package-lock.json": "^1.0.0",
     "pkce-challenge": "^5.0.0",
     "react": "^19.1.0",
     "react-chessboard": "latest",
