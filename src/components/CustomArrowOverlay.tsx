@@ -212,7 +212,7 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const to = squareToCoords(arrow.endSquare, boardSize, boardOrientation);
 
       const headSize = boardSize / 20;
-      const lineWidth = boardSize / 60;
+      const baseLineWidth = boardSize / 50;
       const squareSize = boardSize / 8;
 
       // Calculate arrow direction and create a direction bucket (rounded to nearest 30 degrees)
@@ -229,12 +229,15 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const zOffset = directionKeys.get(directionKey) || 0;
       directionKeys.set(directionKey, zOffset + 1);
 
+      // Make overlapping arrows narrower
+      const lineWidth = baseLineWidth - (zOffset * 3);
+
       drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, arrowOpacity, squareSize, zOffset);
     });
  
     marks.forEach((mark) => {
       const coords = squareToCoords(mark.square, boardSize, boardOrientation);
-      drawXMark(ctx, coords.x, coords.y, 'black', boardSize / 28, boardSize / 80, 'white', 1, 1);
+      drawXMark(ctx, coords.x, coords.y, 'darkgreen', boardSize / 28, boardSize / 80, 'white', 1, 1);
     });
 
     ctx.globalAlpha = 1;
