@@ -32,10 +32,10 @@ const drawArrowHead = (
   const angle = Math.atan2(toY - fromY, toX - fromX);
 
   // Calculate shortened shaft end
-  const dx = toX - fromX;
-  const dy = toY - fromY;
+  const dx = toX - fromX + 10;
+const dy = toY - fromY + 10;
   const distance = Math.sqrt(dx * dx + dy * dy);
-  const shaftEndDistance = distance - headSize * 0.8;
+  const shaftEndDistance = distance - headSize * 1;
   const shaftRatio = shaftEndDistance / distance;
   const shaftEndX = fromX + dx * shaftRatio;
   const shaftEndY = fromY + dy * shaftRatio;
