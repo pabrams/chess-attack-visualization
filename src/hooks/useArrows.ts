@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { Square, Color as PieceColor } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { Arrow, Mark } from '../types/arrows';
-import { createArrowsFromAttackers, createArrowsForSquaresAroundKing } from '../utils/arrowUtils';
 import { getAdjacentSquares } from '../utils/squareUtils';
 import { invertColor } from '../utils/chessPieceUtils';
 import type { ChessGame } from './useChessGame';
@@ -35,14 +34,6 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
     newArrows.push(
       ...createArrowsFromAttackers(blackAttackers, square, blackArrowColor)
     );
-
-    newArrows.sort((a, b) => {
-      const aLen = Math.pow(a.endSquare.charCodeAt(0) - a.startSquare.charCodeAt(0), 2) +
-                   Math.pow(parseInt(a.endSquare[1]) - parseInt(a.startSquare[1]), 2);
-      const bLen = Math.pow(b.endSquare.charCodeAt(0) - b.startSquare.charCodeAt(0), 2) +
-                   Math.pow(parseInt(b.endSquare[1]) - parseInt(b.startSquare[1]), 2);
-      return aLen - bLen;
-    });
 
     setArrows(newArrows);
   }, [chessGame, whiteArrowColor, blackArrowColor]);
@@ -110,4 +101,45 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
     showCheckmaters,
     handleSquareRightClick,
   };
+};
+
+
+const createArrow = (
+  fromSquare: Square,
+  toSquare: Square,
+  color: string
+): Arrow => ({
+  startSquare: fromSquare,
+  endSquare: toSquare,
+  color,
+});
+
+
+const createArrowsFromAttackers = (
+  attackerSquares: Square[],
+  targetSquare: Square,
+  arrowColor: string
+): Arrow[] =>
+  attackerSquares.map(attackerSquare =>
+    createArrow(attackerSquare, targetSquare, arrowColor)
+  );
+
+
+const createArrowsForSquaresAroundKing = (
+  targetSquares: Square[],
+  getAttackers: (square: Square, color: PieceColor) => Square[],
+  attackingColor: PieceColor,
+  getPieceAt: (square: Square) => any,
+  arrowColor: string
+): { arrows: Arrow[] } => {
+  const arrows: Arrow[] = [];
+  for (const square of targetSquares) {
+    const piece = getPieceAt(square);
+    if (!piece || piece.color === attackingColor) {
+      const attackers = getAttackers(square, attackingColor);
+      arrows.push(...createArrowsFromAttackers(attackers, square, arrowColor));
+    }
+  }
+
+  return { arrows };
 };
