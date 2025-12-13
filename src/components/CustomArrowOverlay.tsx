@@ -49,16 +49,32 @@ const drawArrowHead = (
   const newToX = toX - dx * (shortenRatio / 2);
   const newToY = toY - dy * (shortenRatio / 2);
 
-  // Calculate shaft end (leaving room for arrowhead)
+  const newAngle = Math.atan2(newToY - newFromY, newToX - newFromX);
   const newDx = newToX - newFromX;
   const newDy = newToY - newFromY;
   const newDistance = Math.sqrt(newDx * newDx + newDy * newDy);
-  const shaftEndDistance = newDistance - headSize * 0.8;
-  const shaftRatio = shaftEndDistance / newDistance;
-  const shaftEndX = newFromX + newDx * shaftRatio;
-  const shaftEndY = newFromY + newDy * shaftRatio;
 
-  // Draw border (thin)
+  const borderHeadSize = headSize + 4;
+  const coloredHeadSize = headSize;
+  const borderTipExtension = 2; // Extend border tip forward by 2 pixels
+
+  // Calculate extended tip position for border arrow
+  const borderTipX = newToX + (newDx / newDistance) * borderTipExtension;
+  const borderTipY = newToY + (newDy / newDistance) * borderTipExtension;
+
+  // Calculate shaft end for border arrow
+  const borderShaftEndDistance = newDistance - borderHeadSize * 0.8;
+  const borderShaftRatio = borderShaftEndDistance / newDistance;
+  const borderShaftEndX = newFromX + newDx * borderShaftRatio;
+  const borderShaftEndY = newFromY + newDy * borderShaftRatio;
+
+  // Calculate shaft end for colored arrow
+  const coloredShaftEndDistance = newDistance - coloredHeadSize * 0.8;
+  const coloredShaftRatio = coloredShaftEndDistance / newDistance;
+  const coloredShaftEndX = newFromX + newDx * coloredShaftRatio;
+  const coloredShaftEndY = newFromY + newDy * coloredShaftRatio;
+
+  // Draw border arrow (larger) first
   ctx.strokeStyle = borderColor;
   ctx.globalAlpha = opacity;
   ctx.lineWidth = lineWidth + 2;
@@ -67,38 +83,37 @@ const drawArrowHead = (
 
   ctx.beginPath();
   ctx.moveTo(newFromX, newFromY);
-  ctx.lineTo(shaftEndX, shaftEndY);
+  ctx.lineTo(borderShaftEndX, borderShaftEndY);
   ctx.stroke();
 
-  // Draw colored center
+  // Border arrowhead (with extended tip)
+  const borderPoint1X = borderTipX - borderHeadSize * Math.cos(newAngle - Math.PI / 6);
+  const borderPoint1Y = borderTipY - borderHeadSize * Math.sin(newAngle - Math.PI / 6);
+  const borderPoint2X = borderTipX - borderHeadSize * Math.cos(newAngle + Math.PI / 6);
+  const borderPoint2Y = borderTipY - borderHeadSize * Math.sin(newAngle + Math.PI / 6);
+
+  ctx.fillStyle = borderColor;
+  ctx.beginPath();
+  ctx.moveTo(borderTipX, borderTipY);
+  ctx.lineTo(borderPoint1X, borderPoint1Y);
+  ctx.lineTo(borderPoint2X, borderPoint2Y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Draw colored arrow (smaller) on top
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth;
 
   ctx.beginPath();
   ctx.moveTo(newFromX, newFromY);
-  ctx.lineTo(shaftEndX, shaftEndY);
+  ctx.lineTo(coloredShaftEndX, coloredShaftEndY);
   ctx.stroke();
 
-  const newAngle = Math.atan2(newToY - newFromY, newToX - newFromX);
+  const point1X = newToX - coloredHeadSize * Math.cos(newAngle - Math.PI / 6);
+  const point1Y = newToY - coloredHeadSize * Math.sin(newAngle - Math.PI / 6);
+  const point2X = newToX - coloredHeadSize * Math.cos(newAngle + Math.PI / 6);
+  const point2Y = newToY - coloredHeadSize * Math.sin(newAngle + Math.PI / 6);
 
-  const point1X = newToX - headSize * Math.cos(newAngle - Math.PI / 6);
-  const point1Y = newToY - headSize * Math.sin(newAngle - Math.PI / 6);
-  const point2X = newToX - headSize * Math.cos(newAngle + Math.PI / 6);
-  const point2Y = newToY - headSize * Math.sin(newAngle + Math.PI / 6);
-
-  // Draw border on outer edges only (not on base)
-  ctx.strokeStyle = borderColor;
-  ctx.lineWidth = 2;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
-  
-  ctx.beginPath();
-  ctx.moveTo(point1X, point1Y);
-  ctx.lineTo(newToX, newToY);
-  ctx.lineTo(point2X, point2Y);
-  ctx.stroke();
-
-  // Draw colored fill
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(newToX, newToY);
