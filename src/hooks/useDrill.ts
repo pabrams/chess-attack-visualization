@@ -6,7 +6,7 @@ import type { ChessGame } from './useChessGame';
 import { getLevelFromRating } from '../utils/ratingCalculation';
 import { convertToLichessPuzzleFormat, type RawPuzzle } from '../utils/puzzleUtils';
 
-export const SOLVE_COMPLETION_DELAY_MS = 1000;
+const SOLVE_COMPLETION_DELAY_MS = 1000;
 
 interface UseDrillProps {
   chessGame: ChessGame;
