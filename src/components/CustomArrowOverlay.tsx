@@ -189,7 +189,8 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       return distB - distA;
     });
 
-    const targetSquareCounts = new Map<string, number>();
+    // Track z-index per (target square + direction) to only shorten overlapping arrows
+    const directionKeys = new Map<string, number>();
 
     sortedArrows.forEach((arrow) => {
       const from = squareToCoords(arrow.startSquare, boardSize, boardOrientation);
@@ -199,10 +200,19 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const lineWidth = boardSize / 60;
       const squareSize = boardSize / 8;
 
-      // Get z-index for this arrow based on how many arrows already drawn to this target
-      const targetSquare = arrow.endSquare;
-      const zOffset = targetSquareCounts.get(targetSquare) || 0;
-      targetSquareCounts.set(targetSquare, zOffset + 1);
+      // Calculate arrow direction and create a direction bucket (rounded to nearest 30 degrees)
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const angleRadians = Math.atan2(dy, dx);
+      const angleDegrees = (angleRadians * 180 / Math.PI);
+      const directionBucket = Math.round(angleDegrees / 30) * 30; // Round to nearest 30 degrees
+
+      // Create unique key for this target+direction combination
+      const directionKey = `${arrow.endSquare}_${directionBucket}`;
+
+      // Only apply z-offset if there's already an arrow in this direction to this target
+      const zOffset = directionKeys.get(directionKey) || 0;
+      directionKeys.set(directionKey, zOffset + 1);
 
       drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, arrowOpacity, squareSize, zOffset);
     });
