@@ -4,7 +4,6 @@ import { LichessPuzzle } from '../types/lichess';
 import { UserColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
 import { getLevelFromRating } from '../utils/ratingCalculation';
-import { sampleArray } from '../utils/arrayUtils';
 import { convertToLichessPuzzleFormat, type RawPuzzle } from '../utils/puzzleUtils';
 
 export const SOLVE_COMPLETION_DELAY_MS = 1000;
@@ -78,7 +77,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, 
         }
 
         const data = await response.json() as { puzzles: RawPuzzle[] };
-        const sampled = sampleArray(data.puzzles, 200);
+        const sampled = randomSubset(data.puzzles, 200);
         const converted = convertToLichessPuzzleFormat(sampled);
 
         dispatch({ type: 'LOAD_PUZZLES', payload: converted });
@@ -161,3 +160,9 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, 
     handlePuzzleMove,
   };
 };
+
+const shuffleArray = <T,>(array: T[]): T[] =>
+  [...array].sort(() => Math.random() - 0.5);
+
+const randomSubset = <T,>(array: T[], n: number): T[] =>
+  shuffleArray(array).slice(0, n);
