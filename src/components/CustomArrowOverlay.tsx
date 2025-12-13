@@ -37,7 +37,9 @@ const drawArrowHead = (
   const dy = toY - fromY;
   const distance = Math.sqrt(dx * dx + dy * dy);
   const shortenAmount = squareSize / 2 + zOffset * (squareSize/4); // Half the square size + z*4 pixels
-  const shortenRatio = shortenAmount / distance;
+
+  const maxShortenRatio = 1.0;
+  const shortenRatio = Math.min(shortenAmount / distance, maxShortenRatio);
 
   // Move start point forward by quarter square
   const newFromX = fromX + dx * (shortenRatio / 4);
