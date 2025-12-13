@@ -11,6 +11,7 @@ interface LayoutProps {
   fen: string;
   arrows: Arrow[];
   marks?: Mark[];
+  attackerDisplay?: { square: Square; whiteCount: number; blackCount: number } | null;
   lastMove: { from: Square; to: Square } | null;
   pendingMove: { sourceSquare: Square; legalTargets: Square[] } | null;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
@@ -31,6 +32,7 @@ export const Layout: React.FC<LayoutProps> = (props) => {
             fen={props.fen}
             arrows={props.arrows}
             marks={props.marks}
+            attackerDisplay={props.attackerDisplay}
             lastMove={props.lastMove}
             pendingMove={props.pendingMove}
             onPieceDrop={props.onPieceDrop}

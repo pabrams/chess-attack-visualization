@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Square } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
@@ -17,6 +17,7 @@ const App = () => {
   const chessGame = useChessGame();
   const { theme, currentThemeColors, toggleTheme } = useTheme();
   const { rating, addPoints } = useRating();
+  const [attackerDisplay, setAttackerDisplay] = useState<{ square: Square; whiteCount: number; blackCount: number } | null>(null);
 
   const { attempts, lastResult, recordResult } = usePuzzleResults({
     rating,
@@ -31,6 +32,24 @@ const App = () => {
     if (!args.square) return;
 
     const clickedSquare = args.square as Square;
+
+    // If clicking the same square again, clear the attacker display
+    if (attackerDisplay && attackerDisplay.square === clickedSquare) {
+      setAttackerDisplay(null);
+      return;
+    }
+
+    // Calculate attackers for the clicked square
+    const whiteAttackers = chessGame.getAttackers(clickedSquare, 'w');
+    const blackAttackers = chessGame.getAttackers(clickedSquare, 'b');
+
+    setAttackerDisplay({
+      square: clickedSquare,
+      whiteCount: whiteAttackers.length,
+      blackCount: blackAttackers.length,
+    });
+
+    // Also handle arrow logic
     if (arrows.arrows.length > 0 && arrows.arrows.every(arrow =>
       arrow.endSquare === clickedSquare
     )) {
@@ -38,7 +57,7 @@ const App = () => {
     } else {
       arrows.handleSquareRightClick(args);
     }
-  }, [arrows]);
+  }, [arrows, attackerDisplay, chessGame]);
 
   const handlePuzzleResult = useCallback(() => {
     arrows.showCheckmaters();
@@ -102,6 +121,7 @@ const App = () => {
           fen={chessGame.fen}
           arrows={arrows.arrows}
           marks={arrows.marks}
+          attackerDisplay={attackerDisplay}
           lastMove={
             sourceSquare && targetSquare
               ? { from: sourceSquare, to: targetSquare }

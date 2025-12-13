@@ -34,6 +34,7 @@ interface ChessBoardProps {
   fen: string;
   arrows: Arrow[];
   marks?: Mark[];
+  attackerDisplay?: { square: Square; whiteCount: number; blackCount: number } | null;
   lastMove: { from: Square; to: Square } | null;
   pendingMove: { sourceSquare: Square; legalTargets: Square[] } | null;
   onPieceDrop: (args: PieceDropHandlerArgs) => boolean;
@@ -107,6 +108,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
         <CustomArrowOverlay
           arrows={props.arrows}
           marks={props.marks}
+          attackerDisplay={props.attackerDisplay}
           boardSize={boardSize}
           boardOrientation={props.boardOrientation ?? 'white'}
           arrowBorderColor={currentThemeColors.arrowBorderColor}
