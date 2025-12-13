@@ -28,19 +28,20 @@ const drawArrowHead = (
   borderColor: string = 'black',
   lineWidth: number = 2,
   opacity: number = 0.8,
-  squareSize: number = 0
+  squareSize: number = 0,
+  zOffset: number = 0
 ) => {
 
-  // Calculate shortened arrow endpoints (shorten by half square size total)
+  // Calculate shortened arrow endpoints (shorten by half square size total + z-offset)
   const dx = toX - fromX;
   const dy = toY - fromY;
   const distance = Math.sqrt(dx * dx + dy * dy);
-  const shortenAmount = squareSize / 2; // Half the square size
+  const shortenAmount = squareSize / 2 + zOffset * (squareSize/4); // Half the square size + z*4 pixels
   const shortenRatio = shortenAmount / distance;
 
   // Move start point forward by quarter square
-  const newFromX = fromX + dx * (shortenRatio / 2);
-  const newFromY = fromY + dy * (shortenRatio / 2);
+  const newFromX = fromX + dx * (shortenRatio / 4);
+  const newFromY = fromY + dy * (shortenRatio / 4);
 
   // Move end point backward by quarter square
   const newToX = toX - dx * (shortenRatio / 2);
@@ -189,9 +190,10 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const fromB = squareToCoords(b.startSquare, boardSize, boardOrientation);
       const toB = squareToCoords(b.endSquare, boardSize, boardOrientation);
       const distB = Math.sqrt((toB.x - fromB.x) ** 2 + (toB.y - fromB.y) ** 2);
-
       return distB - distA;
     });
+
+    const targetSquareCounts = new Map<string, number>();
 
     sortedArrows.forEach((arrow) => {
       const from = squareToCoords(arrow.startSquare, boardSize, boardOrientation);
@@ -201,7 +203,12 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const lineWidth = boardSize / 60;
       const squareSize = boardSize / 8;
 
-      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, arrowOpacity, squareSize);
+      // Get z-index for this arrow based on how many arrows already drawn to this target
+      const targetSquare = arrow.endSquare;
+      const zOffset = targetSquareCounts.get(targetSquare) || 0;
+      targetSquareCounts.set(targetSquare, zOffset + 1);
+
+      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, arrowOpacity, squareSize, zOffset);
     });
 
     ctx.globalAlpha = 1;
