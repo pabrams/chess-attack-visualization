@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Square, Color as PieceColor } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
-import { Arrow } from '../types/arrows';
+import { Arrow, Mark } from '../types/arrows';
 import type { ChessGame } from './useChessGame';
 
 interface UseArrowsProps {
@@ -15,9 +15,11 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
   const whiteArrowColor = getCSSVar('--chess-white-arrow');
   const blackArrowColor = getCSSVar('--chess-black-arrow');
   const [arrows, setArrows] = useState<Arrow[]>([]);
+  const [marks, setMarks] = useState<Mark[]>([]);
 
   const clearArrows = useCallback(() => {
     setArrows([]);
+    setMarks([]);
   }, []);
 
   const showAttackersForSquare = useCallback((square: Square) => {
@@ -84,7 +86,14 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
       arrowEndSquares.add(arrow.endSquare);
     });
 
+    // Create marks for adjacent squares around the king
+    const newMarks: Mark[] = aroundSquares.map(square => ({
+      square,
+      color: arrowColor,
+    }));
+
     setArrows(newArrows);
+    setMarks(newMarks);
   }, [chessGame, whiteArrowColor, blackArrowColor, clearArrows]);
 
   // When board position changes, clear and re-evaluate for checkmate
@@ -95,6 +104,7 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
 
   return {
     arrows,
+    marks,
     clearArrows,
     showCheckmaters,
     handleSquareRightClick,
