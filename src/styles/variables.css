@@ -1,8 +1,4 @@
-/* Global Design System Variables */
-/* Use these instead of hardcoding values */
-
 :root {
-  /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 12px;
@@ -10,12 +6,10 @@
   --spacing-xl: 24px;
   --spacing-2xl: 32px;
 
-  /* Border Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
 
-  /* Opacity */
   --opacity-dim: 0.5;
   --opacity-medium: 0.6;
   --opacity-text: 0.8;
@@ -25,12 +19,9 @@
   --opacity-x-mark-border: 0.3;
   --opacity-panel: 0.8;
 
-  /* Transitions */
   --transition-quick: 0.2s;
   --transition-normal: 0.3s;
 
-
-  /* Theme-independent Colors */
   --color-overlay-dark: rgba(0, 0, 0, 0.7);
   --color-yellow-highlight: rgba(255, 255, 0, 0.4);
   --color-green-highlight: rgba(0, 255, 0, 0.5);
