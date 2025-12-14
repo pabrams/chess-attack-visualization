@@ -40,16 +40,12 @@ const drawArrowHead = (
  
   const opacity = 1.0;
 
-  // Calculate shortened arrow endpoints (shorten by half square size total + z-offset)
   const dx = toX - fromX;
   const dy = toY - fromY;
   const distance = Math.sqrt(dx * dx + dy * dy);
 
-  // Circle at the tail
   const circleRadius = squareSize * 0.45;
-  const circleBorderWidth = lineWidth / 2;
 
-  // Start arrow slightly inside the circle to overlap with the edge
   const effectiveRadius = circleRadius;
   const circleEdgeX = fromX + (dx / distance) * effectiveRadius;
   const circleEdgeY = fromY + (dy / distance) * effectiveRadius;
@@ -59,11 +55,9 @@ const drawArrowHead = (
   const maxShortenRatio = 1.0;
   const shortenRatio = Math.min(shortenAmount / distance, maxShortenRatio);
 
-  // Move start point forward from circle edge
   const newFromX = circleEdgeX;
   const newFromY = circleEdgeY;
 
-  // Move end point backward by quarter square
   const newToX = toX - dx * (shortenRatio / 2);
   const newToY = toY - dy * (shortenRatio / 2);
 
@@ -74,7 +68,7 @@ const drawArrowHead = (
 
   const borderHeadSize = headSize + 4;
   const coloredHeadSize = headSize;
-  const borderTipExtension = 2; // Extend border tip forward by 2 pixels
+  const borderTipExtension = 2;
 
   // Calculate extended tip position for border arrow
   const borderTipX = newToX + (newDx / newDistance) * borderTipExtension;
@@ -92,8 +86,7 @@ const drawArrowHead = (
   const coloredShaftEndX = newFromX + newDx * coloredShaftRatio;
   const coloredShaftEndY = newFromY + newDy * coloredShaftRatio;
 
-  // Draw circle at the tail (around the piece)
-  // Draw border circle
+  // Draw circle at the tail
   ctx.globalAlpha = opacity;
   ctx.strokeStyle = borderColor;
   ctx.lineWidth = lineWidth / 2;
@@ -101,14 +94,12 @@ const drawArrowHead = (
   ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Draw colored circle on top
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth / 3;
   ctx.beginPath();
   ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Draw border arrow (larger) first
   ctx.strokeStyle = borderColor;
   ctx.globalAlpha = opacity;
   ctx.lineWidth = lineWidth + 2;
@@ -120,7 +111,6 @@ const drawArrowHead = (
   ctx.lineTo(borderShaftEndX, borderShaftEndY);
   ctx.stroke();
 
-  // Border arrowhead (with extended tip)
   const borderPoint1X = borderTipX - borderHeadSize * Math.cos(newAngle - Math.PI / 6);
   const borderPoint1Y = borderTipY - borderHeadSize * Math.sin(newAngle - Math.PI / 6);
   const borderPoint2X = borderTipX - borderHeadSize * Math.cos(newAngle + Math.PI / 6);
@@ -134,7 +124,6 @@ const drawArrowHead = (
   ctx.closePath();
   ctx.fill();
 
-  // Draw colored arrow (smaller) on top
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth;
 
@@ -199,7 +188,7 @@ const drawXMark = (
   ctx.globalAlpha = 1;
 };
 
-const drawAttackerCounts = (
+const drawAttackerBorder = (
   ctx: CanvasRenderingContext2D,
   square: string,
   whiteCount: number,
@@ -209,9 +198,7 @@ const drawAttackerCounts = (
 ) => {
   const coords = squareToCoords(square, boardSize, boardOrientation);
   const squareSize = boardSize / 8;
-  const fontSize = squareSize / 3;
 
-  const attackerCountBackground = '#d0d0d0'
   const whiteArrowColor = ARROW_COLORS.white;
   const blackArrowColor = ARROW_COLORS.black;
 
@@ -235,13 +222,30 @@ const drawAttackerCounts = (
     squareSize,
     squareSize
   );
+};
+
+const drawAttackerCountCircles = (
+  ctx: CanvasRenderingContext2D,
+  square: string,
+  whiteCount: number,
+  blackCount: number,
+  boardSize: number,
+  boardOrientation: 'white' | 'black'
+) => {
+  const coords = squareToCoords(square, boardSize, boardOrientation);
+  const squareSize = boardSize / 8;
+  const fontSize = squareSize / 3;
+
+  const attackerCountBackground = '#d0d0d0'
+  const whiteArrowColor = ARROW_COLORS.white;
+  const blackArrowColor = ARROW_COLORS.black;
 
   ctx.font = `bold ${fontSize}px Arial`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
   const circleRadius = fontSize * 0.6;
-  
+
   if (whiteCount > 0) {
     const whiteX = coords.x - squareSize / 4;
     const whiteY = coords.y - squareSize / 4;
@@ -300,6 +304,17 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
 
     ctx.clearRect(0, 0, boardSize, boardSize);
 
+    if (attackerDisplay) {
+      drawAttackerBorder(
+        ctx,
+        attackerDisplay.square,
+        attackerDisplay.whiteCount,
+        attackerDisplay.blackCount,
+        boardSize,
+        boardOrientation
+      );
+    }
+
     const sortedArrows = [...arrows].sort((a, b) => {
       const fromA = squareToCoords(a.startSquare, boardSize, boardOrientation);
       const toA = squareToCoords(a.endSquare, boardSize, boardOrientation);
@@ -336,7 +351,6 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const zOffset = directionKeys.get(directionKey) || 0;
       directionKeys.set(directionKey, zOffset + 1);
 
-      // Make overlapping arrows narrower
       const lineWidth = baseLineWidth - (zOffset * 3);
 
       drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, squareSize, zOffset);
@@ -348,7 +362,7 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
     });
 
     if (attackerDisplay) {
-      drawAttackerCounts(
+      drawAttackerCountCircles(
         ctx,
         attackerDisplay.square,
         attackerDisplay.whiteCount,
