@@ -141,9 +141,13 @@ const drawArrowHead = (
   const borderStartX = newFromX + (newDx / newDistance) * borderStartOffset;
   const borderStartY = newFromY + (newDy / newDistance) * borderStartOffset;
 
-  const borderEndOffset = 2;
+  const shaftShortenAmount = coloredXSize * 0.28;
+  const borderEndOffset = 2 + shaftShortenAmount;
   const borderEndX = newToX - (newDx / newDistance) * borderEndOffset;
   const borderEndY = newToY - (newDy / newDistance) * borderEndOffset;
+
+  const coloredShaftEndX = newToX - (newDx / newDistance) * shaftShortenAmount;
+  const coloredShaftEndY = newToY - (newDy / newDistance) * shaftShortenAmount;
 
   ctx.strokeStyle = borderColor;
   ctx.globalAlpha = opacity;
@@ -162,7 +166,7 @@ const drawArrowHead = (
 
   ctx.beginPath();
   ctx.moveTo(newFromX, newFromY);
-  ctx.lineTo(newToX, newToY);
+  ctx.lineTo(coloredShaftEndX, coloredShaftEndY);
   ctx.stroke();
 };
 
