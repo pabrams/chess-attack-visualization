@@ -29,12 +29,6 @@
   --transition-quick: 0.2s;
   --transition-normal: 0.3s;
 
-  /* Light Theme (default) - Base Colors */
-  --color-bg-light: #ffffff;
-  --color-bg-secondary-light: #f5f5f5;
-  --color-border-light: #ddd;
-  --color-border-secondary-light: #999;
-  --color-text-light: #000000;
 
   /* Theme-independent Colors */
   --color-overlay-dark: rgba(0, 0, 0, 0.7);
@@ -55,8 +49,6 @@
   --color-info: #4a9eff;
 
   --color-text-muted-dark: #E0E0E0;
-  --color-bg-header-dark: #000000;
-  --color-bg-header-light: #cccccc;
   --color-border-header-dark: #333333;
   --color-border-header-light: #999;
 
@@ -74,31 +66,33 @@
 
   --shadow-dialog: 0 8px 24px rgba(0, 0, 0, 0.3);
 
-  /* Arrow colors (theme-independent) */
-  --chess-black-arrow: #0066cc;
-  --chess-white-arrow: #bb0000;
+  --black-arrow: #0066cc;
+  --white-arrow: #bb0000;
 
-  /* Light Theme - Chess Board Colors (defaults) */
-  --chess-page-bg: #ffffff;
-  --chess-page-fg: #000000;
-  --chess-light-square: #f0d9b5;
-  --chess-dark-square: #b58863;
-  --chess-arrow-border: #000000;
+  --page-bg-light: #ffffff;
+  --page-fg-light: #000000;
+  --light-square-light: #f0d9b5;
+  --dark-square-light: #b58863;
+  --arrow-border-light: #000000;
+  --header-bg-light: #cccccc;
+  --header-text-light: #000000;
 
-  /* Dark Theme Colors (for component styling) */
-  --color-bg-dark: #2a2a2a;
-  --color-bg-secondary-dark: #3a3a3a;
-  --color-bg-tertiary-dark: #4a4a4a;
-  --color-border-dark: #555;
-  --color-border-secondary-dark: #777;
-  --color-text-dark: #ffffff;
+
+  --color-bg-secondary-light: #f5f5f5;
+  --color-border-light: #ddd;
+  --color-border-secondary-light: #999;
+
+  --color-bg-secondary-dark: #000000;
+  --color-border-dark: #ddd;
+  --color-border-secondary-dark: #999;
+
+  --page-bg-dark: #000000;
+  --page-fg-dark: #ffffff;
+  --light-square-dark: #444444;
+  --dark-square-dark: #000000;
+  --arrow-border-dark: #ffffff;
+  --header-bg-dark: #000000;
+  --header-text-dark: #ffffff;
+
 }
 
-[data-theme="dark"] {
-  /* Dark Theme - Chess Board Colors */
-  --chess-page-bg: #000000;
-  --chess-page-fg: #ffffff;
-  --chess-light-square: #444444;
-  --chess-dark-square: #000000;
-  --chess-arrow-border: #ffffff;
-}

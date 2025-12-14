@@ -6,4 +6,6 @@ export interface ThemeColors {
   lightSquareColor: string;
   darkSquareColor: string;
   arrowBorderColor: string;
+  headerBackgroundColor: string;
+  headerTextColor: string;
 }

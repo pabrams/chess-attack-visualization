@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { PuzzleAttempt, UserColor } from '../types/drill';
 import { usePuzzleStats } from '../hooks/usePuzzleStats';
-import { useTheme } from '../hooks/useTheme';
+import { ThemeContext } from '../hooks/useTheme';
 import styles from './InfoPanelLayout.module.css';
 
 const formatDate = (timestamp: number): string => {
@@ -27,7 +27,7 @@ interface InfoPanelLayoutProps {
 }
 
 export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
-  const { theme } = useTheme();
+  const { theme } = useContext(ThemeContext)!;
   const {
     sortedAttempts,
     visibleAttempts,

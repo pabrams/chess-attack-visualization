@@ -9,11 +9,8 @@ interface UseArrowsProps {
 }
 
 export const useArrows = ({ chessGame }: UseArrowsProps) => {
-  const getCSSVar = (name: string) =>
-    getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-
-  const whiteArrowColor = getCSSVar('--chess-white-arrow');
-  const blackArrowColor = getCSSVar('--chess-black-arrow');
+  const whiteArrowColor = '#bb0000';
+  const blackArrowColor = '#0066cc';
   const [arrows, setArrows] = useState<Arrow[]>([]);
   const [marks, setMarks] = useState<Mark[]>([]);
 
@@ -86,7 +83,6 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
       arrowEndSquares.add(arrow.endSquare);
     });
 
-    // Create marks for adjacent squares around the king
     const newMarks: Mark[] = aroundSquares.map(square => ({
       square,
       color: arrowColor,
@@ -96,7 +92,6 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
     setMarks(newMarks);
   }, [chessGame, whiteArrowColor, blackArrowColor, clearArrows]);
 
-  // When board position changes, clear and re-evaluate for checkmate
   useEffect(() => {
     clearArrows();
     showCheckmaters();

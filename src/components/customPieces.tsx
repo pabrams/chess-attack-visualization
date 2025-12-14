@@ -93,7 +93,7 @@ const getCommonStyles = (filterId: string) => ({
 });
 
 export const getCustomPieces = (theme: 'dark' | 'light'): PieceRenderObject | undefined => {
-  if (theme === 'dark') {
+  if (theme === 'light') {
     return undefined;
   }
 

@@ -1,8 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useContext } from 'react';
 import { Square } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
-import { useTheme } from './hooks/useTheme';
+import { ThemeContext } from './hooks/useTheme';
 import { useArrows } from './hooks/useArrows';
 import { useRating } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
@@ -15,7 +15,7 @@ import './App.css';
 
 const App = () => {
   const chessGame = useChessGame();
-  const { theme, currentThemeColors, toggleTheme } = useTheme();
+  const { theme, currentThemeColors, toggleTheme } = useContext(ThemeContext)!;
   const { rating, addPoints } = useRating();
   const [attackerDisplay, setAttackerDisplay] = useState<{ square: Square; whiteCount: number; blackCount: number } | null>(null);
 
@@ -39,7 +39,6 @@ const App = () => {
       return;
     }
 
-    // Calculate attackers for the clicked square
     const whiteAttackers = chessGame.getAttackers(clickedSquare, 'w');
     const blackAttackers = chessGame.getAttackers(clickedSquare, 'b');
 
@@ -49,7 +48,6 @@ const App = () => {
       blackCount: blackAttackers.length,
     });
 
-    // Also handle arrow logic
     if (arrows.arrows.length > 0 && arrows.arrows.every(arrow =>
       arrow.endSquare === clickedSquare
     )) {

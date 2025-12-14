@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ThemeMode } from '../types';
+import { ThemeContext } from '../hooks/useTheme';
 import { useLichessAuth } from '../hooks/useLichessAuth';
 import { login } from '../services/lichessAuth';
 import { SettingsMenu } from './SettingsMenu';
-import styles from './Header.module.css';
 
 interface HeaderProps {
   theme: ThemeMode;
@@ -12,18 +12,27 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = (props) => {
   const { user, loading, logout } = useLichessAuth();
+  const { currentThemeColors } = useContext(ThemeContext)!;
 
   return (
-    <header className={`${styles.header} ${props.theme === 'light' ? styles.headerLight : ''}`}>
-      <div className={styles.titleSection}>
-        <img src="monkey.jpeg" alt="Monkey" className={styles.monkeyImage} />
-        <h1 className={`${styles.title} ${props.theme === 'light' ? styles.titleLight : ''}`}>Monkey Drill</h1>
+    <header style={{
+      width: '100%',
+      backgroundColor: currentThemeColors.headerBackgroundColor,
+      padding: '10px 20px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      borderBottom: `2px solid ${currentThemeColors.headerBackgroundColor}`,
+      boxSizing: 'border-box',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <img src="monkey.jpeg" alt="Monkey" style={{ height: '40px', width: 'auto', borderRadius: '4px' }} />
+        <h1 style={{ color: currentThemeColors.headerTextColor, margin: 0, fontSize: '24px' }}>Monkey Drill</h1>
       </div>
 
-      <div className={styles.actions}>
-
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {loading ? (
-          <div className={styles.loading}>Loading...</div>
+          <div style={{ color: currentThemeColors.headerTextColor, fontSize: '14px' }}>Loading...</div>
         ) : (
           <SettingsMenu
             theme={props.theme}

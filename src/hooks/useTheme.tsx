@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { ThemeMode, ThemeColors } from '../types';
 import { useLocalStorage } from './useLocalStorage';
 
@@ -8,26 +8,33 @@ interface ThemeContextValue {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useLocalStorage<ThemeMode>('theme', 'dark');
 
   const currentThemeColors = useMemo(() => {
-    const getCSSVar = (name: string) =>
-      getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-
-    return {
-      pageBackgroundColor: getCSSVar('--chess-page-bg'),
-      pageForegroundColor: getCSSVar('--chess-page-fg'),
-      lightSquareColor: getCSSVar('--chess-light-square'),
-      darkSquareColor: getCSSVar('--chess-dark-square'),
-      arrowBorderColor: getCSSVar('--chess-arrow-border'),
-    } as ThemeColors;
-  }, [theme]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    const colors = {
+      light: {
+        pageBackgroundColor: '#ffffff',
+        pageForegroundColor: '#000000',
+        lightSquareColor: '#f0d9b5',
+        darkSquareColor: '#b58863',
+        arrowBorderColor: '#000000',
+        headerBackgroundColor: '#cccccc',
+        headerTextColor: '#000000',
+      },
+      dark: {
+        pageBackgroundColor: '#000000',
+        pageForegroundColor: '#ffffff',
+        lightSquareColor: '#444444',
+        darkSquareColor: '#000000',
+        arrowBorderColor: '#ffffff',
+        headerBackgroundColor: '#000000',
+        headerTextColor: '#ffffff',
+      }
+    };
+    return colors[theme];
   }, [theme]);
 
   const toggleTheme = () => {
@@ -40,12 +47,3 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     </ThemeContext.Provider>
   );
 };
-
-export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider');
-  }
-  return context;
-};
-

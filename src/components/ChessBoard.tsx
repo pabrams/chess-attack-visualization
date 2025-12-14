@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Square } from 'chess.js';
 import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow, Mark } from '../types/arrows';
 import { UserColor } from '../types/drill';
-import { useTheme } from '../hooks/useTheme';
+import { ThemeContext } from '../hooks/useTheme';
 import { getCustomPieces } from './customPieces';
 import { CustomArrowOverlay } from './CustomArrowOverlay';
 
@@ -44,7 +44,7 @@ interface ChessBoardProps {
 }
 
 export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
-  const { theme, currentThemeColors } = useTheme();
+  const { theme, currentThemeColors } = useContext(ThemeContext)!;
   const customPieces = getCustomPieces(theme);
   const [boardSize, setBoardSize] = React.useState(400);
   const boardContainerRef = React.useRef<HTMLDivElement>(null);

@@ -2,18 +2,18 @@
 
 .header {
   width: 100%;
-  background-color: var(--color-bg-header-dark);
+  background-color: var(--header-bg-dark);
   padding: 10px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid var(--color-border-header-dark);
+  border-bottom: 2px solid var(--header-border-dark);
   box-sizing: border-box;
 }
 
 .headerLight {
-  background-color: var(--color-bg-header-light);
-  border-bottom: 1px solid var(--color-border-header-light);
+  background-color: var(--header-bg-light);
+  border-bottom: 1px solid var(--header-border-light);
 }
 
 .titleSection {
@@ -35,7 +35,7 @@
 }
 
 .titleLight {
-  color: var(--color-text-light);
+  color: var(--header-text-light);
 }
 
 .actions {

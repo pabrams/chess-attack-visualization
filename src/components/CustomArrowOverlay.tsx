@@ -3,6 +3,11 @@ import { Square } from 'chess.js';
 import { getRelativeCoords } from 'react-chessboard';
 import { Arrow, Mark } from '../types/arrows';
 
+const ARROW_COLORS = {
+  white: '#bb0000',
+  black: '#0066cc',
+} as const;
+
 interface CustomArrowOverlayProps {
   arrows: Arrow[];
   marks?: Mark[];
@@ -29,10 +34,11 @@ const drawArrowHead = (
   headSize: number = 20,
   borderColor: string = 'black',
   lineWidth: number = 2,
-  opacity: number = 0.8,
   squareSize: number = 0,
   zOffset: number = 0
 ) => {
+ 
+  const opacity = 1.0;
 
   // Calculate shortened arrow endpoints (shorten by half square size total + z-offset)
   const dx = toX - fromX;
@@ -125,10 +131,6 @@ const drawArrowHead = (
   ctx.fill();
 };
 
-const getCSSVariable = (varName: string): string => {
-  return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-};
-
 const drawXMark = (
   ctx: CanvasRenderingContext2D,
   centerX: number,
@@ -137,14 +139,11 @@ const drawXMark = (
   size: number = 35,
   lineWidth: number = 4,
   borderColor: string = 'black',
-  xMarkOpacity: number = 0.5,
-  xMarkBorderOpacity: number = 0.3
 ) => {
   const offset = size / 2;
   const borderWidth = 4;
 
   ctx.strokeStyle = borderColor;
-  ctx.globalAlpha = xMarkBorderOpacity;
   ctx.lineWidth = lineWidth + borderWidth;
   ctx.lineCap = 'round';
 
@@ -159,7 +158,6 @@ const drawXMark = (
   ctx.stroke();
 
   ctx.strokeStyle = color;
-  ctx.globalAlpha = xMarkOpacity;
   ctx.lineWidth = lineWidth;
 
   ctx.beginPath();
@@ -187,10 +185,10 @@ const drawAttackerCounts = (
   const squareSize = boardSize / 8;
   const fontSize = squareSize / 3;
 
-  const whiteArrowColor = getCSSVariable('--chess-white-arrow');
-  const blackArrowColor = getCSSVariable('--chess-black-arrow');
+  const attackerCountBackground = '#d0d0d0'
+  const whiteArrowColor = ARROW_COLORS.white;
+  const blackArrowColor = ARROW_COLORS.black;
 
-  // Draw thick border around the square based on which side has more attackers
   let borderColor: string;
   if (whiteCount > blackCount) {
     borderColor = whiteArrowColor;
@@ -217,12 +215,12 @@ const drawAttackerCounts = (
   ctx.textBaseline = 'middle';
 
   const circleRadius = fontSize * 0.6;
-
+  
   if (whiteCount > 0) {
     const whiteX = coords.x - squareSize / 4;
     const whiteY = coords.y - squareSize / 4;
+    ctx.fillStyle = attackerCountBackground
 
-    ctx.fillStyle = '#d0d0d0';
     ctx.beginPath();
     ctx.arc(whiteX, whiteY, circleRadius, 0, Math.PI * 2);
     ctx.fill();
@@ -241,7 +239,7 @@ const drawAttackerCounts = (
     const blackX = coords.x + squareSize / 4;
     const blackY = coords.y + squareSize / 4;
 
-    ctx.fillStyle = '#d0d0d0';
+    ctx.fillStyle = attackerCountBackground
     ctx.beginPath();
     ctx.arc(blackX, blackY, circleRadius, 0, Math.PI * 2);
     ctx.fill();
@@ -274,8 +272,6 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const arrowOpacity = parseFloat(getCSSVariable('--opacity-arrow')) || 1;
-
     ctx.clearRect(0, 0, boardSize, boardSize);
 
     const sortedArrows = [...arrows].sort((a, b) => {
@@ -305,7 +301,7 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       const dy = to.y - from.y;
       const angleRadians = Math.atan2(dy, dx);
       const angleDegrees = (angleRadians * 180 / Math.PI);
-      const directionBucket = Math.round(angleDegrees / 30) * 30; // Round to nearest 30 degrees
+      const directionBucket = Math.round(angleDegrees / 30) * 30;
 
       // Create unique key for this target+direction combination
       const directionKey = `${arrow.endSquare}_${directionBucket}`;
@@ -317,12 +313,12 @@ export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
       // Make overlapping arrows narrower
       const lineWidth = baseLineWidth - (zOffset * 3);
 
-      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, arrowOpacity, squareSize, zOffset);
+      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, squareSize, zOffset);
     });
  
     marks.forEach((mark) => {
       const coords = squareToCoords(mark.square, boardSize, boardOrientation);
-      drawXMark(ctx, coords.x, coords.y, 'darkgreen', boardSize / 28, boardSize / 80, 'white', 1, 1);
+      drawXMark(ctx, coords.x, coords.y, 'darkgreen', boardSize / 28, boardSize / 80, 'white');
     });
 
     if (attackerDisplay) {
