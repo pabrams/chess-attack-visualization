@@ -44,14 +44,24 @@ const drawArrowHead = (
   const dx = toX - fromX;
   const dy = toY - fromY;
   const distance = Math.sqrt(dx * dx + dy * dy);
+
+  // Circle at the tail
+  const circleRadius = squareSize * 0.45;
+  const circleBorderWidth = lineWidth / 2;
+
+  // Start arrow slightly inside the circle to overlap with the edge
+  const effectiveRadius = circleRadius;
+  const circleEdgeX = fromX + (dx / distance) * effectiveRadius;
+  const circleEdgeY = fromY + (dy / distance) * effectiveRadius;
+
   const shortenAmount = squareSize / 2 + zOffset * (squareSize/4); // Half the square size + z*4 pixels
 
   const maxShortenRatio = 1.0;
   const shortenRatio = Math.min(shortenAmount / distance, maxShortenRatio);
 
-  // Move start point forward by quarter square
-  const newFromX = fromX + dx * (shortenRatio / 4);
-  const newFromY = fromY + dy * (shortenRatio / 4);
+  // Move start point forward from circle edge
+  const newFromX = circleEdgeX;
+  const newFromY = circleEdgeY;
 
   // Move end point backward by quarter square
   const newToX = toX - dx * (shortenRatio / 2);
@@ -82,11 +92,27 @@ const drawArrowHead = (
   const coloredShaftEndX = newFromX + newDx * coloredShaftRatio;
   const coloredShaftEndY = newFromY + newDy * coloredShaftRatio;
 
+  // Draw circle at the tail (around the piece)
+  // Draw border circle
+  ctx.globalAlpha = opacity;
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = lineWidth / 2;
+  ctx.beginPath();
+  ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Draw colored circle on top
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth / 3;
+  ctx.beginPath();
+  ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
+  ctx.stroke();
+
   // Draw border arrow (larger) first
   ctx.strokeStyle = borderColor;
   ctx.globalAlpha = opacity;
   ctx.lineWidth = lineWidth + 2;
-  ctx.lineCap = 'round';
+  ctx.lineCap = 'butt';
   ctx.lineJoin = 'round';
 
   ctx.beginPath();
