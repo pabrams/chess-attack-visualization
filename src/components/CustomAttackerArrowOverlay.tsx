@@ -8,7 +8,7 @@ const ARROW_COLORS = {
   black: '#0066cc',
 } as const;
 
-interface CustomArrowOverlayProps {
+interface CustomAttackerArrowOverlayProps {
   arrows: Arrow[];
   marks?: Mark[];
   attackerDisplay?: { square: Square; whiteCount: number; blackCount: number } | null;
@@ -290,7 +290,7 @@ const drawAttackerCountCircles = (
   }
 };
 
-export const CustomArrowOverlay: React.FC<CustomArrowOverlayProps> = ({
+export const CustomAttackerArrowOverlay: React.FC<CustomAttackerArrowOverlayProps> = ({
   arrows,
   marks = [],
   attackerDisplay,

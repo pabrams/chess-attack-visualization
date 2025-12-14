@@ -5,7 +5,7 @@ import { Arrow, Mark } from '../types/arrows';
 import { UserColor } from '../types/drill';
 import { ThemeContext } from '../hooks/useTheme';
 import { getCustomPieces } from './customPieces';
-import { CustomArrowOverlay } from './CustomArrowOverlay';
+import { CustomAttackerArrowOverlay } from './CustomAttackerArrowOverlay';
 
 const getCSSVar = (varName: string): string => {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
@@ -105,7 +105,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
         data-testid="chessboard"
       />
       {boardSize > 0 && (
-        <CustomArrowOverlay
+        <CustomAttackerArrowOverlay
           arrows={props.arrows}
           marks={props.marks}
           attackerDisplay={props.attackerDisplay}
