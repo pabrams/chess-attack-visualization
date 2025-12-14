@@ -96,34 +96,7 @@ const drawArrowHead = (
 
   ctx.beginPath();
   ctx.moveTo(borderStartX, borderStartY);
-  ctx.lineTo(borderTipX, borderTipY);
-  ctx.stroke();
-
-  const xSize = borderHeadSize * 0.7;
-  ctx.strokeStyle = borderColor;
-  ctx.lineWidth = lineWidth + 2;
-  ctx.lineCap = 'round';
-
-  ctx.beginPath();
-  ctx.moveTo(
-    borderTipX + xSize * Math.cos(Math.PI / 4),
-    borderTipY + xSize * Math.sin(Math.PI / 4)
-  );
-  ctx.lineTo(
-    borderTipX - xSize * Math.cos(Math.PI / 4),
-    borderTipY - xSize * Math.sin(Math.PI / 4)
-  );
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(
-    borderTipX + xSize * Math.cos(3 * Math.PI / 4),
-    borderTipY + xSize * Math.sin(3 * Math.PI / 4)
-  );
-  ctx.lineTo(
-    borderTipX - xSize * Math.cos(3 * Math.PI / 4),
-    borderTipY - xSize * Math.sin(3 * Math.PI / 4)
-  );
+  ctx.lineTo(newToX, newToY);
   ctx.stroke();
 
   ctx.strokeStyle = color;
@@ -136,6 +109,33 @@ const drawArrowHead = (
   ctx.stroke();
 
   const coloredXSize = coloredHeadSize * 0.7;
+
+  ctx.strokeStyle = borderColor;
+  ctx.lineWidth = lineWidth + 2;
+  ctx.lineCap = 'round';
+
+  ctx.beginPath();
+  ctx.moveTo(
+    newToX + coloredXSize * Math.cos(Math.PI / 4),
+    newToY + coloredXSize * Math.sin(Math.PI / 4)
+  );
+  ctx.lineTo(
+    newToX - coloredXSize * Math.cos(Math.PI / 4),
+    newToY - coloredXSize * Math.sin(Math.PI / 4)
+  );
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(
+    newToX + coloredXSize * Math.cos(3 * Math.PI / 4),
+    newToY + coloredXSize * Math.sin(3 * Math.PI / 4)
+  );
+  ctx.lineTo(
+    newToX - coloredXSize * Math.cos(3 * Math.PI / 4),
+    newToY - coloredXSize * Math.sin(3 * Math.PI / 4)
+  );
+  ctx.stroke();
+
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth - 1;
   ctx.lineCap = 'round';
