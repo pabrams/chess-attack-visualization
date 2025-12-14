@@ -61,14 +61,7 @@ const drawArrowHead = (
   const newDy = newToY - newFromY;
   const newDistance = Math.sqrt(newDx * newDx + newDy * newDy);
 
-  const borderHeadSize = headSize + 4;
   const coloredHeadSize = headSize;
-  const borderTipExtension = 2;
-
-  const borderTipX = newToX + (newDx / newDistance) * borderTipExtension;
-  const borderTipY = newToY + (newDy / newDistance) * borderTipExtension;
-
-
 
   // Draw circle at the tail
   ctx.globalAlpha = opacity;
