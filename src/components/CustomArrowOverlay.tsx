@@ -100,6 +100,11 @@ const drawArrowHead = (
   ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
   ctx.stroke();
 
+  // Move border arrow start forward to hide shadow at tail
+  const borderStartOffset = 2;
+  const borderStartX = newFromX + (newDx / newDistance) * borderStartOffset;
+  const borderStartY = newFromY + (newDy / newDistance) * borderStartOffset;
+
   ctx.strokeStyle = borderColor;
   ctx.globalAlpha = opacity;
   ctx.lineWidth = lineWidth + 2;
@@ -107,7 +112,7 @@ const drawArrowHead = (
   ctx.lineJoin = 'round';
 
   ctx.beginPath();
-  ctx.moveTo(newFromX, newFromY);
+  ctx.moveTo(borderStartX, borderStartY);
   ctx.lineTo(borderShaftEndX, borderShaftEndY);
   ctx.stroke();
 
@@ -125,7 +130,7 @@ const drawArrowHead = (
   ctx.fill();
 
   ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth;
+  ctx.lineWidth = lineWidth - 1;
 
   ctx.beginPath();
   ctx.moveTo(newFromX, newFromY);
@@ -247,8 +252,8 @@ const drawAttackerCountCircles = (
   const circleRadius = fontSize * 0.6;
 
   if (whiteCount > 0) {
-    const whiteX = coords.x - squareSize / 4;
-    const whiteY = coords.y - squareSize / 4;
+    const whiteX = coords.x - squareSize / 6;
+    const whiteY = coords.y - squareSize / 6;
     ctx.fillStyle = attackerCountBackground
 
     ctx.beginPath();
@@ -266,8 +271,8 @@ const drawAttackerCountCircles = (
   }
 
   if (blackCount > 0) {
-    const blackX = coords.x + squareSize / 4;
-    const blackY = coords.y + squareSize / 4;
+    const blackX = coords.x + squareSize / 6;
+    const blackY = coords.y + squareSize / 6;
 
     ctx.fillStyle = attackerCountBackground
     ctx.beginPath();
