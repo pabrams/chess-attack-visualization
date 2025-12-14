@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { ThemeMode } from '../types';
-import styles from './SettingsMenu.module.css';
+import { ThemeContext } from '../hooks/useTheme';
 
 interface SettingsMenuProps {
   theme: ThemeMode;
@@ -13,14 +13,26 @@ interface SettingsMenuProps {
 
 export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { currentThemeColors } = useContext(ThemeContext)!;
 
   return (
     <div
-      className={styles.container}
+      style={{ position: 'relative', display: 'inline-block', paddingBottom: '10px' }}
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      <button className={`${styles.gearButton} ${props.theme === 'light' ? styles.gearButtonLight : ''}`} aria-label="Settings">
+      <button
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          padding: '8px',
+          color: currentThemeColors.headerTextColor,
+          display: 'flex',
+          alignItems: 'center',
+        }}
+        aria-label="Settings"
+      >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
           <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24" />
@@ -28,15 +40,36 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
       </button>
 
       {isOpen && (
-        <div className={`${styles.dropdown} ${props.theme === 'light' ? styles.dropdownLight : ''}`}>
+        <div style={{
+          position: 'absolute',
+          right: 0,
+          top: '100%',
+          backgroundColor: currentThemeColors.headerBackgroundColor,
+          border: `1px solid ${currentThemeColors.headerTextColor}`,
+          borderRadius: '8px',
+          padding: '8px',
+          minWidth: '200px',
+          zIndex: 1000,
+        }}>
           <button
-            className={`${styles.menuButton} ${styles.themeButton} ${props.theme === 'light' ? `${styles.menuButtonLight} ${styles.themeButtonLight}` : ''}`}
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              color: currentThemeColors.headerTextColor,
+              fontSize: '14px',
+            }}
             onClick={() => {
               setIsOpen(false);
               props.onToggleTheme();
             }}
           >
-            <span className={styles.icon}>
+            <span style={{ display: 'flex', alignItems: 'center' }}>
               {props.theme === 'dark' ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="5" />
@@ -55,11 +88,22 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
                 </svg>
               )}
             </span>
-            <span>{props.theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+            <span style={{ color: currentThemeColors.headerTextColor }}>{props.theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
           </button>
 
           <button
-            className={`${styles.menuButton} ${props.theme === 'light' ? styles.menuButtonLight : ''}`}
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              color: currentThemeColors.headerTextColor,
+              fontSize: '14px',
+            }}
             onClick={() => {
               setIsOpen(false);
               if (props.isLoggedIn) {
@@ -69,7 +113,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
               }
             }}
           >
-            <span className={styles.icon}>
+            <span style={{ display: 'flex', alignItems: 'center' }}>
               {props.isLoggedIn ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -84,7 +128,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
                 </svg>
               )}
             </span>
-            <span>
+            <span style={{ color: currentThemeColors.headerTextColor }}>
               {props.isLoggedIn ? (props.username ? `Logout (${props.username})` : 'Logout') : 'Login with Lichess'}
             </span>
           </button>
