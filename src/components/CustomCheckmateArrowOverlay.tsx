@@ -34,11 +34,12 @@ const drawArrowHead = (
   headSize: number = 20,
   borderColor: string = 'black',
   lineWidth: number = 2,
-  squareSize: number = 0,
-  zOffset: number = 0
+  squareSize: number = 0
 ) => {
- 
+
   const opacity = 1.0;
+
+  lineWidth = lineWidth * 0.7;
 
   const dx = toX - fromX;
   const dy = toY - fromY;
@@ -50,19 +51,12 @@ const drawArrowHead = (
   const circleEdgeX = fromX + (dx / distance) * effectiveRadius;
   const circleEdgeY = fromY + (dy / distance) * effectiveRadius;
 
-  const shortenAmount = squareSize / 2 + zOffset * (squareSize/4); // Half the square size + z*4 pixels
-
-  const maxShortenRatio = 1.0;
-  const shortenRatio = Math.min(shortenAmount / distance, maxShortenRatio);
-
   const newFromX = circleEdgeX;
   const newFromY = circleEdgeY;
 
-  // Arrow reaches center of target square (no shortening)
   const newToX = toX;
   const newToY = toY;
 
-  const newAngle = Math.atan2(newToY - newFromY, newToX - newFromX);
   const newDx = newToX - newFromX;
   const newDy = newToY - newFromY;
   const newDistance = Math.sqrt(newDx * newDx + newDy * newDy);
@@ -71,21 +65,10 @@ const drawArrowHead = (
   const coloredHeadSize = headSize;
   const borderTipExtension = 2;
 
-  // Calculate extended tip position for border arrow
   const borderTipX = newToX + (newDx / newDistance) * borderTipExtension;
   const borderTipY = newToY + (newDy / newDistance) * borderTipExtension;
 
-  // Calculate shaft end for border arrow
-  const borderShaftEndDistance = newDistance - borderHeadSize * 0.8;
-  const borderShaftRatio = borderShaftEndDistance / newDistance;
-  const borderShaftEndX = newFromX + newDx * borderShaftRatio;
-  const borderShaftEndY = newFromY + newDy * borderShaftRatio;
 
-  // Calculate shaft end for colored arrow
-  const coloredShaftEndDistance = newDistance - coloredHeadSize * 0.8;
-  const coloredShaftRatio = coloredShaftEndDistance / newDistance;
-  const coloredShaftEndX = newFromX + newDx * coloredShaftRatio;
-  const coloredShaftEndY = newFromY + newDy * coloredShaftRatio;
 
   // Draw circle at the tail
   ctx.globalAlpha = opacity;
@@ -101,7 +84,6 @@ const drawArrowHead = (
   ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
   ctx.stroke();
 
-  // Move border arrow start forward to hide shadow at tail
   const borderStartOffset = 2;
   const borderStartX = newFromX + (newDx / newDistance) * borderStartOffset;
   const borderStartY = newFromY + (newDy / newDistance) * borderStartOffset;
@@ -114,16 +96,14 @@ const drawArrowHead = (
 
   ctx.beginPath();
   ctx.moveTo(borderStartX, borderStartY);
-  ctx.lineTo(borderShaftEndX, borderShaftEndY);
+  ctx.lineTo(borderTipX, borderTipY);
   ctx.stroke();
 
-  // Draw X-shaped border arrowhead (at fixed 45-degree angles)
   const xSize = borderHeadSize * 0.7;
   ctx.strokeStyle = borderColor;
   ctx.lineWidth = lineWidth + 2;
   ctx.lineCap = 'round';
 
-  // First diagonal of X (northeast to southwest, 45 degrees)
   ctx.beginPath();
   ctx.moveTo(
     borderTipX + xSize * Math.cos(Math.PI / 4),
@@ -135,7 +115,6 @@ const drawArrowHead = (
   );
   ctx.stroke();
 
-  // Second diagonal of X (northwest to southeast, 135 degrees)
   ctx.beginPath();
   ctx.moveTo(
     borderTipX + xSize * Math.cos(3 * Math.PI / 4),
@@ -149,19 +128,18 @@ const drawArrowHead = (
 
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth - 1;
+  ctx.lineCap = 'butt';
 
   ctx.beginPath();
   ctx.moveTo(newFromX, newFromY);
-  ctx.lineTo(coloredShaftEndX, coloredShaftEndY);
+  ctx.lineTo(newToX, newToY);
   ctx.stroke();
 
-  // Draw X-shaped colored arrowhead (at fixed 45-degree angles)
   const coloredXSize = coloredHeadSize * 0.7;
   ctx.strokeStyle = color;
   ctx.lineWidth = lineWidth - 1;
   ctx.lineCap = 'round';
 
-  // First diagonal of X (northeast to southwest, 45 degrees)
   ctx.beginPath();
   ctx.moveTo(
     newToX + coloredXSize * Math.cos(Math.PI / 4),
@@ -173,7 +151,6 @@ const drawArrowHead = (
   );
   ctx.stroke();
 
-  // Second diagonal of X (northwest to southeast, 135 degrees)
   ctx.beginPath();
   ctx.moveTo(
     newToX + coloredXSize * Math.cos(3 * Math.PI / 4),
@@ -366,7 +343,6 @@ export const CustomCheckmateArrowOverlay: React.FC<CustomCheckmateArrowOverlayPr
       return distB - distA;
     });
 
-    // Track z-index per (target square + direction) to only shorten overlapping arrows
     const directionKeys = new Map<string, number>();
 
     sortedArrows.forEach((arrow) => {
@@ -377,17 +353,14 @@ export const CustomCheckmateArrowOverlay: React.FC<CustomCheckmateArrowOverlayPr
       const baseLineWidth = boardSize / 50;
       const squareSize = boardSize / 8;
 
-      // Calculate arrow direction and create a direction bucket (rounded to nearest 30 degrees)
       const dx = to.x - from.x;
       const dy = to.y - from.y;
       const angleRadians = Math.atan2(dy, dx);
       const angleDegrees = (angleRadians * 180 / Math.PI);
       const directionBucket = Math.round(angleDegrees / 30) * 30;
 
-      // Create unique key for this target+direction combination
       const directionKey = `${arrow.endSquare}_${directionBucket}`;
 
-      // Only apply z-offset if there's already an arrow in this direction to this target
       const zOffset = directionKeys.get(directionKey) || 0;
       directionKeys.set(directionKey, zOffset + 1);
 

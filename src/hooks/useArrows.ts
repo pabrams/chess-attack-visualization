@@ -85,10 +85,15 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
       arrowEndSquares.add(arrow.endSquare);
     });
 
-    const newMarks: Mark[] = aroundSquares.map(square => ({
-      square,
-      color: arrowColor,
-    }));
+    const newMarks: Mark[] = aroundSquares
+      .filter(square => {
+        const piece = chessGame.getPieceAt(square);
+        return piece && piece.color === checksColor;
+      })
+      .map(square => ({
+        square,
+        color: arrowColor,
+      }));
 
     setCheckmateArrows(newArrows);
     setCheckmateMarks(newMarks);
