@@ -34,7 +34,9 @@ const drawArrowHead = (
   headSize: number = 20,
   borderColor: string = 'black',
   lineWidth: number = 2,
-  squareSize: number = 0
+  squareSize: number = 0,
+  zOffset: number = 0,
+  shouldDrawCircle: boolean = true
 ) => {
 
   const opacity = 1.0;
@@ -63,18 +65,20 @@ const drawArrowHead = (
 
   const coloredHeadSize = headSize;
 
-  ctx.globalAlpha = opacity;
-  ctx.strokeStyle = borderColor;
-  ctx.lineWidth = lineWidth / 2;
-  ctx.beginPath();
-  ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
-  ctx.stroke();
+  if (shouldDrawCircle) {
+    ctx.globalAlpha = opacity;
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = lineWidth / 2;
+    ctx.beginPath();
+    ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
+    ctx.stroke();
 
-  ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth / 3;
-  ctx.beginPath();
-  ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
-  ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth / 3;
+    ctx.beginPath();
+    ctx.arc(fromX, fromY, circleRadius, 0, Math.PI * 2);
+    ctx.stroke();
+  }
 
   const borderStartOffset = 2;
   const borderStartX = newFromX + (newDx / newDistance) * borderStartOffset;
@@ -336,6 +340,7 @@ export const CustomCheckmateArrowOverlay: React.FC<CustomCheckmateArrowOverlayPr
     });
 
     const directionKeys = new Map<string, number>();
+    const drawnStartCircles = new Set<string>();
 
     sortedArrows.forEach((arrow) => {
       const from = squareToCoords(arrow.startSquare, boardSize, boardOrientation);
@@ -358,7 +363,12 @@ export const CustomCheckmateArrowOverlay: React.FC<CustomCheckmateArrowOverlayPr
 
       const lineWidth = baseLineWidth - (zOffset * 3);
 
-      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, squareSize, zOffset);
+      const shouldDrawCircle = !drawnStartCircles.has(arrow.startSquare);
+      if (shouldDrawCircle) {
+        drawnStartCircles.add(arrow.startSquare);
+      }
+
+      drawArrowHead(ctx, from.x, from.y, to.x, to.y, arrow.color, headSize, arrowBorderColor, lineWidth, squareSize, zOffset, shouldDrawCircle);
     });
  
     marks.forEach((mark) => {
