@@ -6,6 +6,7 @@ import { UserColor } from '../types/drill';
 import { ThemeContext } from '../hooks/useTheme';
 import { getCustomPieces } from './customPieces';
 import { CustomAttackerArrowOverlay } from './CustomAttackerArrowOverlay';
+import { CustomCheckmateArrowOverlay } from './CustomCheckmateArrowOverlay';
 
 const getCSSVar = (varName: string): string => {
   return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
@@ -32,8 +33,9 @@ const BOARD_STYLES = {
 
 interface ChessBoardProps {
   fen: string;
-  arrows: Arrow[];
-  marks?: Mark[];
+  attackerArrows: Arrow[];
+  checkmateArrows: Arrow[];
+  checkmateMarks: Mark[];
   attackerDisplay?: { square: Square; whiteCount: number; blackCount: number } | null;
   lastMove: { from: Square; to: Square } | null;
   pendingMove: { sourceSquare: Square; legalTargets: Square[] } | null;
@@ -105,14 +107,24 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
         data-testid="chessboard"
       />
       {boardSize > 0 && (
-        <CustomAttackerArrowOverlay
-          arrows={props.arrows}
-          marks={props.marks}
-          attackerDisplay={props.attackerDisplay}
-          boardSize={boardSize}
-          boardOrientation={props.boardOrientation ?? 'white'}
-          arrowBorderColor={currentThemeColors.arrowBorderColor}
-        />
+        <>
+          <CustomAttackerArrowOverlay
+            arrows={props.attackerArrows}
+            marks={[]}
+            attackerDisplay={props.attackerDisplay}
+            boardSize={boardSize}
+            boardOrientation={props.boardOrientation ?? 'white'}
+            arrowBorderColor={currentThemeColors.arrowBorderColor}
+          />
+          <CustomCheckmateArrowOverlay
+            arrows={props.checkmateArrows}
+            marks={props.checkmateMarks}
+            attackerDisplay={null}
+            boardSize={boardSize}
+            boardOrientation={props.boardOrientation ?? 'white'}
+            arrowBorderColor={currentThemeColors.arrowBorderColor}
+          />
+        </>
       )}
     </div>
   );

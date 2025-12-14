@@ -9,8 +9,9 @@ import styles from './Layout.module.css';
 
 interface LayoutProps {
   fen: string;
-  arrows: Arrow[];
-  marks?: Mark[];
+  attackerArrows: Arrow[];
+  checkmateArrows: Arrow[];
+  checkmateMarks: Mark[];
   attackerDisplay?: { square: Square; whiteCount: number; blackCount: number } | null;
   lastMove: { from: Square; to: Square } | null;
   pendingMove: { sourceSquare: Square; legalTargets: Square[] } | null;
@@ -30,8 +31,9 @@ export const Layout: React.FC<LayoutProps> = (props) => {
         <div className={styles.board}>
           <ChessBoard
             fen={props.fen}
-            arrows={props.arrows}
-            marks={props.marks}
+            attackerArrows={props.attackerArrows}
+            checkmateArrows={props.checkmateArrows}
+            checkmateMarks={props.checkmateMarks}
             attackerDisplay={props.attackerDisplay}
             lastMove={props.lastMove}
             pendingMove={props.pendingMove}

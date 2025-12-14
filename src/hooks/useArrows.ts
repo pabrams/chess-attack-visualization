@@ -11,12 +11,14 @@ interface UseArrowsProps {
 export const useArrows = ({ chessGame }: UseArrowsProps) => {
   const whiteArrowColor = '#bb0000';
   const blackArrowColor = '#0066cc';
-  const [arrows, setArrows] = useState<Arrow[]>([]);
-  const [marks, setMarks] = useState<Mark[]>([]);
+  const [attackerArrows, setAttackerArrows] = useState<Arrow[]>([]);
+  const [checkmateArrows, setCheckmateArrows] = useState<Arrow[]>([]);
+  const [checkmateMarks, setCheckmateMarks] = useState<Mark[]>([]);
 
   const clearArrows = useCallback(() => {
-    setArrows([]);
-    setMarks([]);
+    setAttackerArrows([]);
+    setCheckmateArrows([]);
+    setCheckmateMarks([]);
   }, []);
 
   const showAttackersForSquare = useCallback((square: Square) => {
@@ -32,7 +34,7 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
       ...createArrowsFromAttackers(blackAttackers, square, blackArrowColor)
     );
 
-    setArrows(newArrows);
+    setAttackerArrows(newArrows);
   }, [chessGame, whiteArrowColor, blackArrowColor]);
 
   const handleSquareRightClick = useCallback(({ square }: SquareHandlerArgs) => {
@@ -88,8 +90,8 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
       color: arrowColor,
     }));
 
-    setArrows(newArrows);
-    setMarks(newMarks);
+    setCheckmateArrows(newArrows);
+    setCheckmateMarks(newMarks);
   }, [chessGame, whiteArrowColor, blackArrowColor, clearArrows]);
 
   useEffect(() => {
@@ -98,8 +100,9 @@ export const useArrows = ({ chessGame }: UseArrowsProps) => {
   }, [chessGame.fen, clearArrows, showCheckmaters]);
 
   return {
-    arrows,
-    marks,
+    attackerArrows,
+    checkmateArrows,
+    checkmateMarks,
     clearArrows,
     showCheckmaters,
     handleSquareRightClick,

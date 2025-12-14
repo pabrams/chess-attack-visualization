@@ -48,7 +48,7 @@ const App = () => {
       blackCount: blackAttackers.length,
     });
 
-    if (arrows.arrows.length > 0 && arrows.arrows.every(arrow =>
+    if (arrows.attackerArrows.length > 0 && arrows.attackerArrows.every(arrow =>
       arrow.endSquare === clickedSquare
     )) {
       arrows.clearArrows();
@@ -117,8 +117,9 @@ const App = () => {
 
         <Layout
           fen={chessGame.fen}
-          arrows={arrows.arrows}
-          marks={arrows.marks}
+          attackerArrows={arrows.attackerArrows}
+          checkmateArrows={arrows.checkmateArrows}
+          checkmateMarks={arrows.checkmateMarks}
           attackerDisplay={attackerDisplay}
           lastMove={
             sourceSquare && targetSquare
