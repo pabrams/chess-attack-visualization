@@ -63,7 +63,6 @@ const drawArrowHead = (
 
   const coloredHeadSize = headSize;
 
-  // Draw circle at the tail
   ctx.globalAlpha = opacity;
   ctx.strokeStyle = borderColor;
   ctx.lineWidth = lineWidth / 2;
