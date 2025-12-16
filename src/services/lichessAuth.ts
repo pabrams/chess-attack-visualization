@@ -33,7 +33,7 @@ export const login = async () => {
       return;
     }
 
-    const redirectUri = window.location.origin;
+    const redirectUri = window.location.origin + window.location.pathname;
     const authUrl = new URL(`${LICHESS_HOST}/oauth`);
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('client_id', CLIENT_ID);

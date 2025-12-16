@@ -105,9 +105,8 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
       const url = 'https://lichess.org/api/puzzle/batch/matein1?nb=50&difficulty=easiest';
       const response = await fetch(url, { 
         headers: { 
-          'Accept': 'application/json',
-          'User-Agent': 'MonkeyDrill/1.0 (codemonkeyfromspace@gmail.com)'
-        } 
+          'Accept': 'application/json'
+        }
       });
 
       if (response.status === 429) {
