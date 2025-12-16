@@ -52,42 +52,42 @@ export const handleRedirect = async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
 
-  const codeVerifier = sessionStorage.getItem('codeVerifier');
+  if (!code) return null;
 
-  if (code && codeVerifier) {
-    const redirectUri = window.location.origin;
+  const codeVerifier = sessionStorage.getItem('codeVerifier');
+  let accessToken = null;
+
+  if (codeVerifier) {
+    const redirectUri = window.location.origin + window.location.pathname;
     const tokenUrl = `${LICHESS_HOST}/api/token`;
 
-    const response = await fetch(tokenUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: redirectUri,
-        client_id: CLIENT_ID,
-        code_verifier: codeVerifier,
-      }),
-    });
+    try {
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grant_type: 'authorization_code',
+          code,
+          redirect_uri: redirectUri,
+          client_id: CLIENT_ID,
+          code_verifier: codeVerifier,
+        }),
+      });
 
-    if (response.ok) {
-      const data = await response.json();
-      window.history.replaceState({}, document.title, window.location.pathname);
-      sessionStorage.removeItem('codeVerifier');
-      return data.access_token;
-    } else {
-      const errorText = await response.text();
-      console.error('Failed to exchange authorization code for access token');
-      console.error('Response status:', response.status);
-      console.error('Response body:', errorText);
-      window.history.replaceState({}, document.title, window.location.pathname);
-      sessionStorage.removeItem('codeVerifier');
-      return null;
+      if (response.ok) {
+        const data = await response.json();
+        accessToken = data.access_token;
+      } else {
+        const errorText = await response.text();
+        console.error('Token exchange failed:', response.status, errorText);
+      }
+    } catch (error) {
+      console.error('Network error during token exchange:', error);
     }
-  } else if (code) {
-    window.history.replaceState({}, document.title, window.location.pathname);
   }
-  return null;
+
+  window.history.replaceState({}, document.title, window.location.pathname);
+  sessionStorage.removeItem('codeVerifier');
+
+  return accessToken;
 };
