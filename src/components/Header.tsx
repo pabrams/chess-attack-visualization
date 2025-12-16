@@ -25,9 +25,10 @@ const Header: React.FC<HeaderProps> = (props) => {
       borderBottom: `2px solid ${currentThemeColors.headerBackgroundColor}`,
       boxSizing: 'border-box',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+      <div style={{ color: currentThemeColors.headerTextColor,display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <img src="monkey.jpeg" alt="Monkey" style={{ height: '40px', width: 'auto', borderRadius: '4px' }} />
-        <h1 style={{ color: currentThemeColors.headerTextColor, margin: 0, fontSize: '24px' }}>Monkey Drill</h1>
+        <h1 style={{ margin: 0, fontSize: '24px' }}>Monkey Drill</h1>
+        <p>Right-click a square to show attackers</p>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
