@@ -3,10 +3,10 @@ import { Square, Chess } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
 import { UserColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
-import { getLevelFromRating } from '../utils/ratingCalculation';
-import { convertToLichessPuzzleFormat, type RawPuzzle } from '../utils/puzzleUtils';
+import { useLocalStorage } from './useLocalStorage';
 
 const SOLVE_COMPLETION_DELAY_MS = 1000;
+const STORAGE_KEY = 'monkeydrillState';
 
 interface UseDrillProps {
   chessGame: ChessGame;
@@ -23,9 +23,9 @@ interface DrillState {
 }
 
 type DrillAction =
-  | { type: 'INITIALIZE_COLOR'; payload: UserColor }
-  | { type: 'LOAD_PUZZLES'; payload: LichessPuzzle[] }
-  | { type: 'ADVANCE_PUZZLE'; payload: LichessPuzzle | null };
+  | { type: 'SET_STATE'; payload: DrillState }
+  | { type: 'LOAD_NEW_PUZZLES'; payload: { puzzles: LichessPuzzle[]; userColor: UserColor } }
+  | { type: 'ADVANCE_PUZZLE' };
 
 const initialState: DrillState = {
   userColor: 'white',
@@ -33,18 +33,35 @@ const initialState: DrillState = {
   currentPuzzle: null,
 };
 
+const initDrillState = (defaultState: DrillState): DrillState => {
+  if (typeof window === 'undefined') return defaultState;
+  try {
+    const item = window.localStorage.getItem(STORAGE_KEY);
+    const state = item ? JSON.parse(item) : defaultState;
+    return state;
+  } catch (error) {
+    return defaultState;
+  }
+};
+
 const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
   switch (action.type) {
-    case 'INITIALIZE_COLOR':
-      return { ...state, userColor: action.payload };
-    case 'LOAD_PUZZLES':
-      return { ...state, puzzles: action.payload };
-    case 'ADVANCE_PUZZLE': {
-      const [, ...remaining] = state.puzzles;
+    case 'SET_STATE':
+      return action.payload;
+    case 'LOAD_NEW_PUZZLES':
+      const { puzzles, userColor } = action.payload;
       return {
         ...state,
-        puzzles: remaining,
-        currentPuzzle: action.payload,
+        userColor,
+        puzzles,
+        currentPuzzle: puzzles.length > 0 ? puzzles[0] : null,
+      };
+    case 'ADVANCE_PUZZLE': {
+      const nextPuzzles = state.puzzles.slice(1);
+      return {
+        ...state,
+        puzzles: nextPuzzles,
+        currentPuzzle: nextPuzzles.length > 0 ? nextPuzzles[0] : null,
       };
     }
     default:
@@ -56,65 +73,92 @@ const selectRandomUserColor = (): UserColor => {
   return Math.random() < 0.5 ? 'white' : 'black';
 };
 
-export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, onPuzzleLoad }: UseDrillProps) => {
-  const [state, dispatch] = useReducer(drillReducer, initialState);
-
-  const initialRatingRef = useRef(rating);
+export const useDrill = ({ chessGame, onResultRecorded, onPuzzleResult, onPuzzleLoad }: UseDrillProps) => {
+  const [state, dispatch] = useReducer(drillReducer, initialState, initDrillState);
+  const [rateLimitTime, setRateLimitTime] = useLocalStorage<number>('monkeydrillRateLimitTime', 0);
+  
+  const isFetching = useRef(false);
 
   useEffect(() => {
-    const loadPuzzles = async () => {
-      const newUserColor = selectRandomUserColor();
-      dispatch({ type: 'INITIALIZE_COLOR', payload: newUserColor });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
 
-      try {
-        const playerLevel = getLevelFromRating(initialRatingRef.current);
-        const colorPrefix = newUserColor === 'white' ? 'w' : 'b';
-        const puzzleFile = `${import.meta.env.BASE_URL}lichess_db_puzzle-${colorPrefix}-one-move-${playerLevel}.json`;
-        const response = await fetch(puzzleFile);
+  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-        if (!response.ok) {
-          throw new Error(`Failed to load puzzle file: ${response.status} ${response.statusText}`);
-        }
-
-        const data = await response.json() as { puzzles: RawPuzzle[] };
-        const sampled = randomSubset(data.puzzles, 200);
-        const converted = convertToLichessPuzzleFormat(sampled);
-
-        dispatch({ type: 'LOAD_PUZZLES', payload: converted });
-        if (converted.length > 0) {
-          dispatch({ type: 'ADVANCE_PUZZLE', payload: converted[0] });
-          loadPuzzleOnBoard(converted[0]);
-        }
-      } catch (error) {
-        console.error('Error loading puzzles:', error);
-      }
-    };
-
-    loadPuzzles();
-  }, []);
-
-  const loadPuzzleOnBoard = useCallback((puzzle: LichessPuzzle) => {
-    const setupMove = puzzle._setupMove;
-    const fen = puzzle._fen;
-
-    if (!setupMove || !fen) return;
-
-    const success = chessGame.loadPgn(new Chess(fen).pgn());
-    if (!success) return;
-
-    setTimeout(() => {
-      const tempChess = new Chess(fen);
-      const from = setupMove.substring(0, 2) as Square;
-      const to = setupMove.substring(2, 4) as Square;
-      const promotion = setupMove.length > 4 ? setupMove.substring(4) as 'n' | 'b' | 'r' | 'q' : undefined;
-
-      const move = tempChess.move({ from, to, promotion });
-      if (move) {
-        chessGame.loadPgn(tempChess.pgn());
-        onPuzzleLoad?.();
-      }
-    }, 600);
+  const loadBoard = useCallback((puzzle: LichessPuzzle) => {
+    if (!puzzle) return;
+    const chess = new Chess();
+    chess.loadPgn(puzzle.game.pgn);
+    chessGame.loadPgn(chess.pgn());
+    onPuzzleLoad?.();
   }, [chessGame, onPuzzleLoad]);
+
+  const fetchPuzzles = useCallback(async () => {
+    if (isFetching.current) return;
+    isFetching.current = true;
+
+    let targetColor = state.userColor || selectRandomUserColor();
+
+    if (rateLimitTime > 0) {
+      alert("Rate limit exceeded. Waiting before fetching new puzzles.");
+      await sleep(rateLimitTime);
+      setRateLimitTime(0);
+    }
+
+    try {
+      const url = 'https://lichess.org/api/puzzle/batch/matein1?nb=50&difficulty=easiest';
+      const response = await fetch(url, { 
+        headers: { 
+          'Accept': 'application/json',
+          'User-Agent': 'MonkeyDrill/1.0 (codemonkeyfromspace@gmail.com)'
+        } 
+      });
+
+      if (response.status === 429) {
+        setRateLimitTime(65000);
+        return;
+      }
+
+      if (!response.ok) throw new Error(`API Error: ${response.status}`);
+      
+      const data = await response.json();
+      const rawPuzzles = data.puzzles as LichessPuzzle[];
+
+      if (rawPuzzles.length === 0) return;
+
+
+      let coloredPuzzles = rawPuzzles.filter(p => 
+        p.puzzle.initialPly % 2 === (targetColor === 'black' ? 0 : 1)
+      );
+
+      // If no puzzles found for color, flip color and try again with same batch
+      if (coloredPuzzles.length === 0) {
+        throw new Error(`Error: no puzzles found for color ${targetColor}`);
+      }
+
+      dispatch({ 
+        type: 'LOAD_NEW_PUZZLES', 
+        payload: { puzzles: coloredPuzzles, userColor: targetColor } 
+      });
+
+      if (coloredPuzzles.length > 0) {
+        loadBoard(coloredPuzzles[0]);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      isFetching.current = false;
+    }
+  }, [state.userColor, rateLimitTime, setRateLimitTime, loadBoard]);
+
+  useEffect(() => {
+    if (state.currentPuzzle) {
+      loadBoard(state.currentPuzzle);
+    } else if (state.puzzles.length === 0) {
+      fetchPuzzles();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); 
 
   const recordResultAndLoadNext = useCallback((success: boolean) => {
     if (!state.currentPuzzle) return;
@@ -122,14 +166,17 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, 
     onResultRecorded(success, state.currentPuzzle.puzzle.rating, state.currentPuzzle.puzzle.id);
 
     setTimeout(() => {
-      const [, ...remaining] = state.puzzles;
-      const next = remaining[0] ?? null;
-      dispatch({ type: 'ADVANCE_PUZZLE', payload: next });
-      if (next) {
-        loadPuzzleOnBoard(next);
+      const nextPuzzle = state.puzzles[1];
+
+      if (!nextPuzzle) {
+        dispatch({ type: 'ADVANCE_PUZZLE' }); 
+        fetchPuzzles();
+      } else {
+        dispatch({ type: 'ADVANCE_PUZZLE' });
+        loadBoard(nextPuzzle);
       }
     }, SOLVE_COMPLETION_DELAY_MS);
-  }, [state, onResultRecorded, loadPuzzleOnBoard]);
+  }, [state.puzzles, state.currentPuzzle, onResultRecorded, loadBoard, fetchPuzzles]);
 
   const handlePuzzleMove = useCallback((sourceSquare: Square, targetSquare: Square, promotion?: string) => {
     if (!state.currentPuzzle) return null;
@@ -153,16 +200,7 @@ export const useDrill = ({ chessGame, rating, onResultRecorded, onPuzzleResult, 
   }, [state.currentPuzzle, chessGame, onPuzzleResult, recordResultAndLoadNext]);
 
   return {
-    drillState: {
-      userColor: state.userColor,
-      currentPuzzle: state.currentPuzzle,
-    },
+    drillState: state,
     handlePuzzleMove,
   };
 };
-
-const shuffleArray = <T,>(array: T[]): T[] =>
-  [...array].sort(() => Math.random() - 0.5);
-
-const randomSubset = <T,>(array: T[], n: number): T[] =>
-  shuffleArray(array).slice(0, n);
