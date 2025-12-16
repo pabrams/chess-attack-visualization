@@ -57,20 +57,20 @@ const App = () => {
     }
   }, [arrows, attackerDisplay, chessGame]);
 
-  const handlePuzzleResult = useCallback(() => {
+  const showPuzzleOutcomeVisuals = useCallback(() => {
     arrows.showCheckmaters();
   }, [arrows]);
 
-  const handleLoadNextPuzzle = useCallback(() => {
+  const resetVisualsForNextPuzzle = useCallback(() => {
     arrows.clearArrows();
   }, [arrows]);
 
   const { drillState, handlePuzzleMove } = useDrill({
     chessGame,
     rating,
-    onResultRecorded: recordResult,
-    onPuzzleResult: handlePuzzleResult,
-    onPuzzleLoad: handleLoadNextPuzzle,
+    onPuzzleResult: recordResult,
+    triggerPuzzleOutcomeVisuals: showPuzzleOutcomeVisuals,
+    onLoadNext: resetVisualsForNextPuzzle,
   });
 
   const {
@@ -83,7 +83,7 @@ const App = () => {
   } = useMoveHandler({
     chessGame,
     handlePuzzleMove,
-    onMoveComplete: handlePuzzleResult,
+    onMoveComplete: showPuzzleOutcomeVisuals,
     fen: chessGame.fen,
   });
 

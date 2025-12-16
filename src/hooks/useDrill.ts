@@ -11,15 +11,14 @@ const STORAGE_KEY = 'monkeydrillState';
 interface UseDrillProps {
   chessGame: ChessGame;
   rating: number;
-  onResultRecorded: (success: boolean, puzzleRating: number, puzzleId: string) => void;
-  onPuzzleResult: () => void;
-  onPuzzleLoad?: () => void;
+  onPuzzleResult: (success: boolean, puzzleRating: number, puzzleId: string) => void;
+  triggerPuzzleOutcomeVisuals: () => void;
+  onLoadNext?: () => void;
 }
 
 interface DrillState {
   userColor: UserColor;
   puzzles: LichessPuzzle[];
-  currentPuzzle: LichessPuzzle | null;
 }
 
 type DrillAction =
@@ -29,8 +28,7 @@ type DrillAction =
 
 const initialState: DrillState = {
   userColor: 'white',
-  puzzles: [],
-  currentPuzzle: null,
+  puzzles: []
 };
 
 const initDrillState = (defaultState: DrillState): DrillState => {
@@ -53,15 +51,13 @@ const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
       return {
         ...state,
         userColor,
-        puzzles,
-        currentPuzzle: puzzles.length > 0 ? puzzles[0] : null,
+        puzzles
       };
     case 'ADVANCE_PUZZLE': {
       const nextPuzzles = state.puzzles.slice(1);
       return {
         ...state,
-        puzzles: nextPuzzles,
-        currentPuzzle: nextPuzzles.length > 0 ? nextPuzzles[0] : null,
+        puzzles: nextPuzzles
       };
     }
     default:
@@ -73,7 +69,7 @@ const selectRandomUserColor = (): UserColor => {
   return Math.random() < 0.5 ? 'white' : 'black';
 };
 
-export const useDrill = ({ chessGame, onResultRecorded, onPuzzleResult, onPuzzleLoad }: UseDrillProps) => {
+export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisuals, onLoadNext }: UseDrillProps) => {
   const [state, dispatch] = useReducer(drillReducer, initialState, initDrillState);
   const [rateLimitTime, setRateLimitTime] = useLocalStorage<number>('monkeydrillRateLimitTime', 0);
   
@@ -90,14 +86,14 @@ export const useDrill = ({ chessGame, onResultRecorded, onPuzzleResult, onPuzzle
     const chess = new Chess();
     chess.loadPgn(puzzle.game.pgn);
     chessGame.loadPgn(chess.pgn());
-    onPuzzleLoad?.();
-  }, [chessGame, onPuzzleLoad]);
+    onLoadNext?.();
+  }, [chessGame, onLoadNext]);
 
   const fetchPuzzles = useCallback(async () => {
     if (isFetching.current) return;
     isFetching.current = true;
 
-    let targetColor = state.userColor || selectRandomUserColor();
+    let targetColor = selectRandomUserColor();
 
     if (rateLimitTime > 0) {
       alert("Rate limit exceeded. Waiting before fetching new puzzles.");
@@ -126,12 +122,10 @@ export const useDrill = ({ chessGame, onResultRecorded, onPuzzleResult, onPuzzle
 
       if (rawPuzzles.length === 0) return;
 
-
       let coloredPuzzles = rawPuzzles.filter(p => 
         p.puzzle.initialPly % 2 === (targetColor === 'black' ? 0 : 1)
       );
 
-      // If no puzzles found for color, flip color and try again with same batch
       if (coloredPuzzles.length === 0) {
         throw new Error(`Error: no puzzles found for color ${targetColor}`);
       }
@@ -152,18 +146,18 @@ export const useDrill = ({ chessGame, onResultRecorded, onPuzzleResult, onPuzzle
   }, [state.userColor, rateLimitTime, setRateLimitTime, loadBoard]);
 
   useEffect(() => {
-    if (state.currentPuzzle) {
-      loadBoard(state.currentPuzzle);
-    } else if (state.puzzles.length === 0) {
+    if (state.puzzles.length > 0) {
+      loadBoard(state.puzzles[0]);
+    } else {
       fetchPuzzles();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); 
 
-  const recordResultAndLoadNext = useCallback((success: boolean) => {
-    if (!state.currentPuzzle) return;
+  const processPuzzleResult = useCallback((success: boolean) => {
+    if (!state.puzzles[0]) return;
 
-    onResultRecorded(success, state.currentPuzzle.puzzle.rating, state.currentPuzzle.puzzle.id);
+    onPuzzleResult(success, state.puzzles[0].puzzle.rating, state.puzzles[0].puzzle.id);
 
     setTimeout(() => {
       const nextPuzzle = state.puzzles[1];
@@ -176,28 +170,28 @@ export const useDrill = ({ chessGame, onResultRecorded, onPuzzleResult, onPuzzle
         loadBoard(nextPuzzle);
       }
     }, SOLVE_COMPLETION_DELAY_MS);
-  }, [state.puzzles, state.currentPuzzle, onResultRecorded, loadBoard, fetchPuzzles]);
+  }, [state.puzzles, onPuzzleResult, loadBoard, fetchPuzzles]);
 
   const handlePuzzleMove = useCallback((sourceSquare: Square, targetSquare: Square, promotion?: string) => {
-    if (!state.currentPuzzle) return null;
+    if (!state.puzzles[0]) return null;
 
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
     if (!move) return move;
 
-    const expectedMove = state.currentPuzzle.puzzle.solution[0];
+    const expectedMove = state.puzzles[0].puzzle.solution[0];
     const isCorrect = move.lan === expectedMove;
 
     if (!isCorrect) {
       chessGame.undoLastMove();
-      recordResultAndLoadNext(false);
-      onPuzzleResult();
+      processPuzzleResult(false);
+      triggerPuzzleOutcomeVisuals();
       return null;
     }
 
-    recordResultAndLoadNext(true);
-    onPuzzleResult();
+    processPuzzleResult(true);
+    triggerPuzzleOutcomeVisuals();
     return move;
-  }, [state.currentPuzzle, chessGame, onPuzzleResult, recordResultAndLoadNext]);
+  }, [state.puzzles[0], chessGame, triggerPuzzleOutcomeVisuals, processPuzzleResult]);
 
   return {
     drillState: state,
