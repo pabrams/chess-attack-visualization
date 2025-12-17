@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { PuzzleAttempt, UserColor } from '../types/drill';
 import { usePuzzleStats } from '../hooks/usePuzzleStats';
 import { ThemeContext } from '../hooks/useTheme';
@@ -23,10 +23,14 @@ interface InfoPanelLayoutProps {
   rating: number;
   lastResult: boolean | null;
   userColor: UserColor;
+  onLoadFen: (fen: string) => boolean;
 }
 
 export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
   const { theme } = useContext(ThemeContext)!;
+  const [fenInput, setFenInput] = useState('');
+  const [fenError, setFenError] = useState<string | null>(null);
+
   const {
     sortedAttempts,
     visibleAttempts,
@@ -36,6 +40,24 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
     successRatio,
     handleLoadMore,
   } = usePuzzleStats(props.attempts);
+
+  const handleFenSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFenError(null);
+
+    const trimmedFen = fenInput.trim();
+    if (!trimmedFen) {
+      setFenError('Please enter a FEN string');
+      return;
+    }
+
+    const success = props.onLoadFen(trimmedFen);
+    if (success) {
+      setFenInput('');
+    } else {
+      setFenError('Invalid FEN string');
+    }
+  };
 
   return (
     <div className={styles.wrapper}>
@@ -125,6 +147,51 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
           </div>
         )}
         </div>
+      </fieldset>
+
+      <fieldset className={styles.toolsContainer}>
+        <legend>Tools</legend>
+        <form onSubmit={handleFenSubmit} style={{ padding: '10px' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <label htmlFor="fen-input" style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>
+              Input FEN
+            </label>
+            <input
+              id="fen-input"
+              type="text"
+              value={fenInput}
+              onChange={(e) => setFenInput(e.target.value)}
+              placeholder="Enter FEN notation"
+              style={{
+                width: '100%',
+                padding: '6px 8px',
+                fontSize: '13px',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                boxSizing: 'border-box',
+              }}
+            />
+          </div>
+          {fenError && (
+            <div style={{ color: 'red', fontSize: '12px', marginBottom: '10px' }}>
+              {fenError}
+            </div>
+          )}
+          <button
+            type="submit"
+            style={{
+              padding: '6px 12px',
+              fontSize: '13px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+            }}
+          >
+            Submit
+          </button>
+        </form>
       </fieldset>
     </div>
   );

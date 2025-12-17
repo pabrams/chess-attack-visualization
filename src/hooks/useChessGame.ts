@@ -37,6 +37,17 @@ export const useChessGame = () => {
     }
   };
 
+  const loadFen = (fenString: string) => {
+    try {
+      chessGameRef.current.load(fenString);
+      setFen(chessGameRef.current.fen());
+      return true;
+    } catch (e) {
+      console.error('Failed to load FEN:', e);
+      return false;
+    }
+  };
+
   const undoLastMove = () => {
     const move = chessGameRef.current.undo();
     if (move) {
@@ -93,6 +104,7 @@ export const useChessGame = () => {
       makeMove,
       undoLastMove,
       loadPgn,
+      loadFen,
       getAttackers,
       getPieceAt,
       getLegalMoves,

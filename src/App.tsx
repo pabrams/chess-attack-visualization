@@ -138,6 +138,7 @@ const App = () => {
           rating={rating}
           lastPuzzleResult={lastResult}
           userColor={drillState.userColor}
+          onLoadFen={chessGame.loadFen}
         />
       </div>
     </>
