@@ -30,7 +30,6 @@ const Header: React.FC<HeaderProps> = (props) => {
         <h1 style={{ margin: 0, fontSize: '24px' }}>Monkey Drill</h1>
         <p>Right-click a square to show attackers</p>
       </div>
-
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {loading ? (
           <div style={{ color: currentThemeColors.headerTextColor, fontSize: '14px' }}>Loading...</div>

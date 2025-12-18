@@ -94,11 +94,9 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
           </div>
         </div>
       </fieldset>
-
       <fieldset className={styles.historyContainer}>
         <legend>Puzzle History</legend>
         <div className={styles.tableWrapper}>
-          <p style={{fontSize: '11px'}}>Puzzles provided by lichess.org</p>
           <table className={`${styles.table} ${theme === 'light' ? styles.tableLight : ''}`}>
             <thead>
               <tr>
