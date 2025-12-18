@@ -22,7 +22,6 @@ interface DrillState {
 }
 
 type DrillAction =
-  | { type: 'SET_STATE'; payload: DrillState }
   | { type: 'LOAD_NEW_PUZZLES'; payload: { puzzles: LichessPuzzle[]; userColor: UserColor } }
   | { type: 'ADVANCE_PUZZLE' };
 
@@ -35,51 +34,32 @@ const initDrillState = (defaultState: DrillState): DrillState => {
   if (typeof window === 'undefined') return defaultState;
   try {
     const item = window.localStorage.getItem(STORAGE_KEY);
-    const state = item ? JSON.parse(item) : defaultState;
-    return state;
-  } catch (error) {
+    return item ? JSON.parse(item) : defaultState;
+  } catch {
     return defaultState;
   }
 };
 
 const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
   switch (action.type) {
-    case 'SET_STATE':
-      return action.payload;
     case 'LOAD_NEW_PUZZLES':
-      const { puzzles, userColor } = action.payload;
-      return {
-        ...state,
-        userColor,
-        puzzles
-      };
-    case 'ADVANCE_PUZZLE': {
-      const nextPuzzles = state.puzzles.slice(1);
-      return {
-        ...state,
-        puzzles: nextPuzzles
-      };
-    }
+      return { ...state, userColor: action.payload.userColor, puzzles: action.payload.puzzles };
+    case 'ADVANCE_PUZZLE':
+      return { ...state, puzzles: state.puzzles.slice(1) };
     default:
       return state;
   }
 };
 
-const selectRandomUserColor = (): UserColor => {
-  return Math.random() < 0.5 ? 'white' : 'black';
-};
-
 export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisuals, onLoadNext }: UseDrillProps) => {
   const [state, dispatch] = useReducer(drillReducer, initialState, initDrillState);
   const [rateLimitTime, setRateLimitTime] = useLocalStorage<number>('monkeydrillRateLimitTime', 0);
-  
   const isFetching = useRef(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
-  const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const loadBoard = useCallback((puzzle: LichessPuzzle) => {
     if (!puzzle) return;
@@ -93,48 +73,28 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
     if (isFetching.current) return;
     isFetching.current = true;
 
-    let targetColor = selectRandomUserColor();
+    const targetColor = Math.random() < 0.5 ? 'white' : 'black';
 
     if (rateLimitTime > 0) {
-      alert("Rate limit exceeded. Waiting before fetching new puzzles.");
-      await sleep(rateLimitTime);
+      alert("Rate limit exceeded. Waiting...");
+      await new Promise(resolve => setTimeout(resolve, rateLimitTime));
       setRateLimitTime(0);
     }
 
     try {
-      const url = 'https://lichess.org/api/puzzle/batch/matein1?nb=50&difficulty=easiest';
-      const response = await fetch(url, { 
-        headers: { 
-          'Accept': 'application/json'
-        }
-      });
-
+      const response = await fetch('https://lichess.org/api/puzzle/batch/matein1?nb=50&difficulty=easiest');
       if (response.status === 429) {
         setRateLimitTime(65000);
         return;
       }
-
-      if (!response.ok) throw new Error(`API Error: ${response.status}`);
       
       const data = await response.json();
-      const rawPuzzles = data.puzzles as LichessPuzzle[];
-
-      if (rawPuzzles.length === 0) return;
-
-      let coloredPuzzles = rawPuzzles.filter(p => 
+      const coloredPuzzles = (data.puzzles as LichessPuzzle[]).filter(p => 
         p.puzzle.initialPly % 2 === (targetColor === 'black' ? 0 : 1)
       );
 
-      if (coloredPuzzles.length === 0) {
-        throw new Error(`Error: no puzzles found for color ${targetColor}`);
-      }
-
-      dispatch({ 
-        type: 'LOAD_NEW_PUZZLES', 
-        payload: { puzzles: coloredPuzzles, userColor: targetColor } 
-      });
-
       if (coloredPuzzles.length > 0) {
+        dispatch({ type: 'LOAD_NEW_PUZZLES', payload: { puzzles: coloredPuzzles, userColor: targetColor } });
         loadBoard(coloredPuzzles[0]);
       }
     } catch (e) {
@@ -142,7 +102,7 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
     } finally {
       isFetching.current = false;
     }
-  }, [state.userColor, rateLimitTime, setRateLimitTime, loadBoard]);
+  }, [rateLimitTime, setRateLimitTime, loadBoard]);
 
   useEffect(() => {
     if (state.puzzles.length > 0) {
@@ -151,49 +111,43 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
       fetchPuzzles();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, []);
 
   const processPuzzleResult = useCallback((success: boolean) => {
-    if (!state.puzzles[0]) return;
+    const current = state.puzzles[0];
+    if (!current) return;
 
-    onPuzzleResult(success, state.puzzles[0].puzzle.rating, state.puzzles[0].puzzle.id);
+    onPuzzleResult(success, current.puzzle.rating, current.puzzle.id);
 
     setTimeout(() => {
-      const nextPuzzle = state.puzzles[1];
+      const next = state.puzzles[1];
+      dispatch({ type: 'ADVANCE_PUZZLE' });
 
-      if (!nextPuzzle) {
-        dispatch({ type: 'ADVANCE_PUZZLE' }); 
-        fetchPuzzles();
+      if (next) {
+        loadBoard(next);
       } else {
-        dispatch({ type: 'ADVANCE_PUZZLE' });
-        loadBoard(nextPuzzle);
+        fetchPuzzles();
       }
     }, SOLVE_COMPLETION_DELAY_MS);
   }, [state.puzzles, onPuzzleResult, loadBoard, fetchPuzzles]);
 
   const handlePuzzleMove = useCallback((sourceSquare: Square, targetSquare: Square, promotion?: string) => {
-    if (!state.puzzles[0]) return null;
+    const current = state.puzzles[0];
+    if (!current) return null;
 
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
-    if (!move) return move;
+    if (!move) return null;
 
-    const expectedMove = state.puzzles[0].puzzle.solution[0];
-    const isCorrect = move.lan === expectedMove;
-
-    if (!isCorrect) {
+    if (move.lan !== current.puzzle.solution[0]) {
       chessGame.undoLastMove();
       processPuzzleResult(false);
-      triggerPuzzleOutcomeVisuals();
-      return null;
+    } else {
+      processPuzzleResult(true);
     }
 
-    processPuzzleResult(true);
     triggerPuzzleOutcomeVisuals();
     return move;
-  }, [state.puzzles[0], chessGame, triggerPuzzleOutcomeVisuals, processPuzzleResult]);
+  }, [state.puzzles, chessGame, triggerPuzzleOutcomeVisuals, processPuzzleResult]);
 
-  return {
-    drillState: state,
-    handlePuzzleMove,
-  };
+  return { drillState: state, handlePuzzleMove };
 };
