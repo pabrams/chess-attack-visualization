@@ -17,16 +17,14 @@ interface UseDrillProps {
 }
 
 interface DrillState {
-  userColor: UserColor;
   puzzles: LichessPuzzle[];
 }
 
 type DrillAction =
-  | { type: 'LOAD_NEW_PUZZLES'; payload: { puzzles: LichessPuzzle[]; userColor: UserColor } }
+  | { type: 'LOAD_NEW_PUZZLES'; payload: { puzzles: LichessPuzzle[] } }
   | { type: 'ADVANCE_PUZZLE' };
 
 const initialState: DrillState = {
-  userColor: 'white',
   puzzles: []
 };
 
@@ -43,7 +41,7 @@ const initDrillState = (defaultState: DrillState): DrillState => {
 const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
   switch (action.type) {
     case 'LOAD_NEW_PUZZLES':
-      return { ...state, userColor: action.payload.userColor, puzzles: action.payload.puzzles };
+      return { ...state, puzzles: action.payload.puzzles };
     case 'ADVANCE_PUZZLE':
       return { ...state, puzzles: state.puzzles.slice(1) };
     default:
@@ -73,8 +71,6 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
     if (isFetching.current) return;
     isFetching.current = true;
 
-    const targetColor = Math.random() < 0.5 ? 'white' : 'black';
-
     if (rateLimitTime > 0) {
       alert("Rate limit exceeded. Waiting...");
       await new Promise(resolve => setTimeout(resolve, rateLimitTime));
@@ -87,15 +83,13 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
         setRateLimitTime(65000);
         return;
       }
-      
-      const data = await response.json();
-      const coloredPuzzles = (data.puzzles as LichessPuzzle[]).filter(p => 
-        p.puzzle.initialPly % 2 === (targetColor === 'black' ? 0 : 1)
-      );
 
-      if (coloredPuzzles.length > 0) {
-        dispatch({ type: 'LOAD_NEW_PUZZLES', payload: { puzzles: coloredPuzzles, userColor: targetColor } });
-        loadBoard(coloredPuzzles[0]);
+      const data = await response.json();
+      const puzzles = data.puzzles as LichessPuzzle[];
+
+      if (puzzles.length > 0) {
+        dispatch({ type: 'LOAD_NEW_PUZZLES', payload: { puzzles } });
+        loadBoard(puzzles[0]);
       }
     } catch (e) {
       console.error(e);
@@ -149,5 +143,10 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
     return move;
   }, [state.puzzles, chessGame, triggerPuzzleOutcomeVisuals, processPuzzleResult]);
 
-  return { drillState: state, handlePuzzleMove };
+  const currentPuzzle = state.puzzles[0];
+  const userColor: UserColor = currentPuzzle
+    ? (currentPuzzle.puzzle.initialPly % 2 === 0 ? 'black' : 'white')
+    : 'white';
+
+  return { drillState: { ...state, userColor }, handlePuzzleMove };
 };
