@@ -11,6 +11,7 @@
     "dev": "vite",
     "docker:dev": "docker run --network=host -v .:/app -it chess npm exec vite dev --host",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "preview": "vite preview",
     "zip:init": "pnpm run zip -- preedit",
     "zip:beetle": "pnpm run zip -- beetle_postedit",
