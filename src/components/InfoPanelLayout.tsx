@@ -62,7 +62,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
   return (
     <div className={styles.wrapper}>
       <fieldset className={styles.playerInfoContainer}>
-        <legend>Monkey Drill Info</legend>
+        <legend>Info</legend>
         <div className={styles.moveInstruction}>
           Move the{' '}
           <span
