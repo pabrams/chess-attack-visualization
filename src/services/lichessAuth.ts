@@ -1,5 +1,5 @@
 const LICHESS_HOST = 'https://lichess.org';
-const CLIENT_ID = 'monkey-drill';
+const CLIENT_ID = 'chess-attack-visualization';
 
 function toBase64Url(base64: string): string {
   return base64

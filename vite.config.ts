@@ -13,5 +13,5 @@ export default defineConfig({
       usePolling: true,
     },
   },
-  base: '/monkey-drill/',
+  base: '/chess-attack-visualization/',
 });

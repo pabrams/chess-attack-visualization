@@ -1,5 +1,6 @@
-# Monkey-Drill
+# Chess attack visualization
 
+A small app that uses (my fork of chess.js)[https://github.com/pabrams/chess.js]
 Chess tactics training
 
 ## Data Attribution
