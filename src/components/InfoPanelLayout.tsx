@@ -159,7 +159,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
               type="text"
               value={fenInput}
               onChange={(e) => setFenInput(e.target.value)}
-              placeholder="Enter FEN notation"
+              placeholder="Enter Forsythe-Edwards notation"
               style={{
                 width: '100%',
                 padding: '6px 8px',
