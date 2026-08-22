@@ -6,6 +6,11 @@ import { useChessGame } from '../src/hooks/useChessGame';
 import { useRating, RatingStorageMode } from '../src/hooks/useRating';
 import { usePuzzleResults } from '../src/hooks/usePuzzleResults';
 import { useDrill } from '../src/hooks/useDrill';
+import {
+  DEFAULT_NEXT_PUZZLE_DELAY_MS,
+  DEFAULT_PUZZLE_DIFFICULTY,
+  PuzzleDifficulty,
+} from '../src/types/settings';
 import puzzles from './puzzles.json';
 
 let api: any = {};
@@ -13,20 +18,28 @@ let api: any = {};
 interface HarnessProps {
   mode?: RatingStorageMode;
   token?: string | null;
+  difficulty?: PuzzleDifficulty;
+  nextPuzzleDelayMs?: number | null;
 }
 
-const Harness = ({ mode = 'local', token = null }: HarnessProps) => {
+const Harness = ({
+  mode = 'local',
+  token = null,
+  difficulty = DEFAULT_PUZZLE_DIFFICULTY,
+  nextPuzzleDelayMs = DEFAULT_NEXT_PUZZLE_DELAY_MS,
+}: HarnessProps) => {
   const chessGame = useChessGame();
   const { rating, applyResult, usingLichess } = useRating({
     mode, token, lichessPuzzleRating: null,
   });
   const { attempts, recordResult } = usePuzzleResults({ applyResult });
   const noop = useCallback(() => {}, []);
-  const { drillState, handlePuzzleMove } = useDrill({
+  const { drillState, handlePuzzleMove, loadNextPuzzle } = useDrill({
     chessGame, token, onPuzzleResult: recordResult,
     triggerPuzzleOutcomeVisuals: noop, onLoadNext: noop,
+    difficulty, nextPuzzleDelayMs,
   });
-  api = { attempts, handlePuzzleMove, drillState, rating, usingLichess };
+  api = { attempts, handlePuzzleMove, drillState, rating, usingLichess, loadNextPuzzle };
   return null;
 };
 
@@ -42,6 +55,14 @@ const solveCurrent = async () => {
     api.handlePuzzleMove(sol.slice(0, 2) as Square, sol.slice(2, 4) as Square, sol[4]);
   });
   await settle();
+};
+
+/** Plays the solution without waiting out the post-puzzle pause. */
+const playSolution = async () => {
+  const sol = api.drillState.currentPuzzle.puzzle.solution[0];
+  await act(async () => {
+    api.handlePuzzleMove(sol.slice(0, 2) as Square, sol.slice(2, 4) as Square, sol[4]);
+  });
 };
 
 const mockBatch = (body: any = { puzzles }) =>
@@ -107,6 +128,54 @@ describe('drill', () => {
     await settle(70_000);
     expect(api.drillState.currentPuzzle).toBeTruthy();
     expect(fetchMock.mock.calls.length).toBeGreaterThan(1);
+  });
+
+  it('waits the configured pause before loading the next puzzle', async () => {
+    globalThis.fetch = mockBatch();
+    render(<Harness nextPuzzleDelayMs={5000} />);
+    await settle(10);
+
+    const solvedId = api.drillState.currentPuzzle.puzzle.id;
+    await playSolution();
+
+    await settle(2000);
+    expect(api.drillState.currentPuzzle.puzzle.id).toBe(solvedId);
+
+    await settle(5000);
+    expect(api.drillState.currentPuzzle.puzzle.id).not.toBe(solvedId);
+  });
+
+  it('holds the solved position until clicked through at the longest pause', async () => {
+    globalThis.fetch = mockBatch();
+    render(<Harness nextPuzzleDelayMs={null} />);
+    await settle(10);
+
+    const solvedId = api.drillState.currentPuzzle.puzzle.id;
+    await playSolution();
+
+    await settle(60_000);
+    expect(api.drillState.isAwaitingNext).toBe(true);
+    expect(api.drillState.currentPuzzle.puzzle.id).toBe(solvedId);
+    expect(api.attempts).toHaveLength(1);
+
+    await act(async () => { api.loadNextPuzzle(); });
+    expect(api.drillState.isAwaitingNext).toBe(false);
+    expect(api.drillState.currentPuzzle.puzzle.id).not.toBe(solvedId);
+  });
+
+  it('refills the queue from the new band when the difficulty changes', async () => {
+    const fetchMock = mockBatch();
+    globalThis.fetch = fetchMock;
+    const { rerender } = render(<Harness difficulty="easiest" />);
+    await settle(10);
+    expect(fetchMock.mock.calls[0][0]).toContain('difficulty=easiest');
+
+    rerender(<Harness difficulty="hardest" />);
+    await settle(10);
+
+    const urls = fetchMock.mock.calls.map((c: any[]) => c[0]);
+    expect(urls[urls.length - 1]).toContain('difficulty=hardest');
+    expect(api.drillState.currentPuzzle).toBeTruthy();
   });
 
   it('sends the auth token so Lichess serves unseen puzzles', async () => {

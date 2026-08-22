@@ -5,6 +5,7 @@ import { Arrow, Mark } from '../types/arrows';
 import { PuzzleAttempt, UserColor } from '../types/drill';
 import { ChessBoard } from './ChessBoard';
 import { InfoPanelLayout } from './InfoPanelLayout';
+import { NEXT_PUZZLE_PROMPT } from '../types/settings';
 import styles from './Layout.module.css';
 
 interface LayoutProps {
@@ -25,6 +26,8 @@ interface LayoutProps {
   onLoadFen: (fen: string) => boolean;
   ratingSourceLabel: string;
   ratingNotice: string | null;
+  isAwaitingNextPuzzle?: boolean;
+  onLoadNextPuzzle?: () => void;
 }
 
 export const Layout: React.FC<LayoutProps> = (props) => {
@@ -45,6 +48,16 @@ export const Layout: React.FC<LayoutProps> = (props) => {
             onSquareRightClick={props.onSquareRightClick}
             boardOrientation={props.userColor}
           />
+
+          {props.isAwaitingNextPuzzle && (
+            <button
+              type="button"
+              className={styles.nextPuzzlePrompt}
+              onClick={props.onLoadNextPuzzle}
+            >
+              {NEXT_PUZZLE_PROMPT}
+            </button>
+          )}
         </div>
 
         <div className={styles.infoPanels}>

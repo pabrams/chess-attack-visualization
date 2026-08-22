@@ -1,13 +1,10 @@
 import { LichessPuzzle } from '../types/lichess';
+import { DEFAULT_PUZZLE_DIFFICULTY, PuzzleDifficulty } from '../types/settings';
 
 const LICHESS_HOST = 'https://lichess.org';
 
-/**
- * The only puzzle angle this app currently drills.
- */
 export const PUZZLE_ANGLE = 'mateIn1';
 export const PUZZLE_THEME = 'mateIn1';
-export const PUZZLE_DIFFICULTY = 'easiest';
 
 export class LichessScopeError extends Error {
   constructor() {
@@ -71,9 +68,10 @@ const parseBatch = async (response: Response): Promise<PuzzleBatchResponse> => {
 
 export const fetchPuzzleBatch = async (
   token: string | null,
-  nb = 50
+  nb = 50,
+  difficulty: PuzzleDifficulty = DEFAULT_PUZZLE_DIFFICULTY
 ): Promise<PuzzleBatchResponse> => {
-  const url = `${LICHESS_HOST}/api/puzzle/batch/${PUZZLE_ANGLE}?nb=${nb}&difficulty=${PUZZLE_DIFFICULTY}`;
+  const url = `${LICHESS_HOST}/api/puzzle/batch/${PUZZLE_ANGLE}?nb=${nb}&difficulty=${difficulty}`;
   return parseBatch(await fetch(url, { headers: authHeaders(token) }));
 };
 

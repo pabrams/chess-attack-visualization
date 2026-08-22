@@ -10,6 +10,13 @@ import { useMoveHandler } from './hooks/useMoveHandler';
 import { usePuzzleResults } from './hooks/usePuzzleResults';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { useLichessAuth } from './hooks/useLichessAuth';
+import {
+  DEFAULT_NEXT_PUZZLE_DELAY_MS,
+  DEFAULT_PUZZLE_DIFFICULTY,
+  NEXT_PUZZLE_DELAY_STORAGE_KEY,
+  PUZZLE_DIFFICULTY_STORAGE_KEY,
+  PuzzleDifficulty,
+} from './types/settings';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
 import { PromotionDialog } from './components/PromotionDialog';
@@ -24,6 +31,16 @@ const App = () => {
   const [ratingStorage, setRatingStorage] = useLocalStorage<RatingStorageMode>(
     RATING_MODE_STORAGE_KEY,
     'local'
+  );
+
+  const [difficulty, setDifficulty] = useLocalStorage<PuzzleDifficulty>(
+    PUZZLE_DIFFICULTY_STORAGE_KEY,
+    DEFAULT_PUZZLE_DIFFICULTY
+  );
+
+  const [nextPuzzleDelayMs, setNextPuzzleDelayMs] = useLocalStorage<number | null>(
+    NEXT_PUZZLE_DELAY_STORAGE_KEY,
+    DEFAULT_NEXT_PUZZLE_DELAY_MS
   );
 
   useEffect(function preferLichessRatingAfterLogin() {
@@ -80,13 +97,15 @@ const App = () => {
     arrows.clearArrows();
   }, [arrows]);
 
-  const { drillState, handlePuzzleMove } = useDrill({
+  const { drillState, handlePuzzleMove, loadNextPuzzle } = useDrill({
     chessGame,
     token,
     onPuzzleResult: recordResult,
     triggerPuzzleOutcomeVisuals: showPuzzleOutcomeVisuals,
     onLoadNext: resetVisualsForNextPuzzle,
     onScopeError: reportScopeError,
+    difficulty,
+    nextPuzzleDelayMs,
   });
 
   const {
@@ -118,6 +137,10 @@ const App = () => {
         onToggleTheme={toggleTheme}
         ratingStorage={ratingStorage}
         onSetRatingStorage={setRatingStorage}
+        difficulty={difficulty}
+        onSetDifficulty={setDifficulty}
+        nextPuzzleDelayMs={nextPuzzleDelayMs}
+        onSetNextPuzzleDelayMs={setNextPuzzleDelayMs}
       />
 
       {pendingPromotion && (
@@ -163,6 +186,8 @@ const App = () => {
           onLoadFen={chessGame.loadFen}
           ratingSourceLabel={usingLichess ? `Lichess (${user?.username ?? 'synced'})` : 'This browser'}
           ratingNotice={ratingNotice}
+          isAwaitingNextPuzzle={drillState.isAwaitingNext}
+          onLoadNextPuzzle={loadNextPuzzle}
         />
       </div>
     </>

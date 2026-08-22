@@ -1,7 +1,12 @@
-import { useReducer, useCallback, useEffect, useRef } from 'react';
+import { useReducer, useCallback, useEffect, useRef, useState } from 'react';
 import { Square, Chess } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
 import { UserColor } from '../types/drill';
+import {
+  DEFAULT_NEXT_PUZZLE_DELAY_MS,
+  DEFAULT_PUZZLE_DIFFICULTY,
+  PuzzleDifficulty,
+} from '../types/settings';
 import type { ChessGame } from './useChessGame';
 import {
   LichessRateLimitError,
@@ -10,7 +15,6 @@ import {
   filterMateInOne,
 } from '../services/lichessPuzzles';
 
-const SOLVE_COMPLETION_DELAY_MS = 1000;
 const STORAGE_KEY = 'monkeydrillState';
 const BATCH_SIZE = 50;
 /** Refill before the queue runs dry so the drill never stalls between batches. */
@@ -25,6 +29,8 @@ interface UseDrillProps {
   triggerPuzzleOutcomeVisuals: () => void;
   onLoadNext?: () => void;
   onScopeError?: () => void;
+  difficulty?: PuzzleDifficulty;
+  nextPuzzleDelayMs?: number | null;
 }
 
 interface DrillState {
@@ -33,7 +39,8 @@ interface DrillState {
 
 type DrillAction =
   | { type: 'APPEND_PUZZLES'; payload: { puzzles: LichessPuzzle[] } }
-  | { type: 'ADVANCE_PUZZLE' };
+  | { type: 'ADVANCE_PUZZLE' }
+  | { type: 'CLEAR_PUZZLES' };
 
 const initialState: DrillState = {
   puzzles: []
@@ -58,6 +65,8 @@ const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
       return { ...state, puzzles: [...state.puzzles, ...action.payload.puzzles] };
     case 'ADVANCE_PUZZLE':
       return { ...state, puzzles: state.puzzles.slice(1) };
+    case 'CLEAR_PUZZLES':
+      return { ...state, puzzles: [] };
     default:
       return state;
   }
@@ -70,8 +79,11 @@ export const useDrill = ({
   triggerPuzzleOutcomeVisuals,
   onLoadNext,
   onScopeError,
+  difficulty = DEFAULT_PUZZLE_DIFFICULTY,
+  nextPuzzleDelayMs = DEFAULT_NEXT_PUZZLE_DELAY_MS,
 }: UseDrillProps) => {
   const [state, dispatch] = useReducer(drillReducer, initialState, initDrillState);
+  const [isAwaitingNext, setIsAwaitingNext] = useState(false);
   const isFetching = useRef(false);
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -80,6 +92,13 @@ export const useDrill = ({
   tokenRef.current = token;
   const onScopeErrorRef = useRef(onScopeError);
   onScopeErrorRef.current = onScopeError;
+  const difficultyRef = useRef(difficulty);
+  const nextPuzzleDelayRef = useRef(nextPuzzleDelayMs);
+  nextPuzzleDelayRef.current = nextPuzzleDelayMs;
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isAwaitingNextRef = useRef(isAwaitingNext);
+  isAwaitingNextRef.current = isAwaitingNext;
+  const queueGeneration = useRef(0);
 
   useEffect(function persistQueueToStorage() {
     try {
@@ -91,6 +110,7 @@ export const useDrill = ({
 
   useEffect(() => () => {
     if (retryTimer.current) clearTimeout(retryTimer.current);
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
   }, []);
 
   const loadBoard = useCallback((puzzle: LichessPuzzle) => {
@@ -117,21 +137,24 @@ export const useDrill = ({
       }, delay);
     };
 
+    const generation = queueGeneration.current;
     try {
       const token = tokenRef.current;
       let result;
       try {
-        result = await fetchPuzzleBatch(token, BATCH_SIZE);
+        result = await fetchPuzzleBatch(token, BATCH_SIZE, difficultyRef.current);
       } catch (error) {
         // A token without the puzzle scopes 401s every request, so fall back to
         // anonymous puzzles rather than leaving the board empty.
         if (error instanceof LichessScopeError && token) {
           onScopeErrorRef.current?.();
-          result = await fetchPuzzleBatch(null, BATCH_SIZE);
+          result = await fetchPuzzleBatch(null, BATCH_SIZE, difficultyRef.current);
         } else {
           throw error;
         }
       }
+
+      if (generation !== queueGeneration.current) return;
 
       const queued = new Set(stateRef.current.puzzles.map(p => p.puzzle.id));
       const fresh = result.puzzles.filter(p => !queued.has(p.puzzle.id));
@@ -149,8 +172,22 @@ export const useDrill = ({
       scheduleRetry(error instanceof LichessRateLimitError ? RATE_LIMIT_BACKOFF_MS : ERROR_BACKOFF_MS);
     } finally {
       isFetching.current = false;
+      if (generation !== queueGeneration.current) fetchPuzzles();
     }
   }, []);
+
+  useEffect(function restockOnDifficultyChange() {
+    if (difficultyRef.current === difficulty) return;
+    difficultyRef.current = difficulty;
+    queueGeneration.current += 1;
+
+    if (advanceTimer.current) {
+      clearTimeout(advanceTimer.current);
+      advanceTimer.current = null;
+    }
+    setIsAwaitingNext(false);
+    dispatch({ type: 'CLEAR_PUZZLES' });
+  }, [difficulty]);
 
   useEffect(function keepQueueNonEmpty() {
     if (state.puzzles.length <= REFILL_THRESHOLD) {
@@ -164,6 +201,15 @@ export const useDrill = ({
     if (current) loadBoard(current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPuzzleId]);
+  
+  const loadNextPuzzle = useCallback(() => {
+    if (advanceTimer.current) {
+      clearTimeout(advanceTimer.current);
+      advanceTimer.current = null;
+    }
+    setIsAwaitingNext(false);
+    dispatch({ type: 'ADVANCE_PUZZLE' });
+  }, []);
 
   const processPuzzleResult = useCallback((success: boolean) => {
     const current = state.puzzles[0];
@@ -171,14 +217,21 @@ export const useDrill = ({
 
     onPuzzleResult(success, current.puzzle.rating, current.puzzle.id);
 
-    setTimeout(() => {
+    const delay = nextPuzzleDelayRef.current;
+    if (delay === null) {
+      setIsAwaitingNext(true);
+      return;
+    }
+
+    advanceTimer.current = setTimeout(() => {
+      advanceTimer.current = null;
       dispatch({ type: 'ADVANCE_PUZZLE' });
-    }, SOLVE_COMPLETION_DELAY_MS);
+    }, delay);
   }, [state.puzzles, onPuzzleResult]);
 
   const handlePuzzleMove = useCallback((sourceSquare: Square, targetSquare: Square, promotion?: string) => {
     const current = state.puzzles[0];
-    if (!current) return null;
+    if (!current || isAwaitingNextRef.current) return null;
 
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
     if (!move) return null;
@@ -200,7 +253,8 @@ export const useDrill = ({
     : 'white';
 
   return {
-    drillState: { ...state, userColor, currentPuzzle },
+    drillState: { ...state, userColor, currentPuzzle, isAwaitingNext },
     handlePuzzleMove,
+    loadNextPuzzle,
   };
 };

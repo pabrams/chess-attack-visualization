@@ -5,12 +5,17 @@ import { useLichessAuth } from '../hooks/useLichessAuth';
 import { login } from '../services/lichessAuth';
 import { SettingsMenu } from './SettingsMenu';
 import { RatingStorageMode } from '../hooks/useRating';
+import { PuzzleDifficulty } from '../types/settings';
 
 interface HeaderProps {
   theme: ThemeMode;
   onToggleTheme: () => void;
   ratingStorage: RatingStorageMode;
   onSetRatingStorage: (mode: RatingStorageMode) => void;
+  difficulty: PuzzleDifficulty;
+  onSetDifficulty: (difficulty: PuzzleDifficulty) => void;
+  nextPuzzleDelayMs: number | null;
+  onSetNextPuzzleDelayMs: (ms: number | null) => void;
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
@@ -45,6 +50,10 @@ const Header: React.FC<HeaderProps> = (props) => {
             username={user?.username}
             ratingStorage={props.ratingStorage}
             onSetRatingStorage={props.onSetRatingStorage}
+            difficulty={props.difficulty}
+            onSetDifficulty={props.onSetDifficulty}
+            nextPuzzleDelayMs={props.nextPuzzleDelayMs}
+            onSetNextPuzzleDelayMs={props.onSetNextPuzzleDelayMs}
           />
         )}
       </div>

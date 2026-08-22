@@ -2,6 +2,13 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ThemeMode } from '../types';
 import { ThemeContext } from '../hooks/useTheme';
 import { RatingStorageMode } from '../hooks/useRating';
+import {
+  NEXT_PUZZLE_DELAYS,
+  PUZZLE_DIFFICULTIES,
+  PuzzleDifficulty,
+  difficultyIndex,
+  nextPuzzleDelayIndex,
+} from '../types/settings';
 
 interface SettingsMenuProps {
   theme: ThemeMode;
@@ -12,7 +19,13 @@ interface SettingsMenuProps {
   username?: string;
   ratingStorage: RatingStorageMode;
   onSetRatingStorage: (mode: RatingStorageMode) => void;
+  difficulty: PuzzleDifficulty;
+  onSetDifficulty: (difficulty: PuzzleDifficulty) => void;
+  nextPuzzleDelayMs: number | null;
+  onSetNextPuzzleDelayMs: (ms: number | null) => void;
 }
+
+const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
 
 const RATING_STORAGE_OPTIONS: Array<{ value: RatingStorageMode; label: string; hint: string }> = [
   { value: 'local', label: 'This browser', hint: 'Rating is kept in localStorage on this device' },
@@ -49,6 +62,24 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
   }, [isOpen]);
 
   const isTriggerActive = isHovered || isOpen;
+  const difficultySliderValue = difficultyIndex(props.difficulty);
+  const delaySliderValue = nextPuzzleDelayIndex(props.nextPuzzleDelayMs);
+
+  const sectionStyle: React.CSSProperties = {
+    padding: '12px',
+    borderTop: `1px solid ${currentThemeColors.headerTextColor}33`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    color: currentThemeColors.headerTextColor,
+    fontSize: '14px',
+  };
+  const sectionLabelStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: '8px',
+    fontWeight: 600,
+  };
 
   return (
     <div
@@ -92,7 +123,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
           border: `1px solid ${currentThemeColors.headerTextColor}`,
           borderRadius: '8px',
           padding: '8px',
-          minWidth: '200px',
+          minWidth: '240px',
           zIndex: 1000,
         }}>
           <button
@@ -134,6 +165,42 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
             </span>
             <span style={{ color: currentThemeColors.headerTextColor }}>{props.theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
           </button>
+
+          <div style={sectionStyle}>
+            <label htmlFor="puzzle-difficulty" style={sectionLabelStyle}>
+              <span>Difficulty</span>
+              <span style={{ fontWeight: 400 }}>{capitalize(props.difficulty)}</span>
+            </label>
+            <input
+              id="puzzle-difficulty"
+              type="range"
+              min={0}
+              max={PUZZLE_DIFFICULTIES.length - 1}
+              step={1}
+              value={difficultySliderValue}
+              aria-valuetext={capitalize(props.difficulty)}
+              onChange={event => props.onSetDifficulty(PUZZLE_DIFFICULTIES[Number(event.target.value)])}
+              style={{ width: '100%' }}
+            />
+          </div>
+
+          <div style={sectionStyle}>
+            <label htmlFor="next-puzzle-delay" style={sectionLabelStyle}>
+              <span>Delay before next puzzle</span>
+              <span style={{ fontWeight: 400 }}>{NEXT_PUZZLE_DELAYS[delaySliderValue].label}</span>
+            </label>
+            <input
+              id="next-puzzle-delay"
+              type="range"
+              min={0}
+              max={NEXT_PUZZLE_DELAYS.length - 1}
+              step={1}
+              value={delaySliderValue}
+              aria-valuetext={NEXT_PUZZLE_DELAYS[delaySliderValue].label}
+              onChange={event => props.onSetNextPuzzleDelayMs(NEXT_PUZZLE_DELAYS[Number(event.target.value)].ms)}
+              style={{ width: '100%' }}
+            />
+          </div>
 
           <div
             style={{
