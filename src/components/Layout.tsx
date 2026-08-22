@@ -23,6 +23,8 @@ interface LayoutProps {
   lastPuzzleResult: boolean | null;
   userColor: UserColor;
   onLoadFen: (fen: string) => boolean;
+  ratingSourceLabel: string;
+  ratingNotice: string | null;
 }
 
 export const Layout: React.FC<LayoutProps> = (props) => {
@@ -52,6 +54,8 @@ export const Layout: React.FC<LayoutProps> = (props) => {
             lastResult={props.lastPuzzleResult}
             userColor={props.userColor}
             onLoadFen={props.onLoadFen}
+            ratingSourceLabel={props.ratingSourceLabel}
+            ratingNotice={props.ratingNotice}
           />
         </div>
       </div>

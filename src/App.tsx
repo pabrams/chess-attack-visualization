@@ -4,10 +4,12 @@ import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
 import { ThemeContext } from './hooks/useTheme';
 import { useArrows } from './hooks/useArrows';
-import { useRating } from './hooks/useRating';
+import { useRating, RatingStorageMode, RATING_MODE_STORAGE_KEY } from './hooks/useRating';
 import { useDrill } from './hooks/useDrill';
 import { useMoveHandler } from './hooks/useMoveHandler';
 import { usePuzzleResults } from './hooks/usePuzzleResults';
+import { useLocalStorage } from './hooks/useLocalStorage';
+import { useLichessAuth } from './hooks/useLichessAuth';
 import Header from './components/Header';
 import { Layout } from './components/Layout';
 import { PromotionDialog } from './components/PromotionDialog';
@@ -16,13 +18,22 @@ import './App.css';
 const App = () => {
   const chessGame = useChessGame();
   const { theme, currentThemeColors, toggleTheme } = useContext(ThemeContext)!;
-  const { rating, addPoints } = useRating();
+  const { token, user, lichessPuzzleRating, scopeError, reportScopeError } = useLichessAuth();
   const [attackerDisplay, setAttackerDisplay] = useState<{ square: Square; whiteCount: number; blackCount: number } | null>(null);
 
-  const { attempts, lastResult, recordResult } = usePuzzleResults({
-    rating,
-    onPointsAdded: addPoints,
+  const [ratingStorage, setRatingStorage] = useLocalStorage<RatingStorageMode>(
+    RATING_MODE_STORAGE_KEY,
+    'local'
+  );
+
+  const { rating, usingLichess, syncError, applyResult } = useRating({
+    mode: ratingStorage,
+    token,
+    lichessPuzzleRating,
+    onScopeError: reportScopeError,
   });
+
+  const { attempts, lastResult, recordResult } = usePuzzleResults({ applyResult });
 
   const arrows = useArrows({
     chessGame,
@@ -67,10 +78,11 @@ const App = () => {
 
   const { drillState, handlePuzzleMove } = useDrill({
     chessGame,
-    rating,
+    token,
     onPuzzleResult: recordResult,
     triggerPuzzleOutcomeVisuals: showPuzzleOutcomeVisuals,
     onLoadNext: resetVisualsForNextPuzzle,
+    onScopeError: reportScopeError,
   });
 
   const {
@@ -91,11 +103,17 @@ const App = () => {
   const sourceSquare = lastMove ? lastMove.from : null;
   const targetSquare = lastMove ? lastMove.to : null;
 
+  const ratingNotice = scopeError
+    ? 'Your Lichess login predates the puzzle permissions this app now needs. Log out and back in to update permissions.'
+    : syncError;
+
   return (
     <>
       <Header
         theme={theme}
         onToggleTheme={toggleTheme}
+        ratingStorage={ratingStorage}
+        onSetRatingStorage={setRatingStorage}
       />
 
       {pendingPromotion && (
@@ -139,6 +157,8 @@ const App = () => {
           lastPuzzleResult={lastResult}
           userColor={drillState.userColor}
           onLoadFen={chessGame.loadFen}
+          ratingSourceLabel={usingLichess ? `Lichess (${user?.username ?? 'synced'})` : 'This browser'}
+          ratingNotice={ratingNotice}
         />
       </div>
     </>

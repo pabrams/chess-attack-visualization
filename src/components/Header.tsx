@@ -4,10 +4,13 @@ import { ThemeContext } from '../hooks/useTheme';
 import { useLichessAuth } from '../hooks/useLichessAuth';
 import { login } from '../services/lichessAuth';
 import { SettingsMenu } from './SettingsMenu';
+import { RatingStorageMode } from '../hooks/useRating';
 
 interface HeaderProps {
   theme: ThemeMode;
   onToggleTheme: () => void;
+  ratingStorage: RatingStorageMode;
+  onSetRatingStorage: (mode: RatingStorageMode) => void;
 }
 
 const Header: React.FC<HeaderProps> = (props) => {
@@ -40,6 +43,8 @@ const Header: React.FC<HeaderProps> = (props) => {
             onLogin={login}
             onLogout={logout}
             username={user?.username}
+            ratingStorage={props.ratingStorage}
+            onSetRatingStorage={props.onSetRatingStorage}
           />
         )}
       </div>

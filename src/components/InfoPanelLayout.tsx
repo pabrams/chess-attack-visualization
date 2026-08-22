@@ -24,6 +24,8 @@ interface InfoPanelLayoutProps {
   lastResult: boolean | null;
   userColor: UserColor;
   onLoadFen: (fen: string) => boolean;
+  ratingSourceLabel: string;
+  ratingNotice: string | null;
 }
 
 export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
@@ -82,6 +84,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
           <div className={styles.ratingSection}>
             <span className={styles.ratingLabel}>Rating</span>
             <span className={`${styles.ratingValue} ${props.lastResult === true ? styles.ratingSuccess : props.lastResult === false ? styles.ratingFailure : ''}`}>{props.rating}</span>
+            <span className={styles.ratingSource}>saved to {props.ratingSourceLabel}</span>
           </div>
           <div className={styles.puzzleStats}>
             <span className={styles.puzzleStatsLabel}>Success Rate</span>
@@ -93,6 +96,9 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
             </span>
           </div>
         </div>
+        {props.ratingNotice && (
+          <div className={styles.ratingNotice} role="status">{props.ratingNotice}</div>
+        )}
       </fieldset>
       <fieldset className={styles.historyContainer}>
         <legend>Puzzle History</legend>
@@ -109,7 +115,7 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
             </thead>
           <tbody>
             {visibleAttempts.map((attempt, index) => (
-              <tr key={index} className={theme === 'dark' ? styles.darkRow : styles.lightRow}>
+              <tr key={attempt.attemptId ?? `${attempt.puzzleId}-${attempt.timestamp}`} className={theme === 'dark' ? styles.darkRow : styles.lightRow}>
                 <td className={styles.rowNumber}>{sortedAttempts.length - index}</td>
                 <td>
                   <a
@@ -139,12 +145,12 @@ export const InfoPanelLayout: React.FC<InfoPanelLayoutProps> = (props) => {
             No puzzle attempts yet
           </div>
         )}
-        {displayCount < sortedAttempts.length && (
-          <div className={styles.loadingMore} onClick={handleLoadMore}>
-            Click to load more... ({displayCount} of {sortedAttempts.length})
-          </div>
-        )}
         </div>
+        {displayCount < sortedAttempts.length && (
+          <button type="button" className={styles.loadingMore} onClick={handleLoadMore}>
+            Show older attempts... ({displayCount} of {sortedAttempts.length})
+          </button>
+        )}
       </fieldset>
 
       <fieldset className={styles.toolsContainer}>

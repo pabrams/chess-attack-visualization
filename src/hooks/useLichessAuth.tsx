@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback, useRef } from 'react';
+import { createContext, useContext, useReducer, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { LichessUser } from '../types/lichess';
 import { handleRedirect } from '../services/lichessAuth';
 import { useLocalStorage } from './useLocalStorage';
@@ -9,6 +9,8 @@ interface AuthState {
   token: string | null;
   user: LichessUser | null;
   loading: boolean;
+  /** Set when Lichess rejects the token, e.g. it predates the puzzle scopes. */
+  scopeError: boolean;
 }
 
 type AuthAction =
@@ -16,12 +18,14 @@ type AuthAction =
   | { type: 'AUTH_SUCCESS'; payload: { token: string | null; user: LichessUser | null } }
   | { type: 'AUTH_FAILED' }
   | { type: 'USER_FETCHED'; payload: LichessUser }
+  | { type: 'SCOPE_ERROR' }
   | { type: 'LOGOUT' };
 
 const initialState: AuthState = {
   token: null,
   user: null,
   loading: true,
+  scopeError: false,
 };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
@@ -33,23 +37,35 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         token: action.payload.token,
         user: action.payload.user,
         loading: false,
+        scopeError: false,
       };
     case 'AUTH_FAILED':
-      return {
-        token: null,
-        user: null,
-        loading: false,
-      };
+      return { token: null, user: null, loading: false, scopeError: false };
     case 'USER_FETCHED':
       return { ...state, user: action.payload, loading: false };
+    case 'SCOPE_ERROR':
+      return { ...state, scopeError: true };
     case 'LOGOUT':
-      return { token: null, user: null, loading: false };
+      return { token: null, user: null, loading: false, scopeError: false };
     default:
       return state;
   }
 };
 
-export const useLichessAuth = () => {
+export interface LichessAuth {
+  token: string | null;
+  user: LichessUser | null;
+  loading: boolean;
+  scopeError: boolean;
+  /** The account's Lichess puzzle rating, when it is known. */
+  lichessPuzzleRating: number | null;
+  logout: () => void;
+  reportScopeError: () => void;
+}
+
+const LichessAuthContext = createContext<LichessAuth | null>(null);
+
+const useLichessAuthState = (): LichessAuth => {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const [persistedToken, setPersistedToken] = useLocalStorage<string | null>('lichessToken', null);
   const initializedRef = useRef(false);
@@ -57,9 +73,7 @@ export const useLichessAuth = () => {
   const fetchUserData = useCallback(async (token: string): Promise<LichessUser | null> => {
     try {
       const response = await fetch(`${LICHESS_HOST}/api/account`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
 
       if (!response.ok) {
@@ -77,6 +91,10 @@ export const useLichessAuth = () => {
     dispatch({ type: 'LOGOUT' });
     setPersistedToken(null);
   }, [setPersistedToken]);
+
+  const reportScopeError = useCallback(() => {
+    dispatch({ type: 'SCOPE_ERROR' });
+  }, []);
 
   // Initialize auth on mount - check for OAuth redirect only
   useEffect(() => {
@@ -105,6 +123,7 @@ export const useLichessAuth = () => {
     };
 
     initializeAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch user data only when token changes (new login or logout)
@@ -123,5 +142,30 @@ export const useLichessAuth = () => {
     fetchUser();
   }, [state.token, fetchUserData]);
 
-  return { token: state.token, user: state.user, loading: state.loading, logout };
+  const lichessPuzzleRating = state.user?.perfs?.puzzle?.rating ?? null;
+
+  return {
+    token: state.token,
+    user: state.user,
+    loading: state.loading,
+    scopeError: state.scopeError,
+    lichessPuzzleRating,
+    logout,
+    reportScopeError,
+  };
+};
+
+export const LichessAuthProvider = ({ children }: { children: ReactNode }) => {
+  const auth = useLichessAuthState();
+  return <LichessAuthContext.Provider value={auth}>{children}</LichessAuthContext.Provider>;
+};
+
+/**
+ * Shared auth state. Must be rendered under a {@link LichessAuthProvider} so
+ * the OAuth redirect is only exchanged once per page load.
+ */
+export const useLichessAuth = (): LichessAuth => {
+  const auth = useContext(LichessAuthContext);
+  if (!auth) throw new Error('useLichessAuth must be used within a LichessAuthProvider');
+  return auth;
 };

@@ -3,17 +3,28 @@ import { Square, Chess } from 'chess.js';
 import { LichessPuzzle } from '../types/lichess';
 import { UserColor } from '../types/drill';
 import type { ChessGame } from './useChessGame';
-import { useLocalStorage } from './useLocalStorage';
+import {
+  LichessRateLimitError,
+  LichessScopeError,
+  fetchPuzzleBatch,
+  filterMateInOne,
+} from '../services/lichessPuzzles';
 
 const SOLVE_COMPLETION_DELAY_MS = 1000;
 const STORAGE_KEY = 'monkeydrillState';
+const BATCH_SIZE = 50;
+/** Refill before the queue runs dry so the drill never stalls between batches. */
+const REFILL_THRESHOLD = 5;
+const RATE_LIMIT_BACKOFF_MS = 65000;
+const ERROR_BACKOFF_MS = 5000;
 
 interface UseDrillProps {
   chessGame: ChessGame;
-  rating: number;
+  token: string | null;
   onPuzzleResult: (success: boolean, puzzleRating: number, puzzleId: string) => void;
   triggerPuzzleOutcomeVisuals: () => void;
   onLoadNext?: () => void;
+  onScopeError?: () => void;
 }
 
 interface DrillState {
@@ -21,7 +32,7 @@ interface DrillState {
 }
 
 type DrillAction =
-  | { type: 'LOAD_NEW_PUZZLES'; payload: { puzzles: LichessPuzzle[] } }
+  | { type: 'APPEND_PUZZLES'; payload: { puzzles: LichessPuzzle[] } }
   | { type: 'ADVANCE_PUZZLE' };
 
 const initialState: DrillState = {
@@ -32,7 +43,10 @@ const initDrillState = (defaultState: DrillState): DrillState => {
   if (typeof window === 'undefined') return defaultState;
   try {
     const item = window.localStorage.getItem(STORAGE_KEY);
-    return item ? JSON.parse(item) : defaultState;
+    if (!item) return defaultState;
+    const parsed = JSON.parse(item);
+    // Drop anything that isn't a mate in one.
+    return { puzzles: filterMateInOne(parsed?.puzzles) };
   } catch {
     return defaultState;
   }
@@ -40,8 +54,8 @@ const initDrillState = (defaultState: DrillState): DrillState => {
 
 const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
   switch (action.type) {
-    case 'LOAD_NEW_PUZZLES':
-      return { ...state, puzzles: action.payload.puzzles };
+    case 'APPEND_PUZZLES':
+      return { ...state, puzzles: [...state.puzzles, ...action.payload.puzzles] };
     case 'ADVANCE_PUZZLE':
       return { ...state, puzzles: state.puzzles.slice(1) };
     default:
@@ -49,15 +63,31 @@ const drillReducer = (state: DrillState, action: DrillAction): DrillState => {
   }
 };
 
-export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisuals, onLoadNext }: UseDrillProps) => {
+export const useDrill = ({
+  chessGame,
+  token,
+  onPuzzleResult,
+  triggerPuzzleOutcomeVisuals,
+  onLoadNext,
+  onScopeError,
+}: UseDrillProps) => {
   const [state, dispatch] = useReducer(drillReducer, initialState, initDrillState);
-  const [rateLimitTime, setRateLimitTime] = useLocalStorage<number>('monkeydrillRateLimitTime', 0);
   const isFetching = useRef(false);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tokenRef = useRef(token);
+  tokenRef.current = token;
+  const onScopeErrorRef = useRef(onScopeError);
+  onScopeErrorRef.current = onScopeError;
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
+  useEffect(() => () => {
+    if (retryTimer.current) clearTimeout(retryTimer.current);
+  }, []);
 
   const loadBoard = useCallback((puzzle: LichessPuzzle) => {
     if (!puzzle) return;
@@ -71,41 +101,70 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
     if (isFetching.current) return;
     isFetching.current = true;
 
-    if (rateLimitTime > 0) {
-      alert("Rate limit exceeded. Waiting...");
-      await new Promise(resolve => setTimeout(resolve, rateLimitTime));
-      setRateLimitTime(0);
+    if (retryTimer.current) {
+      clearTimeout(retryTimer.current);
+      retryTimer.current = null;
     }
 
+    const scheduleRetry = (delay: number) => {
+      retryTimer.current = setTimeout(() => {
+        retryTimer.current = null;
+        fetchPuzzles();
+      }, delay);
+    };
+
     try {
-      const response = await fetch('https://lichess.org/api/puzzle/batch/matein1?nb=50&difficulty=easiest');
-      if (response.status === 429) {
-        setRateLimitTime(65000);
-        return;
+      const token = tokenRef.current;
+      let result;
+      try {
+        result = await fetchPuzzleBatch(token, BATCH_SIZE);
+      } catch (error) {
+        // A token without the puzzle scopes 401s every request, so fall back to
+        // anonymous puzzles rather than leaving the board empty.
+        if (error instanceof LichessScopeError && token) {
+          onScopeErrorRef.current?.();
+          result = await fetchPuzzleBatch(null, BATCH_SIZE);
+        } else {
+          throw error;
+        }
       }
 
-      const data = await response.json();
-      const puzzles = data.puzzles as LichessPuzzle[];
+      const queued = new Set(stateRef.current.puzzles.map(p => p.puzzle.id));
+      const fresh = result.puzzles.filter(p => !queued.has(p.puzzle.id));
 
-      if (puzzles.length > 0) {
-        dispatch({ type: 'LOAD_NEW_PUZZLES', payload: { puzzles } });
-        loadBoard(puzzles[0]);
+      if (fresh.length > 0) {
+        dispatch({ type: 'APPEND_PUZZLES', payload: { puzzles: fresh } });
+      } else if (result.puzzles.length > 0 && stateRef.current.puzzles.length === 0) {
+        // Signed out, Lichess hands every client the same batch. Replaying it
+        // beats leaving the board frozen with nothing to solve.
+        dispatch({ type: 'APPEND_PUZZLES', payload: { puzzles: result.puzzles } });
+      } else {
+        scheduleRetry(ERROR_BACKOFF_MS);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error('Failed to fetch puzzles:', error);
+      scheduleRetry(error instanceof LichessRateLimitError ? RATE_LIMIT_BACKOFF_MS : ERROR_BACKOFF_MS);
     } finally {
       isFetching.current = false;
     }
-  }, [rateLimitTime, setRateLimitTime, loadBoard]);
+  }, []);
 
+  // Refill before the queue runs dry rather than after, so there is no gap
+  // where a solved puzzle has nothing to advance to.
   useEffect(() => {
-    if (state.puzzles.length > 0) {
-      loadBoard(state.puzzles[0]);
-    } else {
+    if (state.puzzles.length <= REFILL_THRESHOLD) {
       fetchPuzzles();
     }
+  }, [state.puzzles.length, fetchPuzzles]);
+
+  const currentPuzzleId = state.puzzles[0]?.puzzle.id;
+  useEffect(() => {
+    const current = state.puzzles[0];
+    if (current) loadBoard(current);
+    // loadBoard is intentionally left out: it changes on every FEN update, and
+    // re-running it here would reset the board mid-puzzle.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentPuzzleId]);
 
   const processPuzzleResult = useCallback((success: boolean) => {
     const current = state.puzzles[0];
@@ -114,16 +173,9 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
     onPuzzleResult(success, current.puzzle.rating, current.puzzle.id);
 
     setTimeout(() => {
-      const next = state.puzzles[1];
       dispatch({ type: 'ADVANCE_PUZZLE' });
-
-      if (next) {
-        loadBoard(next);
-      } else {
-        fetchPuzzles();
-      }
     }, SOLVE_COMPLETION_DELAY_MS);
-  }, [state.puzzles, onPuzzleResult, loadBoard, fetchPuzzles]);
+  }, [state.puzzles, onPuzzleResult]);
 
   const handlePuzzleMove = useCallback((sourceSquare: Square, targetSquare: Square, promotion?: string) => {
     const current = state.puzzles[0];
@@ -148,5 +200,8 @@ export const useDrill = ({ chessGame, onPuzzleResult, triggerPuzzleOutcomeVisual
     ? (currentPuzzle.puzzle.initialPly % 2 === 0 ? 'black' : 'white')
     : 'white';
 
-  return { drillState: { ...state, userColor }, handlePuzzleMove };
+  return {
+    drillState: { ...state, userColor, currentPuzzle },
+    handlePuzzleMove,
+  };
 };

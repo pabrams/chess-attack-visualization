@@ -82,6 +82,22 @@
   color: var(--color-failure) !important;
 }
 
+.ratingSource {
+  font-size: 11px;
+  opacity: var(--opacity-panel);
+  text-align: center;
+}
+
+.ratingNotice {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-failure);
+  color: var(--color-failure);
+  font-size: 12px;
+  text-align: center;
+}
+
 .levelLabel {
   font-size: 14px;
   font-weight: 500;
@@ -218,12 +234,19 @@
   font-style: italic;
 }
 
+/* Sits outside .tableWrapper so it stays visible instead of scrolling out of
+   sight below a long list of rows. */
 .loadingMore {
+  flex-shrink: 0;
+  width: 100%;
   padding: var(--spacing-md);
   text-align: center;
   color: var(--color-border-tertiary-light);
   font-size: 12px;
   font-style: italic;
+  font-family: inherit;
+  background: none;
+  border: none;
   border-top: 1px solid var(--color-border-light);
   cursor: pointer;
   user-select: none;

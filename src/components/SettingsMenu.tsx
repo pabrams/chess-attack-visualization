@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { ThemeMode } from '../types';
 import { ThemeContext } from '../hooks/useTheme';
+import { RatingStorageMode } from '../hooks/useRating';
 
 interface SettingsMenuProps {
   theme: ThemeMode;
@@ -9,7 +10,14 @@ interface SettingsMenuProps {
   onLogin: () => void;
   onLogout: () => void;
   username?: string;
+  ratingStorage: RatingStorageMode;
+  onSetRatingStorage: (mode: RatingStorageMode) => void;
 }
+
+const RATING_STORAGE_OPTIONS: Array<{ value: RatingStorageMode; label: string; hint: string }> = [
+  { value: 'local', label: 'This browser', hint: 'Rating is kept in localStorage on this device' },
+  { value: 'lichess', label: 'My Lichess account', hint: 'Solved puzzles are reported to Lichess, which owns the rating' },
+];
 
 export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,6 +98,52 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = (props) => {
             </span>
             <span style={{ color: currentThemeColors.headerTextColor }}>{props.theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
           </button>
+
+          <div
+            style={{
+              padding: '12px',
+              borderTop: `1px solid ${currentThemeColors.headerTextColor}33`,
+              borderBottom: `1px solid ${currentThemeColors.headerTextColor}33`,
+              margin: '4px 0',
+              color: currentThemeColors.headerTextColor,
+              fontSize: '14px',
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: '8px' }}>Save rating to</div>
+            <div role="radiogroup" aria-label="Rating storage" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {RATING_STORAGE_OPTIONS.map(option => {
+                const disabled = option.value === 'lichess' && !props.isLoggedIn;
+                return (
+                  <label
+                    key={option.value}
+                    title={disabled ? 'Log in with Lichess to sync your rating' : option.hint}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      cursor: disabled ? 'not-allowed' : 'pointer',
+                      opacity: disabled ? 0.5 : 1,
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="rating-storage"
+                      value={option.value}
+                      checked={props.ratingStorage === option.value}
+                      disabled={disabled}
+                      onChange={() => props.onSetRatingStorage(option.value)}
+                    />
+                    <span>{option.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {!props.isLoggedIn && (
+              <div style={{ marginTop: '6px', fontSize: '12px', opacity: 0.75 }}>
+                Log in with Lichess to sync your rating there.
+              </div>
+            )}
+          </div>
 
           <button
             style={{

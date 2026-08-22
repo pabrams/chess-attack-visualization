@@ -1,35 +1,44 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { PuzzleAttempt } from '../types/drill';
-import { calculateRatingChange } from '../utils/ratingCalculation';
 import { useLocalStorage } from './useLocalStorage';
+import type { RatingResult } from './useRating';
+
+export const ATTEMPTS_STORAGE_KEY = 'puzzleAttempts';
 
 interface UsePuzzleResultsProps {
-  rating: number;
-  onPointsAdded: (puzzleRating: number, success: boolean) => void;
+  applyResult: (puzzleId: string, puzzleRating: number, success: boolean) => Promise<RatingResult>;
 }
 
-export const usePuzzleResults = ({ rating, onPointsAdded }: UsePuzzleResultsProps) => {
-  const [attempts, setAttempts] = useLocalStorage<PuzzleAttempt[]>(
-    'puzzleAttempts',
-    [],
-  );
+const createAttemptId = (): string =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+
+export const usePuzzleResults = ({ applyResult }: UsePuzzleResultsProps) => {
+  const [attempts, setAttempts] = useLocalStorage<PuzzleAttempt[]>(ATTEMPTS_STORAGE_KEY, []);
   const [lastResult, setLastResult] = useState<boolean | null>(null);
+  const applyResultRef = useRef(applyResult);
+  applyResultRef.current = applyResult;
 
   const recordResult = useCallback((success: boolean, puzzleRating: number, puzzleId: string) => {
-    const ratingChange = calculateRatingChange(rating, puzzleRating, success);
+    const attemptId = createAttemptId();
 
-    const attempt: PuzzleAttempt = {
+    setAttempts(prev => [{
+      attemptId,
       puzzleId,
       puzzleRating,
-      ratingChange,
+      ratingChange: 0,
       timestamp: Date.now(),
       success,
-    };
-
-    setAttempts(prev => [attempt, ...prev]);
+    }, ...prev]);
     setLastResult(success);
-    onPointsAdded(puzzleRating, success);
-  }, [rating, onPointsAdded, setAttempts]);
+
+    applyResultRef.current(puzzleId, puzzleRating, success).then(({ ratingChange, synced }) => {
+      setAttempts(prev => prev.map(attempt =>
+        attempt.attemptId === attemptId
+          ? { ...attempt, ratingChange, syncedToLichess: synced }
+          : attempt
+      ));
+    });
+  }, [setAttempts]);
 
   return {
     attempts,

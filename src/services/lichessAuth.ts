@@ -1,6 +1,10 @@
 const LICHESS_HOST = 'https://lichess.org';
 const CLIENT_ID = 'chess-attack-visualization';
 
+// puzzle:read  -> batches of puzzles the user has never seen before
+// puzzle:write -> report solved puzzles so Lichess updates the account rating
+export const REQUIRED_SCOPES = 'puzzle:read puzzle:write';
+
 function toBase64Url(base64: string): string {
   return base64
     .replace(/\+/g, '-')
@@ -38,7 +42,7 @@ export const login = async () => {
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('client_id', CLIENT_ID);
     authUrl.searchParams.set('redirect_uri', redirectUri);
-    authUrl.searchParams.set('scope', 'preference:read');
+    authUrl.searchParams.set('scope', REQUIRED_SCOPES);
     authUrl.searchParams.set('code_challenge_method', 'S256');
     authUrl.searchParams.set('code_challenge', codeChallenge);
     sessionStorage.setItem('codeVerifier', codeVerifier);
