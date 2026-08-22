@@ -12,3 +12,14 @@ const mock = {
 Object.defineProperty(globalThis, 'localStorage', { value: mock, configurable: true, writable: true });
 Object.defineProperty(window, 'localStorage', { value: mock, configurable: true, writable: true });
 Object.defineProperty(globalThis, 'sessionStorage', { value: { ...mock }, configurable: true, writable: true });
+
+// jsdom implements neither of these; react-chessboard and useElementWidth both
+// need them to render at all.
+globalThis.ResizeObserver = class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+if (!globalThis.HTMLCanvasElement.prototype.getContext) {
+  globalThis.HTMLCanvasElement.prototype.getContext = () => null;
+}

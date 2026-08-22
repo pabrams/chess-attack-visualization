@@ -4,6 +4,7 @@ import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chess
 import { Arrow, Mark } from '../types/arrows';
 import { UserColor } from '../types/drill';
 import { ThemeContext } from '../hooks/useTheme';
+import { useElementWidth } from '../hooks/useElementWidth';
 import { getCustomPieces } from './customPieces';
 import { CustomAttackerArrowOverlay } from './CustomAttackerArrowOverlay';
 import { CustomCheckmateArrowOverlay } from './CustomCheckmateArrowOverlay';
@@ -31,6 +32,8 @@ const BOARD_STYLES = {
   },
 } as const;
 
+const DEFAULT_BOARD_SIZE = 400;
+
 interface ChessBoardProps {
   fen: string;
   attackerArrows: Arrow[];
@@ -48,21 +51,10 @@ interface ChessBoardProps {
 export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   const { theme, currentThemeColors } = useContext(ThemeContext)!;
   const customPieces = getCustomPieces(theme);
-  const [boardSize, setBoardSize] = React.useState(400);
   const boardContainerRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const handleResize = () => {
-      if (boardContainerRef.current) {
-        const size = boardContainerRef.current.offsetWidth;
-        setBoardSize(size);
-      }
-    };
-
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  // Drives the arrow overlays' SVG coordinates, so it has to track the real
+  // rendered width rather than only window-level resizes.
+  const boardSize = useElementWidth(boardContainerRef, DEFAULT_BOARD_SIZE);
 
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
     styles[square] = BOARD_STYLES.LEGAL_MOVE();
