@@ -81,7 +81,7 @@ export const useDrill = ({
   const onScopeErrorRef = useRef(onScopeError);
   onScopeErrorRef.current = onScopeError;
 
-  useEffect(() => {
+  useEffect(function persistQueueToStorage() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [state]);
 
@@ -149,20 +149,16 @@ export const useDrill = ({
     }
   }, []);
 
-  // Refill before the queue runs dry rather than after, so there is no gap
-  // where a solved puzzle has nothing to advance to.
-  useEffect(() => {
+  useEffect(function keepQueueNonEmpty() {
     if (state.puzzles.length <= REFILL_THRESHOLD) {
       fetchPuzzles();
     }
   }, [state.puzzles.length, fetchPuzzles]);
 
   const currentPuzzleId = state.puzzles[0]?.puzzle.id;
-  useEffect(() => {
+  useEffect(function putPuzzleOnBoard() {
     const current = state.puzzles[0];
     if (current) loadBoard(current);
-    // loadBoard is intentionally left out: it changes on every FEN update, and
-    // re-running it here would reset the board mid-puzzle.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPuzzleId]);
 

@@ -96,8 +96,7 @@ const useLichessAuthState = (): LichessAuth => {
     dispatch({ type: 'SCOPE_ERROR' });
   }, []);
 
-  // Initialize auth on mount - check for OAuth redirect only
-  useEffect(() => {
+  useEffect(function initAuth() {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
@@ -126,10 +125,9 @@ const useLichessAuthState = (): LichessAuth => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch user data only when token changes (new login or logout)
-  useEffect(() => {
+  useEffect(function getUserDataForNewToken() {
     if (!state.token) {
-      return; // No token, nothing to fetch
+      return;
     }
 
     const fetchUser = async () => {
