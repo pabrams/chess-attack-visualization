@@ -1,5 +1,5 @@
 import { useReducer, useCallback, useEffect } from 'react';
-import { Square, Color } from 'chess.js';
+import { Square, Color, Move } from 'chess.js';
 import { PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import type { ChessGame } from './useChessGame';
 
@@ -8,7 +8,7 @@ export const isBackRank = (square: Square): boolean =>
 
 interface UseMoveHandlerProps {
   chessGame: ChessGame;
-  handlePuzzleMove: (sourceSquare: Square, targetSquare: Square, promotion?: string) => any;
+  handlePuzzleMove: (sourceSquare: Square, targetSquare: Square, promotion?: string) => Move | null;
   onMoveComplete: () => void;
   fen?: string;
 }

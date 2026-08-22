@@ -5,6 +5,9 @@ const CLIENT_ID = 'chess-attack-visualization';
 // puzzle:write -> report solved puzzles so Lichess updates the account rating
 export const REQUIRED_SCOPES = 'puzzle:read puzzle:write';
 
+const CODE_VERIFIER_KEY = 'codeVerifier';
+const STATE_KEY = 'oauthState';
+
 function toBase64Url(base64: string): string {
   return base64
     .replace(/\+/g, '-')
@@ -12,7 +15,7 @@ function toBase64Url(base64: string): string {
     .replace(/=/g, '');
 }
 
-function generateCodeVerifier() {
+function generateRandomToken(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return toBase64Url(btoa(String.fromCharCode.apply(null, Array.from(array))));
@@ -25,13 +28,19 @@ async function generateCodeChallenge(verifier: string) {
   return toBase64Url(btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(digest)))));
 }
 
+const clearPendingLogin = () => {
+  sessionStorage.removeItem(CODE_VERIFIER_KEY);
+  sessionStorage.removeItem(STATE_KEY);
+};
+
 export const login = async () => {
-  sessionStorage.removeItem('codeVerifier');
-  
+  clearPendingLogin();
+
   try {
-    const codeVerifier = generateCodeVerifier();
+    const codeVerifier = generateRandomToken();
+    const state = generateRandomToken();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
-    
+
     if (!codeVerifier || !codeChallenge) {
       console.error('PKCE generation failed!');
       return;
@@ -45,7 +54,10 @@ export const login = async () => {
     authUrl.searchParams.set('scope', REQUIRED_SCOPES);
     authUrl.searchParams.set('code_challenge_method', 'S256');
     authUrl.searchParams.set('code_challenge', codeChallenge);
-    sessionStorage.setItem('codeVerifier', codeVerifier);
+    authUrl.searchParams.set('state', state);
+
+    sessionStorage.setItem(CODE_VERIFIER_KEY, codeVerifier);
+    sessionStorage.setItem(STATE_KEY, state);
     window.location.href = authUrl.toString();
   } catch (error) {
     console.error('Error in login function:', error);
@@ -55,10 +67,28 @@ export const login = async () => {
 export const handleRedirect = async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
+  const returnedState = urlParams.get('state');
+  const oauthError = urlParams.get('error');
 
-  if (!code) return null;
+  if (!code && !oauthError) return null;
 
-  const codeVerifier = sessionStorage.getItem('codeVerifier');
+  const stripQueryString = () =>
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+  if (oauthError) {
+    stripQueryString();
+    clearPendingLogin();
+    throw new Error(`Lichess denied authorization: ${oauthError}`);
+  }
+
+  const codeVerifier = sessionStorage.getItem(CODE_VERIFIER_KEY);
+  const expectedState = sessionStorage.getItem(STATE_KEY);
+  if (!expectedState || returnedState !== expectedState) {
+    stripQueryString();
+    clearPendingLogin();
+    throw new Error('OAuth state mismatch - ignoring this redirect');
+  }
+
   let accessToken = null;
 
   if (codeVerifier) {
@@ -90,8 +120,19 @@ export const handleRedirect = async () => {
     }
   }
 
-  window.history.replaceState({}, document.title, window.location.pathname);
-  sessionStorage.removeItem('codeVerifier');
+  stripQueryString();
+  clearPendingLogin();
 
   return accessToken;
+};
+
+export const revokeToken = async (token: string): Promise<void> => {
+  try {
+    await fetch(`${LICHESS_HOST}/api/token`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (error) {
+    console.error('Failed to revoke Lichess token:', error);
+  }
 };

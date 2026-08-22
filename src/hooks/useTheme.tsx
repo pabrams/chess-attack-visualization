@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import React, { createContext, ReactNode, useMemo } from 'react';
 import { ThemeMode, ThemeColors } from '../types';
 import { useLocalStorage } from './useLocalStorage';
 

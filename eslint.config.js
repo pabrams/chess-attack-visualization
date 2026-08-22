@@ -8,7 +8,7 @@ export default tseslint.config(
   { ignores: ['dist'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
-    files: ['**/*.{js,jsx}'],
+    files: ['**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -23,13 +23,27 @@ export default tseslint.config(
       'react-refresh': reactRefresh,
     },
     rules: {
-      ...js.configs.recommended.rules,
       ...reactHooks.configs.recommended.rules,
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      // The base rules don't understand TypeScript type positions, so they
+      // report every parameter name in a type signature (`(args: X) => Y`) as
+      // unused and every DOM lib type (HeadersInit) as undefined. The
+      // typescript-eslint equivalents handle both correctly.
+      'no-unused-vars': 'off',
+      'no-undef': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' },
+      ],
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
     },
+  },
+  {
+    // Test harnesses legitimately reach for `any` when faking fetch responses.
+    files: ['test/**/*.{ts,tsx}'],
+    languageOptions: { globals: { ...globals.node } },
+    rules: { '@typescript-eslint/no-explicit-any': 'off' },
   },
 );

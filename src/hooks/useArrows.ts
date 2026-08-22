@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Square, Color as PieceColor } from 'chess.js';
+import { Square, Color as PieceColor, Piece } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { Arrow, Mark } from '../types/arrows';
 import type { ChessGame } from './useChessGame';
@@ -138,7 +138,7 @@ const createArrowsForSquaresAroundKing = (
   targetSquares: Square[],
   getAttackers: (square: Square, color: PieceColor) => Square[],
   attackingColor: PieceColor,
-  getPieceAt: (square: Square) => any,
+  getPieceAt: (square: Square) => Piece | undefined,
   arrowColor: string
 ): { arrows: Arrow[] } => {
   const arrows: Arrow[] = [];

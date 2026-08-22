@@ -35,7 +35,9 @@ const drawArrowHead = (
   borderColor: string = 'black',
   lineWidth: number = 2,
   squareSize: number = 0,
-  zOffset: number = 0,
+  // Unused here, but kept so this signature stays positionally parallel with
+  // CustomAttackerArrowOverlay's drawArrowHead
+  _zOffset: number = 0,
   shouldDrawCircle: boolean = true
 ) => {
 

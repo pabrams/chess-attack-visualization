@@ -82,7 +82,11 @@ export const useDrill = ({
   onScopeErrorRef.current = onScopeError;
 
   useEffect(function persistQueueToStorage() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      console.error('Failed to cache the puzzle queue:', error);
+    }
   }, [state]);
 
   useEffect(() => () => {
@@ -135,8 +139,7 @@ export const useDrill = ({
       if (fresh.length > 0) {
         dispatch({ type: 'APPEND_PUZZLES', payload: { puzzles: fresh } });
       } else if (result.puzzles.length > 0 && stateRef.current.puzzles.length === 0) {
-        // Signed out, Lichess hands every client the same batch. Replaying it
-        // beats leaving the board frozen with nothing to solve.
+        // While signed out, play anonymous puzzle batch
         dispatch({ type: 'APPEND_PUZZLES', payload: { puzzles: result.puzzles } });
       } else {
         scheduleRetry(ERROR_BACKOFF_MS);

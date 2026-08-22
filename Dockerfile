@@ -6,5 +6,4 @@ COPY package.json ./
 COPY pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile
 COPY . .
-COPY run_dev.sh /app/
 CMD ["sh"]

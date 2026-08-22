@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { LichessUser } from '../types/lichess';
-import { handleRedirect } from '../services/lichessAuth';
+import { handleRedirect, revokeToken } from '../services/lichessAuth';
 import { useLocalStorage } from './useLocalStorage';
 
 const LICHESS_HOST = 'https://lichess.org';
@@ -88,9 +88,11 @@ const useLichessAuthState = (): LichessAuth => {
   }, []);
 
   const logout = useCallback(() => {
+    const token = state.token ?? persistedToken;
     dispatch({ type: 'LOGOUT' });
     setPersistedToken(null);
-  }, [setPersistedToken]);
+    if (token) revokeToken(token);
+  }, [state.token, persistedToken, setPersistedToken]);
 
   const reportScopeError = useCallback(() => {
     dispatch({ type: 'SCOPE_ERROR' });

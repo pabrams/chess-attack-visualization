@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Square } from 'chess.js';
 import { Chessboard, PieceDropHandlerArgs, SquareHandlerArgs } from 'react-chessboard';
 import { Arrow, Mark } from '../types/arrows';
@@ -50,14 +50,21 @@ interface ChessBoardProps {
 
 export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   const { theme, currentThemeColors } = useContext(ThemeContext)!;
-  const customPieces = getCustomPieces(theme);
+  // Rebuilding these on every render gave react-chessboard new piece component
+  // identities every time, and each BOARD_STYLES call runs getComputedStyle,
+  // forcing a style recalc per styled square.
+  const customPieces = useMemo(() => getCustomPieces(theme), [theme]);
+  const boardStyles = useMemo(() => ({
+    legalMove: BOARD_STYLES.LEGAL_MOVE(),
+    lastMove: BOARD_STYLES.LAST_MOVE(),
+    pendingMove: BOARD_STYLES.PENDING_MOVE(),
+  }), [theme]);
   const boardContainerRef = React.useRef<HTMLDivElement>(null);
-  // Drives the arrow overlays' SVG coordinates, so it has to track the real
-  // rendered width rather than only window-level resizes.
+
   const boardSize = useElementWidth(boardContainerRef, DEFAULT_BOARD_SIZE);
 
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
-    styles[square] = BOARD_STYLES.LEGAL_MOVE();
+    styles[square] = boardStyles.legalMove;
     return styles;
   }, {} as Record<Square, React.CSSProperties>) : {};
 
@@ -82,10 +89,10 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
     squareStyles: {
       ...legalMoveStyles,
       ...(props.lastMove ? {
-        [props.lastMove.from]: BOARD_STYLES.LAST_MOVE(),
-        [props.lastMove.to]: BOARD_STYLES.LAST_MOVE(),
+        [props.lastMove.from]: boardStyles.lastMove,
+        [props.lastMove.to]: boardStyles.lastMove,
       } : {}),
-      ...(props.pendingMove ? { [props.pendingMove.sourceSquare]: BOARD_STYLES.PENDING_MOVE() } : {}),
+      ...(props.pendingMove ? { [props.pendingMove.sourceSquare]: boardStyles.pendingMove } : {}),
     },
   };
 
