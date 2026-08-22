@@ -1,4 +1,4 @@
-import { useCallback, useState, useContext } from 'react';
+import { useCallback, useEffect, useState, useContext } from 'react';
 import { Square } from 'chess.js';
 import { SquareHandlerArgs } from 'react-chessboard';
 import { useChessGame } from './hooks/useChessGame';
@@ -18,13 +18,17 @@ import './App.css';
 const App = () => {
   const chessGame = useChessGame();
   const { theme, currentThemeColors, toggleTheme } = useContext(ThemeContext)!;
-  const { token, user, lichessPuzzleRating, scopeError, reportScopeError } = useLichessAuth();
+  const { token, user, lichessPuzzleRating, scopeError, justLoggedIn, reportScopeError } = useLichessAuth();
   const [attackerDisplay, setAttackerDisplay] = useState<{ square: Square; whiteCount: number; blackCount: number } | null>(null);
 
   const [ratingStorage, setRatingStorage] = useLocalStorage<RatingStorageMode>(
     RATING_MODE_STORAGE_KEY,
     'local'
   );
+
+  useEffect(function preferLichessRatingAfterLogin() {
+    if (justLoggedIn) setRatingStorage('lichess');
+  }, [justLoggedIn, setRatingStorage]);
 
   const { rating, usingLichess, syncError, applyResult } = useRating({
     mode: ratingStorage,

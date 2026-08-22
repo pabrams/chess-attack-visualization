@@ -11,11 +11,13 @@ interface AuthState {
   loading: boolean;
   /** Set when Lichess rejects the token, e.g. it predates the puzzle scopes. */
   scopeError: boolean;
+  /** True when the token came from an OAuth redirect in this page load, not from storage. */
+  justLoggedIn: boolean;
 }
 
 type AuthAction =
   | { type: 'INIT_AUTH' }
-  | { type: 'AUTH_SUCCESS'; payload: { token: string | null; user: LichessUser | null } }
+  | { type: 'AUTH_SUCCESS'; payload: { token: string | null; user: LichessUser | null; justLoggedIn: boolean } }
   | { type: 'AUTH_FAILED' }
   | { type: 'USER_FETCHED'; payload: LichessUser }
   | { type: 'SCOPE_ERROR' }
@@ -26,6 +28,7 @@ const initialState: AuthState = {
   user: null,
   loading: true,
   scopeError: false,
+  justLoggedIn: false,
 };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
@@ -38,15 +41,16 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         user: action.payload.user,
         loading: false,
         scopeError: false,
+        justLoggedIn: action.payload.justLoggedIn,
       };
     case 'AUTH_FAILED':
-      return { token: null, user: null, loading: false, scopeError: false };
+      return { token: null, user: null, loading: false, scopeError: false, justLoggedIn: false };
     case 'USER_FETCHED':
       return { ...state, user: action.payload, loading: false };
     case 'SCOPE_ERROR':
       return { ...state, scopeError: true };
     case 'LOGOUT':
-      return { token: null, user: null, loading: false, scopeError: false };
+      return { token: null, user: null, loading: false, scopeError: false, justLoggedIn: false };
     default:
       return state;
   }
@@ -57,6 +61,8 @@ export interface LichessAuth {
   user: LichessUser | null;
   loading: boolean;
   scopeError: boolean;
+  /** True for the page load that completed the OAuth redirect, so callers can react to a fresh login. */
+  justLoggedIn: boolean;
   /** The account's Lichess puzzle rating, when it is known. */
   lichessPuzzleRating: number | null;
   logout: () => void;
@@ -112,10 +118,10 @@ const useLichessAuthState = (): LichessAuth => {
           // New token from OAuth - save and fetch user
           setPersistedToken(accessToken);
           const user = await fetchUserData(accessToken);
-          dispatch({ type: 'AUTH_SUCCESS', payload: { token: accessToken, user } });
+          dispatch({ type: 'AUTH_SUCCESS', payload: { token: accessToken, user, justLoggedIn: true } });
         } else {
           // No new token - just restore persisted state without fetching
-          dispatch({ type: 'AUTH_SUCCESS', payload: { token: persistedToken, user: null } });
+          dispatch({ type: 'AUTH_SUCCESS', payload: { token: persistedToken, user: null, justLoggedIn: false } });
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
@@ -149,6 +155,7 @@ const useLichessAuthState = (): LichessAuth => {
     user: state.user,
     loading: state.loading,
     scopeError: state.scopeError,
+    justLoggedIn: state.justLoggedIn,
     lichessPuzzleRating,
     logout,
     reportScopeError,
