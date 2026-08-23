@@ -5,6 +5,7 @@ import { Arrow, Mark } from '../types/arrows';
 import { UserColor } from '../types/drill';
 import { ThemeContext } from '../hooks/useTheme';
 import { useElementWidth } from '../hooks/useElementWidth';
+import { useCoarsePointer } from '../hooks/useCoarsePointer';
 import { getCustomPieces } from './customPieces';
 import { CustomAttackerArrowOverlay } from './CustomAttackerArrowOverlay';
 import { CustomCheckmateArrowOverlay } from './CustomCheckmateArrowOverlay';
@@ -34,6 +35,10 @@ const BOARD_STYLES = {
 
 const DEFAULT_BOARD_SIZE = 400;
 
+// set threshold for drag activation to prevent always-drag-on-mobile
+const DRAG_ACTIVATION_DISTANCE_MOUSE = 1;
+const DRAG_ACTIVATION_DISTANCE_TOUCH = 10;
+
 interface ChessBoardProps {
   fen: string;
   attackerArrows: Arrow[];
@@ -50,9 +55,6 @@ interface ChessBoardProps {
 
 export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   const { theme, currentThemeColors } = useContext(ThemeContext)!;
-  // Rebuilding these on every render gave react-chessboard new piece component
-  // identities every time, and each BOARD_STYLES call runs getComputedStyle,
-  // forcing a style recalc per styled square.
   const customPieces = useMemo(() => getCustomPieces(theme), [theme]);
   const boardStyles = useMemo(() => ({
     legalMove: BOARD_STYLES.LEGAL_MOVE(),
@@ -62,6 +64,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   const boardContainerRef = React.useRef<HTMLDivElement>(null);
 
   const boardSize = useElementWidth(boardContainerRef, DEFAULT_BOARD_SIZE);
+  const isCoarsePointer = useCoarsePointer();
 
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
     styles[square] = boardStyles.legalMove;
@@ -72,6 +75,9 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
     onPieceDrop: props.onPieceDrop,
     onSquareClick: props.onSquareClick,
     onSquareRightClick: props.onSquareRightClick,
+    dragActivationDistance: isCoarsePointer
+      ? DRAG_ACTIVATION_DISTANCE_TOUCH
+      : DRAG_ACTIVATION_DISTANCE_MOUSE,
     arrows: [],
     id: 'chessboard-options',
     position: props.fen,
