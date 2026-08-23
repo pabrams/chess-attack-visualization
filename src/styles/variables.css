@@ -40,8 +40,11 @@
   --color-info: #4a9eff;
 
   --color-text-muted-dark: #E0E0E0;
+  --color-text-light: #000000;
   --color-border-header-dark: #333333;
   --color-border-header-light: #999;
+
+  --color-bg-header-light: #cccccc;
 
   --opacity-hover-light: 0.05;
   --opacity-hover-dark: 0.1;
@@ -65,7 +68,7 @@
   --light-square-light: #f0d9b5;
   --dark-square-light: #b58863;
   --arrow-border-light: #000000;
-  --header-bg-light: #cccccc;
+  --header-bg-light: #ffffff;
   --header-text-light: #000000;
 
 

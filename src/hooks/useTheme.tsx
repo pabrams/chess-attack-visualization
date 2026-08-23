@@ -21,7 +21,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         lightSquareColor: '#f0d9b5',
         darkSquareColor: '#b58863',
         arrowBorderColor: '#000000',
-        headerBackgroundColor: '#cccccc',
+        headerBackgroundColor: '#ffffff',
         headerTextColor: '#000000',
       },
       dark: {
