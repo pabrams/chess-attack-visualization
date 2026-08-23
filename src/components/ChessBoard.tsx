@@ -6,6 +6,7 @@ import { UserColor } from '../types/drill';
 import { ThemeContext } from '../hooks/useTheme';
 import { useElementWidth } from '../hooks/useElementWidth';
 import { useCoarsePointer } from '../hooks/useCoarsePointer';
+import { useSuppressTouchCompatMouse } from '../hooks/useSuppressTouchCompatMouse';
 import { getCustomPieces } from './customPieces';
 import { CustomAttackerArrowOverlay } from './CustomAttackerArrowOverlay';
 import { CustomCheckmateArrowOverlay } from './CustomCheckmateArrowOverlay';
@@ -65,6 +66,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
 
   const boardSize = useElementWidth(boardContainerRef, DEFAULT_BOARD_SIZE);
   const isCoarsePointer = useCoarsePointer();
+  useSuppressTouchCompatMouse(boardContainerRef);
 
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
     styles[square] = boardStyles.legalMove;
