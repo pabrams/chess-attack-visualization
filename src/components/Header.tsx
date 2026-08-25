@@ -35,7 +35,7 @@ const Header: React.FC<HeaderProps> = (props) => {
     }}>
       <div style={{ color: currentThemeColors.headerTextColor,display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <h1 style={{ margin: 0, fontSize: '24px' }}>Chess Attack Visualization Drill</h1>
-        <p>Right-click a square to show attackers</p>
+        <p>Right-click (long-press on mobile) a square to show attackers</p>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {loading ? (

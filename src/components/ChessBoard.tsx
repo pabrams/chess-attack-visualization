@@ -7,6 +7,7 @@ import { ThemeContext } from '../hooks/useTheme';
 import { useElementWidth } from '../hooks/useElementWidth';
 import { useCoarsePointer } from '../hooks/useCoarsePointer';
 import { useSuppressTouchCompatMouse } from '../hooks/useSuppressTouchCompatMouse';
+import { useLongPressSquare } from '../hooks/useLongPressSquare';
 import { getCustomPieces } from './customPieces';
 import { CustomAttackerArrowOverlay } from './CustomAttackerArrowOverlay';
 import { CustomCheckmateArrowOverlay } from './CustomCheckmateArrowOverlay';
@@ -67,6 +68,7 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   const boardSize = useElementWidth(boardContainerRef, DEFAULT_BOARD_SIZE);
   const isCoarsePointer = useCoarsePointer();
   useSuppressTouchCompatMouse(boardContainerRef);
+  useLongPressSquare(boardContainerRef, props.onSquareRightClick);
 
   const legalMoveStyles = props.pendingMove ? props.pendingMove.legalTargets.reduce((styles, square) => {
     styles[square] = boardStyles.legalMove;
@@ -107,7 +109,15 @@ export const ChessBoard: React.FC<ChessBoardProps> = (props) => {
   return (
     <div
       ref={boardContainerRef}
-      style={{ position: 'relative', display: 'inline-block', width: '100%' }}
+      style={{
+        position: 'relative',
+        display: 'inline-block',
+        width: '100%',
+        // A long press is the board's right-click on touch, so stop iOS from
+        // answering it with a text selection and callout of its own.
+        userSelect: 'none',
+        WebkitTouchCallout: 'none',
+      }}
     >
       <Chessboard
         options={chessboardOptions}
