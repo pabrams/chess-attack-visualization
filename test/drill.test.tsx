@@ -115,6 +115,43 @@ describe('drill', () => {
     expect(api.drillState.puzzles.every((p: any) => p.puzzle.themes.includes('mateIn1'))).toBe(true);
   });
 
+  it('accepts an alternate mating move, not just the line Lichess recorded', async () => {
+    // Real dual-mate puzzle (lichess.org/training/4ZvNW): the knight on d4 mates
+    // on both b3 and f3, but Lichess only stores Nb3# (d4b3).
+    const dualMate = {
+      game: { pgn: 'd4 e5 dxe5 d6 Nf3 Bg4 Bf4 Nc6 exd6 Qf6 e3 Qxb2 Nbd2 O-O-O dxc7 Rxd2 Kxd2 Bb4+ Ke2 Nf6 h3 Ne4 Qc1 Nc3+ Kd3 Bf5+ e4 Bxe4+ Ke3 Bc5+ Nd4 Nxd4 Qxb2' },
+      puzzle: { id: '4ZvNW', rating: 1981, solution: ['d4b3'], themes: ['mateIn1', 'oneMove'], initialPly: 32 },
+    };
+    globalThis.fetch = mockBatch({ puzzles: [dualMate] });
+    render(<Harness />);
+    await settle(10);
+    expect(api.drillState.currentPuzzle.puzzle.id).toBe('4ZvNW');
+
+    // Play Nf3# (d4f3) — a mate, but NOT the move Lichess lists.
+    await act(async () => { api.handlePuzzleMove('d4' as Square, 'f3' as Square); });
+    await settle();
+
+    expect(api.attempts).toHaveLength(1);
+    expect(api.attempts[0].success).toBe(true);
+  });
+
+  it('rejects a non-mating move even in a mate-in-1 position', async () => {
+    const dualMate = {
+      game: { pgn: 'd4 e5 dxe5 d6 Nf3 Bg4 Bf4 Nc6 exd6 Qf6 e3 Qxb2 Nbd2 O-O-O dxc7 Rxd2 Kxd2 Bb4+ Ke2 Nf6 h3 Ne4 Qc1 Nc3+ Kd3 Bf5+ e4 Bxe4+ Ke3 Bc5+ Nd4 Nxd4 Qxb2' },
+      puzzle: { id: '4ZvNW', rating: 1981, solution: ['d4b3'], themes: ['mateIn1', 'oneMove'], initialPly: 32 },
+    };
+    globalThis.fetch = mockBatch({ puzzles: [dualMate] });
+    render(<Harness />);
+    await settle(10);
+
+    // Nd4 to c6 is legal but does not give mate.
+    await act(async () => { api.handlePuzzleMove('d4' as Square, 'c6' as Square); });
+    await settle();
+
+    expect(api.attempts).toHaveLength(1);
+    expect(api.attempts[0].success).toBe(false);
+  });
+
   it('retries instead of stalling when Lichess rate-limits the batch request', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({ ok: false, status: 429, json: async () => ({}) })

@@ -236,11 +236,17 @@ export const useDrill = ({
     const move = chessGame.makeMove(sourceSquare, targetSquare, promotion);
     if (!move) return null;
 
-    if (move.lan !== current.puzzle.solution[0]) {
+    // Every puzzle here is a mate-in-one, so any move that delivers checkmate
+    // solves it, not just the single line Lichess records. Some positions have
+    // more than one mating move (e.g. Nb3# and Nf3#), and Lichess itself accepts
+    // any of them.
+    const solved = move.lan === current.puzzle.solution[0] || chessGame.isCheckmate();
+
+    if (solved) {
+      processPuzzleResult(true);
+    } else {
       chessGame.undoLastMove();
       processPuzzleResult(false);
-    } else {
-      processPuzzleResult(true);
     }
 
     triggerPuzzleOutcomeVisuals();
